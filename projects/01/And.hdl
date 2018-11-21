@@ -10,7 +10,16 @@
 
  Nand gate: 
   if a=b=1 then out=0 else out=1
- */
+
+| a   b   | out |
+  0   0     0
+  0   1     0
+  1   0     0
+  1   1     1
+ 
+
+*/
+
 
 CHIP And {
     IN a, b;

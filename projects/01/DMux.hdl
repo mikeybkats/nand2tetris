@@ -7,6 +7,12 @@
  * Demultiplexor:
  * {a, b} = {in, 0} if sel == 0
  *          {0, in} if sel == 1
+
+
+ sel  a   b   
+  0   in  0   
+  1   0   in   
+  
  */
 
 CHIP DMux {
