@@ -1,0 +1,13 @@
+
+CHIP zxTest {
+    IN  
+        x[16],
+        zx;
+    OUT
+        out[16];
+
+    PARTS:
+      And(a=zx, b=true, out=xzOut); // evaluates to 1 / true if zx == 1
+      // set x to zero if zxOut is 1
+      Mux16(a=x, b=false, sel=xzOut, out=out);
+}
