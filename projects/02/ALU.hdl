@@ -63,10 +63,27 @@ CHIP ALU {
 
     // if (no == 1) set out = !out   // bitwise not
     Not16(in=xytOut, out=nXytOut);
-    Mux16(a=xytOut, b=nXytOut, sel=no, out[15]=ngzr, out=out);
+    Mux16(a=xytOut, b=nXytOut, sel=no, out[15]=ngzr,
+	out[0]=preout0,
+	out[1]=preout1,
+	out[2]=preout2,
+	out[3]=preout3,
+	out[4]=preout4,
+	out[5]=preout5,
+	out[6]=preout6,
+	out[7]=preout7,
+	out[8]=preout8,
+	out[9]=preout9,
+	out[10]=preout10,
+	out[11]=preout11,
+	out[12]=preout12,
+	out[13]=preout13,
+	out[14]=preout14,
+	out[15]=preout15,
+	out=out);
 
-    Or8Way(in[0]=out[0], in[1]=out[1], in[2]=out[2], in[3]=out[3], in[4]=out[4], in[5]=out[5], in[6]=out[6], in[7]=out[7], out=orLeftOut);
-    Or8Way(in[0]=out[8], in[1]=out[9], in[2]=out[10], in[3]=out[11], in[4]=out[12], in[5]=out[13], in[6]=out[14], in[7]=out[15], out=orRightOut);
+    Or8Way(in[0]=preout0, in[1]=preout1, in[2]=preout2, in[3]=preout3, in[4]=preout4, in[5]=preout5, in[6]=preout6, in[7]=preout7, out=orLeftOut);
+    Or8Way(in[0]=preout8, in[1]=preout9, in[2]=preout10, in[3]=preout11, in[4]=preout12, in[5]=preout13, in[6]=preout14, in[7]=preout15, out=orRightOut);
     Or(a=orLeftOut, b=orRightOut, out=orOut);
 
     // if (out == 0) set zr = 1
