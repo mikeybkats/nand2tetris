@@ -43,26 +43,37 @@ CHIP ALU {
 
     PARTS:
     // if (zx == 1) set x = 0 
-    Mux16(a=x, b=false, sel=zx, out=zxout);
-
+    Mux16(a=x, b=false, sel=zx, out=zxOut);
     // if (nx == 1) set x = !x       // bitwise not
-    Not16(a=x, out=notX);
-    Mux16(a=zxout, b=notX, sel=nx, out=nxOut);
+    Not16(in=zxOut, out=notX);
+    Mux16(a=zxOut, b=notX, sel=nx, out=nxOut);
 
     // if (zy == 1) set y = 0        // 16-bit constant
     Mux16(a=y, b=false, sel=zy, out=zyOut);
     // if (ny == 1) set y = !y       // bitwise not
-    Not16(a=y, out=notY);
-    Mux16(a=zyout, b=notY, sel=ny, out=nyOut);
+    Not16(in=zyOut, out=notY);
+    Mux16(a=zyOut, b=notY, sel=ny, out=nyOut);
 
     // if (f == 1)  set out = x + y  // integer 2's complement addition
+    Add16(a=nyOut, b=nxOut, out=xyAddOut);
     // if (f == 0)  set out = x & y  // bitwise and
+    And16(a=nyOut, b=nxOut, out=xyAndOut);
+
+    Mux16(a=xyAndOut, b=xyAddOut, sel=f, out=xytOut);
+
     // if (no == 1) set out = !out   // bitwise not
+    Not16(in=xytOut, out=nXytOut);
+    Mux16(a=xytOut, b=nXytOut, sel=no, out[15]=ngzr, out=out);
+
+    Or8Way(in[0]=out[0], in[1]=out[1], in[2]=out[2], in[3]=out[3], in[4]=out[4], in[5]=out[5], in[6]=out[6], in[7]=out[7], out=orLeftOut);
+    Or8Way(in[0]=out[8], in[1]=out[9], in[2]=out[10], in[3]=out[11], in[4]=out[12], in[5]=out[13], in[6]=out[14], in[7]=out[15], out=orRightOut);
+    Or(a=orLeftOut, b=orRightOut, out=orOut);
+
     // if (out == 0) set zr = 1
+    Mux(a=true, b=false, sel=orOut, out=zr);
+
     // if (out < 0) set ng = 1
+    Mux(a=false, b=true, sel=ngzr, out=ng);
 }
-
-
-
 
 
