@@ -14,6 +14,40 @@ CHIP RAM8 {
     IN in[16], load, address[3];
     OUT out[16];
 
+    // out=RAM[address(t)](t)
+    // If load(t-1) then 
+    // //  RAM[address(t-1)](t) = in(t-1)
+
     PARTS:
-    // Put your code here:
+    // 8 Registers
+    DMux8Way(in=load, sel=address, a=load1, b=load2, c=load3, d=load4, e=load5, f=load6, g=load7, h=load8);
+
+    DMux8Way(in=in[0], sel=address,  a=reg00 , b=reg10,   c=reg20, d=reg30,  e=reg40,  f=reg50,  g=reg60,  h=reg70);
+    DMux8Way(in=in[1], sel=address,  a=reg01 , b=reg11,   c=reg21, d=reg31,  e=reg41,  f=reg51,  g=reg61,  h=reg71);
+    DMux8Way(in=in[2], sel=address,  a=reg02 , b=reg12,   c=reg22, d=reg32,  e=reg42,  f=reg52,  g=reg62,  h=reg72);
+    DMux8Way(in=in[3], sel=address,  a=reg03 , b=reg13,   c=reg23, d=reg33,  e=reg43,  f=reg53,  g=reg63,  h=reg73);
+    DMux8Way(in=in[4], sel=address,  a=reg04 , b=reg14,   c=reg24, d=reg34,  e=reg44,  f=reg54,  g=reg64,  h=reg74);
+    DMux8Way(in=in[5], sel=address,  a=reg05 , b=reg15,   c=reg25, d=reg35,  e=reg45,  f=reg55,  g=reg65,  h=reg75);
+    DMux8Way(in=in[6], sel=address,  a=reg06 , b=reg16,   c=reg26, d=reg36,  e=reg46,  f=reg56,  g=reg66,  h=reg76);
+    DMux8Way(in=in[7], sel=address,  a=reg07 , b=reg17,   c=reg27, d=reg37,  e=reg47,  f=reg57,  g=reg67,  h=reg77);
+    DMux8Way(in=in[8], sel=address,  a=reg08 , b=reg18,   c=reg28, d=reg38,  e=reg48,  f=reg58,  g=reg68,  h=reg78);
+    DMux8Way(in=in[9], sel=address,  a=reg09 , b=reg19,   c=reg29, d=reg39,  e=reg49,  f=reg59,  g=reg69,  h=reg79);
+    DMux8Way(in=in[10], sel=address, a=reg010, b=reg110, c=reg210, d=reg310, e=reg410, f=reg510, g=reg610, h=reg710 );
+    DMux8Way(in=in[11], sel=address, a=reg011 ,b=reg111, c=reg211, d=reg311, e=reg411, f=reg511, g=reg611, h=reg711 );
+    DMux8Way(in=in[12], sel=address, a=reg012 ,b=reg112, c=reg212, d=reg312, e=reg412, f=reg512, g=reg612, h=reg712 );
+    DMux8Way(in=in[13], sel=address, a=reg013 ,b=reg113, c=reg213, d=reg313, e=reg413, f=reg513, g=reg613, h=reg713 );
+    DMux8Way(in=in[14], sel=address, a=reg014 ,b=reg114, c=reg214, d=reg314, e=reg414, f=reg514, g=reg614, h=reg714 );
+    DMux8Way(in=in[15], sel=address, a=reg015 ,b=reg115, c=reg215, d=reg315, e=reg415, f=reg515, g=reg615, h=reg715 );
+
+    Register(in[0]=reg00, in[1]=reg01, in[2]=reg02, in[3]=reg03, in[4]=reg04, in[5]=reg05, in[6]=reg06, in[7]=reg07, in[8]=reg08, in[9]=reg09, in[10]=reg010, in[11]=reg011, in[12]=reg012, in[13]=reg013, in[14]=reg014, in[15]=reg015, load=load1, out=out1);
+    Register(in[0]=reg10, in[1]=reg11, in[2]=reg12, in[3]=reg13, in[4]=reg14, in[5]=reg15, in[6]=reg16, in[7]=reg17, in[8]=reg18, in[9]=reg19, in[10]=reg110, in[11]=reg111, in[12]=reg112, in[13]=reg113, in[14]=reg114, in[15]=reg115, load=load2, out=out2);
+    Register(in[0]=reg20, in[1]=reg21, in[2]=reg22, in[3]=reg23, in[4]=reg24, in[5]=reg25, in[6]=reg26, in[7]=reg27, in[8]=reg28, in[9]=reg29, in[10]=reg210, in[11]=reg211, in[12]=reg212, in[13]=reg213, in[14]=reg214, in[15]=reg215, load=load3, out=out3);
+    Register(in[0]=reg30, in[1]=reg31, in[2]=reg32, in[3]=reg33, in[4]=reg34, in[5]=reg35, in[6]=reg36, in[7]=reg37, in[8]=reg38, in[9]=reg39, in[10]=reg310, in[11]=reg311, in[12]=reg312, in[13]=reg313, in[14]=reg314, in[15]=reg315, load=load4, out=out4);
+
+    Register(in[0]=reg40, in[1]=reg41, in[2]=reg42, in[3]=reg43, in[4]=reg44, in[5]=reg45, in[6]=reg46, in[7]=reg47, in[8]=reg48, in[9]=reg49, in[10]=reg410, in[11]=reg411, in[12]=reg412, in[13]=reg413, in[14]=reg414, in[15]=reg415, load=load5, out=out5);
+    Register(in[0]=reg50, in[1]=reg51, in[2]=reg52, in[3]=reg53, in[4]=reg54, in[5]=reg55, in[6]=reg56, in[7]=reg57, in[8]=reg58, in[9]=reg59, in[10]=reg510, in[11]=reg511, in[12]=reg512, in[13]=reg513, in[14]=reg514, in[15]=reg515, load=load6, out=out6);
+    Register(in[0]=reg60, in[1]=reg61, in[2]=reg62, in[3]=reg63, in[4]=reg64, in[5]=reg65, in[6]=reg66, in[7]=reg67, in[8]=reg68, in[9]=reg69, in[10]=reg610, in[11]=reg611, in[12]=reg612, in[13]=reg613, in[14]=reg614, in[15]=reg615, load=load7, out=out7);
+    Register(in[0]=reg70, in[1]=reg71, in[2]=reg72, in[3]=reg73, in[4]=reg74, in[5]=reg75, in[6]=reg76, in[7]=reg77, in[8]=reg78, in[9]=reg79, in[10]=reg710, in[11]=reg711, in[12]=reg712, in[13]=reg713, in[14]=reg714, in[15]=reg715, load=load8, out=out8);
+
+    Mux8Way16(a=out1, b=out2, c=out3, d=out4, e=out5, f=out6, g=out7, h=out8, sel=address, out=out);
 }
