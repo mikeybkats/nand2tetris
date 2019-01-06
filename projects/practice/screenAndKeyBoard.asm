@@ -1,6 +1,6 @@
 @SCREEN
 D=A
-@screenAddress // @16
+@screenAddress // @16 = 16384
 M=D
 
 @i  // @17
@@ -14,18 +14,45 @@ D=M
 @keyPress
 M=D
 
+// @24576
+// D=A
+// @resetValue
+// M=D
+
 (KEYLOOP)
-@KBD
-D=M
-@keyPress
-M=D
+  @i
+  M=0 // set i = 0
+
+    (LOOPWHITE)
+        @i
+        D=M
+        @screenAddress
+        A=M+D  // set screenAddress location to its present value + the value of i
+        M=0   // whiten the pixels of the present location
+
+        @8192 // screen size is 8k 
+        D=A   // set the D register to ram address (the value we need to shift over on the screen)
+
+        @i
+        M=M+1 // get the value from @17 and add one for incrementing our loop
+        D=D-M // D = 8192 - i
+        
+    @LOOPWHITE
+    D;JEQ
+
+  @KBD
+  D=M
+  @keyPress
+  M=D
 
 @KEYLOOP
 D;JEQ
 
 (LOOPBLACK)
-    @keyPress
+    @KBD
     D=M
+    @keyPress
+    M=D
     @KEYLOOP
     D;JEQ
 
