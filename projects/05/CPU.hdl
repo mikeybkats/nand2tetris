@@ -40,4 +40,53 @@ CHIP CPU {
 
     PARTS:
     // Put your code here:
+    // 0000 0000 0000 0000
+    // i xx a cccccc ddd jjj
+    // i  x  x  a1 c1 c2 c3 c4 c5 c6 d1 d2 d3 j1 j2 j3
+    // 15 14 13 12 11 10 09 08 07 06 05 04 03 02 01 00
+    // The first and second d-bits code whether to store the computed value in the A register 
+    // and in the D register, respectively. The third d-bit codes
+    // whether to store the computed value in M (i.e., in Memory[A]). One, more than one,
+    // or none of these bits may be asserted.
+
+    // Decoder()
+    // a1 ––> Mux16
+    // d1 (store in A reg?)  
+    // d2 (store in D reg?)  
+    // d3 (store in M reg?)
+    // j1 j2 j3 ––> ProgramCounter
+
+    // instSelectOut picks either A or C instruction
+    Mux16(a=instruction, b=outMaReg, sel=instruction[15], out=instSelectOut);
+    ALU(
+        x=dRegOut, // 16 bit input
+        y=aRegOrInM, // 16 bit input
+        zx=instruction[11], 
+        nx=instruction[10], 
+        zy=instruction[9], 
+        ny=instruction[8], 
+        f=instruction[7], 
+        no=instruction[6], 
+        out=outMaReg, 
+        out=outMdReg, 
+        zr=zr, // where go? 
+        ng=ng // where go?
+        );
+
+    Not(in=instruction[15], out=isAInstruction);
+
+    // A register
+    Or(a=instruction[5], b=isAInstruction, isARegister)
+    Register(in=instSelectOut, load=isARegister, out=aRegOut1, out=addressM, out=aRegOut3);
+
+    // D register
+    And(a=instruction[4], b=isAInstruction, out=isDRegister);
+    Register(in=outMdReg, load=isDRegister, out=dRegOut);
+    
+    // M or A register?
+    And(a=instruction[3], b=isAInstruction, out=isMDest);
+    Mux16(a=aRegOut1, b=inM, sel=isMDest, out=aRegOrInM);
+    Or(a=instruction[3], b=instruction[3], out=writeM);
+    
+    PC(in=aRegOut3, load=, inc=true, reset=reset, out=pc);
 }
