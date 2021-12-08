@@ -1,0 +1,1 @@
+# symbol table: manages the symbols in the application
