@@ -25,7 +25,6 @@ class ParserFileHandler:
         self._inFile = self.open_input_file(filename)
         self._outFile = self.create_output_file(outputPath)
         self._outFilePath = outputPath
-        self._current = ""
 
     def inFile(self):
         return self._inFile
@@ -35,12 +34,6 @@ class ParserFileHandler:
 
     def outFilePath(self):
         return self._outFilePath
-
-    def current(self):
-        return self.current
-
-    def current(self, newVal):
-        self.current = newVal
 
     def open_input_file(self, inputFile):
         return open(inputFile, mode='rt', encoding='utf-8')
