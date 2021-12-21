@@ -13,11 +13,12 @@ def main(filename, outputPath):
 
     while hasMoreCommands():
         advance()
-        type = commandType()
-        if type == "L_COMMAND" or type == "A_COMMAND":
+        AppState.instructionType = commandType()
+        if AppState.instructionType == "L_COMMAND" or AppState.instructionType == "A_COMMAND":
             symbol()
         else:
             dest()
+            comp()
 
 
 def hasMoreCommands():
@@ -95,7 +96,7 @@ def dest():
     Returns the dest mnemonic in the current C-command (8 possibilities). Should be called only when commandType() is C_COMMAND.
     """
     destTable = dict([
-        ("null", "000"),
+        ("0", "000"),
         ("M", "001"),
         ("D", "010"),
         ("MD", "011"),
@@ -109,15 +110,12 @@ def dest():
         return destTable[null]
     for i, char in enumerate(word):
         # print(i, char)
-        if(char == "="):
+        if(char == "=" or char == ";"):
             if(i == 1):
-                print(destTable[word[0]])
                 return destTable[word[0]]
             if(i == 2):
-                print(destTable[word[:2]])
                 return destTable[word[:2]]
             if(i == 3):
-                print(destTable[word[:3]])
                 return destTable[word[:3]]
 
 
@@ -127,6 +125,58 @@ def comp():
     Returns:
         string
     """
+    compTableA0 = dict([
+        ("0", "101010"),
+        ("1", "111111"),
+        ("-1", "111010"),
+        ("D", "001100"),
+        ("A", "110000"),
+        ("!D", "001101"),
+        ("!A", "110001"),
+        ("-D", "001111"),
+        ("-A", "110011"),
+        ("D+1", "011111"),
+        ("A+1", "110111"),
+        ("D-1", "001110"),
+        ("A-1", "110010"),
+        ("D+A", "000010"),
+        ("A-D", "000111"),
+        ("D-A", "010011"),
+        ("D&A", "000000"),
+        ("D|A", "010101"),
+    ])
+    compTableA1 = dict([
+        ("M", "110000"),
+        ("!M", "110001"),
+        ("-M", "110011"),
+        ("M+1", "110111"),
+        ("M-1", "110010"),
+        ("D+M", "000010"),
+        ("M-D", "000111"),
+        ("D-M", "010011"),
+        ("D&M", "000000"),
+        ("D|M", "010101"),
+    ])
+    compTable = None
+    word = AppState.current
+    if len(word) == 0:
+        return ""
+    if "A" in word:
+        compTable = compTableA0
+    else:
+        compTable = compTableA1
+
+    compCommand = ""
+    count = False
+    for i, char in enumerate(word):
+        if(bool(count)):
+            if(not char.isspace()):
+                compCommand = compCommand + char
+        if(char == "="):
+            count = True
+
+    print(compCommand)
+    # return compTable[compCommand]
 
 
 def jump():
@@ -136,6 +186,7 @@ def jump():
     Returns:
         string
     """
+    pass
 
 
 if __name__ == '__main__':

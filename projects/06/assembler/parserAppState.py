@@ -6,6 +6,7 @@ class ParserAppState:
 
         self._inFile = fileHandler.inFile()
         self._current = ""
+        self._instructionType = ""
 
     def current(self):
         return self._current
@@ -15,3 +16,9 @@ class ParserAppState:
 
     def inFile(self):
         return self._inFile
+
+    def instructionType(self):
+        return self._instructionType
+
+    def instructionType(self, newVal):
+        self._instructionType = newVal
