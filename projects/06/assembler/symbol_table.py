@@ -17,16 +17,24 @@ def build_default_table():
     return symbols
 
 
-def add_symbol_to_table(symbol, address):
-    # check if already exists
+def addEntry(symbol, address):
+    """Adds the pair (symbol, address) to the table."""
     pass
 
 
-def check_for_symbol():
-    # returns boolean
+def contains():
+    """Does the symbol table contain the given symbol?
+
+    Returns:
+        boolean
+    """
     pass
 
 
-def get_symbol_by_address(address):
-    # return symbol
+def getAddress(symbol):
+    """Returns the address associated with the symbol.
+
+    Returns:
+        int
+    """
     pass
