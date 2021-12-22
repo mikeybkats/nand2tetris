@@ -2,7 +2,7 @@
 
 class SymbolTable:
     def __init__(self):
-        self.table = self.build_default_table()
+        self._table = self.build_default_table()
 
     def build_default_table(self):
         symbols = dict([
@@ -21,7 +21,7 @@ class SymbolTable:
 
     def addEntry(self, symbol, address):
         """Adds the pair (symbol, address) to the table."""
-        self.table[symbol] = address
+        self._table[symbol] = address
 
     def contains(self, symbol):
         """Does the symbol table contain the given symbol?

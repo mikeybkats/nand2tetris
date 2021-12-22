@@ -5,15 +5,21 @@ class ParserAppState:
         self._symbolTable = symbolTable
 
         self._inFile = fileHandler.inFile()
+        self._outFile = fileHandler.outFile()
         self._current = ""
         self._instructionType = ""
         self._instructionBin = ""
 
     def write_to_output_file(self):
-        self._fileHandler.write_to_output_file(self._instructionBin)
+        print(self.instructionBin)
+        self._fileHandler.write_to_output_file(self.instructionBin)
+        self._fileHandler.write_to_output_file("\n")
 
-    def addSymbolToTable(self, symbol):
-        self._symbolTable.addEntry(symbol, symbol)
+    def close_output_file(self):
+        self._outFile.close()
+
+    def addSymbolToTable(self, symbol, address):
+        self._symbolTable.addEntry(symbol, address)
 
     def current(self):
         return self._current

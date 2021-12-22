@@ -3,6 +3,7 @@ import sys
 from init import ParserFileHandler
 from symbol_table import SymbolTable
 from parserAppState import ParserAppState
+from code import *
 
 
 def main(filename, outputPath):
@@ -10,32 +11,59 @@ def main(filename, outputPath):
     symbolTable = SymbolTable()
     global AppState
     AppState = ParserAppState(fileHandler, symbolTable)
+    parse()
 
+
+def parse():
+    instSym = ""
     # scan one
     while hasMoreCommands():
         advance()
         AppState.instructionType = commandType()
         if AppState.instructionType == "L_COMMAND" or AppState.instructionType == "A_COMMAND":
-            symbol = symbol()
-            AppState.addSymbolToTable(symbol, symbol)
+            instSym = symbol()
+            AppState.addSymbolToTable(instSym, instSym)
     # scan two
+    AppState.inFile().seek(0)
     count = 16
     while hasMoreCommands():
         advance()
         AppState.instructionType = commandType()
         if AppState.instructionType == "L_COMMAND" or AppState.instructionType == "A_COMMAND":
-            symbol = symbol()
-            if bool(AppState._symbolTable.contains(symbol)):
-                address = AppState._symbolTable.getAddress(symbol)
-                AppState.instructionBin = f'{address:08b}'
+            instSym = symbol()
+            if bool(AppState._symbolTable.contains(instSym)):
+                address = int(AppState._symbolTable.getAddress(instSym))
+                address = f'0{address:015b}'
+                address = insert_space(address, 4)
+                address = insert_space(address, 9)
+                address = insert_space(address, 14)
+                AppState.instructionBin = address
             else:
-                AppState.addSymbolToTable(symbol, count)
-                AppState.instructionBin = f'{count:08b}'
+                AppState.addSymbolToTable(instSym, count)
+                address = f'0{count:015b}'
+                address = insert_space(address, 4)
+                address = insert_space(address, 9)
+                address = insert_space(address, 14)
+                AppState.instructionBin = address
             count = count + 1
         else:
-            address = comp() + dest() + jump()
+            compI = code_comp(comp())
+            destI = code_dest(dest())
+            jumpI = code_jump(jump())
+            address = "111" + compI + destI + jumpI
+            address = insert_space(address, 4)
+            address = insert_space(address, 9)
+            address = insert_space(address, 14)
+            # print(address)
             AppState.instructionBin = address
+            print(AppState.instructionBin)
+        # print(AppState.instructionBin)
         AppState.write_to_output_file()
+    AppState.close_output_file()
+
+
+def insert_space(string, integer):
+    return string[0:integer] + ' ' + string[integer:]
 
 
 def hasMoreCommands():
