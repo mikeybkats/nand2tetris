@@ -7,6 +7,13 @@ class ParserAppState:
         self._inFile = fileHandler.inFile()
         self._current = ""
         self._instructionType = ""
+        self._instructionBin = ""
+
+    def write_to_output_file(self):
+        self._fileHandler.write_to_output_file(self._instructionBin)
+
+    def addSymbolToTable(self, symbol):
+        self._symbolTable.addEntry(symbol, symbol)
 
     def current(self):
         return self._current
@@ -22,3 +29,9 @@ class ParserAppState:
 
     def instructionType(self, newVal):
         self._instructionType = newVal
+
+    def instructionBin(self):
+        return self._instructionBin
+
+    def instructionBin(self, newVal):
+        self._instructionBin = newVal

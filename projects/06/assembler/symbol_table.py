@@ -40,4 +40,4 @@ class SymbolTable:
         Returns:
             int
         """
-        pass
+        return self._table.get(symbol)

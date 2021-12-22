@@ -11,14 +11,31 @@ def main(filename, outputPath):
     global AppState
     AppState = ParserAppState(fileHandler, symbolTable)
 
+    # scan one
     while hasMoreCommands():
         advance()
         AppState.instructionType = commandType()
         if AppState.instructionType == "L_COMMAND" or AppState.instructionType == "A_COMMAND":
-            symbol()
+            symbol = symbol()
+            AppState.addSymbolToTable(symbol, symbol)
+    # scan two
+    count = 16
+    while hasMoreCommands():
+        advance()
+        AppState.instructionType = commandType()
+        if AppState.instructionType == "L_COMMAND" or AppState.instructionType == "A_COMMAND":
+            symbol = symbol()
+            if bool(AppState._symbolTable.contains(symbol)):
+                address = AppState._symbolTable.getAddress(symbol)
+                AppState.instructionBin = f'{address:08b}'
+            else:
+                AppState.addSymbolToTable(symbol, count)
+                AppState.instructionBin = f'{count:08b}'
+            count = count + 1
         else:
-            dest()
-            comp()
+            address = comp() + dest() + jump()
+            AppState.instructionBin = address
+        AppState.write_to_output_file()
 
 
 def hasMoreCommands():
@@ -41,12 +58,9 @@ def advance():
     AppState.current = AppState.inFile().readline()
     while(isEmptyLine(AppState.current)):
         AppState.current = AppState.inFile().readline()
-    # print("Current:", AppState.current)
 
 
 def isEmptyLine(line):
-    # if(not line):
-    #     return False
     return line[:2] == "//" or line == "/n" or line.isspace()
 
 
@@ -83,7 +97,6 @@ def symbol():
     Returns:
         string
     """
-    # get current word
     word = ""
     for char in AppState.current:
         if char.isalnum():
@@ -95,28 +108,17 @@ def dest():
     """
     Returns the dest mnemonic in the current C-command (8 possibilities). Should be called only when commandType() is C_COMMAND.
     """
-    destTable = dict([
-        ("0", "000"),
-        ("M", "001"),
-        ("D", "010"),
-        ("MD", "011"),
-        ("A", "100"),
-        ("AM", "101"),
-        ("AD", "110"),
-        ("AMD", "111"),
-    ])
     word = AppState.current
     if len(word) == 0:
-        return destTable[null]
+        return ""
     for i, char in enumerate(word):
-        # print(i, char)
         if(char == "=" or char == ";"):
             if(i == 1):
-                return destTable[word[0]]
+                return word[0]
             if(i == 2):
-                return destTable[word[:2]]
+                return word[:2]
             if(i == 3):
-                return destTable[word[:3]]
+                return word[:3]
 
 
 def comp():
@@ -125,58 +127,24 @@ def comp():
     Returns:
         string
     """
-    compTableA0 = dict([
-        ("0", "101010"),
-        ("1", "111111"),
-        ("-1", "111010"),
-        ("D", "001100"),
-        ("A", "110000"),
-        ("!D", "001101"),
-        ("!A", "110001"),
-        ("-D", "001111"),
-        ("-A", "110011"),
-        ("D+1", "011111"),
-        ("A+1", "110111"),
-        ("D-1", "001110"),
-        ("A-1", "110010"),
-        ("D+A", "000010"),
-        ("A-D", "000111"),
-        ("D-A", "010011"),
-        ("D&A", "000000"),
-        ("D|A", "010101"),
-    ])
-    compTableA1 = dict([
-        ("M", "110000"),
-        ("!M", "110001"),
-        ("-M", "110011"),
-        ("M+1", "110111"),
-        ("M-1", "110010"),
-        ("D+M", "000010"),
-        ("M-D", "000111"),
-        ("D-M", "010011"),
-        ("D&M", "000000"),
-        ("D|M", "010101"),
-    ])
-    compTable = None
     word = AppState.current
     if len(word) == 0:
         return ""
-    if "A" in word:
-        compTable = compTableA0
-    else:
-        compTable = compTableA1
 
     compCommand = ""
     count = False
+    if ";" in word:
+        count = True
     for i, char in enumerate(word):
+        if(char == ";"):
+            return compCommand
         if(bool(count)):
             if(not char.isspace()):
                 compCommand = compCommand + char
         if(char == "="):
             count = True
 
-    print(compCommand)
-    # return compTable[compCommand]
+    return compCommand
 
 
 def jump():
@@ -186,7 +154,10 @@ def jump():
     Returns:
         string
     """
-    pass
+    word = AppState.current
+    if ";" in word:
+        return word[-3:]
+    return ""
 
 
 if __name__ == '__main__':
