@@ -11,7 +11,6 @@ class ParserAppState:
         self._instructionBin = ""
 
     def write_to_output_file(self):
-        print(self.instructionBin)
         self._fileHandler.write_to_output_file(self.instructionBin)
         self._fileHandler.write_to_output_file("\n")
 

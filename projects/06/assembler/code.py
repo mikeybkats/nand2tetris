@@ -1,6 +1,8 @@
 # translates each field into its corresponding binary value
 
 def code_dest(mnemonic):
+    if mnemonic == None:
+        mnemonic = "0"
     destTable = dict([
         ("", "000"),
         ("0", "000"),
@@ -16,6 +18,8 @@ def code_dest(mnemonic):
 
 
 def code_comp(mnemonic):
+    if mnemonic == None:
+        mnemonic = "0"
     compTable = dict([
         ("0", "0101010"),
         ("1", "0111111"),
@@ -51,6 +55,8 @@ def code_comp(mnemonic):
 
 
 def code_jump(mnemonic):
+    if mnemonic == None:
+        mnemonic = "0"
     jumpValues = dict([
         ("", "000"),
         ("0", "000"),

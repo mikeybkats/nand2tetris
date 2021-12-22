@@ -16,54 +16,85 @@ def main(filename, outputPath):
 
 def parse():
     instSym = ""
+    romAddress = 0
     # scan one
+    # loop through all commands
     while hasMoreCommands():
         advance()
+        # check what kind of instruction
         AppState.instructionType = commandType()
-        if AppState.instructionType == "L_COMMAND" or AppState.instructionType == "A_COMMAND":
+        # Each time a pseudocommand (Xxx) is encountered, add a new entry to the symbol table
+        if AppState.instructionType == "L_COMMAND":
             instSym = symbol()
-            AppState.addSymbolToTable(instSym, instSym)
+            # add the symbol to the table
+            AppState.addSymbolToTable(instSym, str(romAddress))
+        # if instruction is A_COMMAND or C_COMMAND count
+        if AppState.instructionType == "C_COMMAND" or "A_COMMAND":
+            romAddress += 1
+
     # scan two
+    # go back to the begginning of the file
     AppState.inFile().seek(0)
-    count = 16
+    # # start at 16 because this is where the variables are stored in the RAM
+    romAddress = 16
+    # # loop through all commands
     while hasMoreCommands():
         advance()
+        # check what kind of instruction
         AppState.instructionType = commandType()
-        if AppState.instructionType == "L_COMMAND" or AppState.instructionType == "A_COMMAND":
+        # if instruction is A_COMMAND
+        if AppState.instructionType == "A_COMMAND":
             instSym = symbol()
-            if bool(AppState._symbolTable.contains(instSym)):
-                address = int(AppState._symbolTable.getAddress(instSym))
-                address = f'0{address:015b}'
-                address = insert_space(address, 4)
-                address = insert_space(address, 9)
-                address = insert_space(address, 14)
-                AppState.instructionBin = address
+            if not bool(instSym.isnumeric()):
+                # if the symbol is in the table
+                if bool(AppState._symbolTable.contains(instSym)):
+                    # If the symbol is found in the table, get the address
+                    address = AppState._symbolTable.getAddress(instSym)
+                # if the symbol is not found add it to the table
+                else:
+                    AppState.addSymbolToTable(instSym, romAddress)
             else:
-                AppState.addSymbolToTable(instSym, count)
-                address = f'0{count:015b}'
-                address = insert_space(address, 4)
-                address = insert_space(address, 9)
-                address = insert_space(address, 14)
-                AppState.instructionBin = address
-            count = count + 1
-        else:
-            compI = code_comp(comp())
-            destI = code_dest(dest())
-            jumpI = code_jump(jump())
-            address = "111" + compI + destI + jumpI
-            address = insert_space(address, 4)
-            address = insert_space(address, 9)
-            address = insert_space(address, 14)
-            # print(address)
-            AppState.instructionBin = address
-            print(AppState.instructionBin)
-        # print(AppState.instructionBin)
+                # add the symbol to the table
+                AppState.addSymbolToTable(instSym, instSym)
+            # set the current instruction binary
+            address = int(AppState._symbolTable.getAddress(instSym))
+            AppState.instructionBin = convert_to_base16_and_format(address)
+            romAddress += 1
+        elif AppState.instructionType == "C_COMMAND":
+            AppState.instructionBin = determine_c_instruction()
+        print(AppState.current, AppState.instructionBin)
         AppState.write_to_output_file()
     AppState.close_output_file()
 
 
+def determine_c_instruction():
+    # print("AppCurrent:", AppState.current)
+    # print("comp:", comp())
+    # print("dest:", dest())
+    # print("jump:", jump())
+    compI = code_comp(comp())
+    destI = code_dest(dest())
+    jumpI = code_jump(jump())
+    address = "111" + compI + destI + jumpI
+    address = add_whitespace_to_base16(address)
+    return address
+
+
+def convert_to_base16_and_format(number):
+    number = f'0{number:015b}'
+    number = add_whitespace_to_base16(number)
+    return number
+
+
 def insert_space(string, integer):
     return string[0:integer] + ' ' + string[integer:]
+
+
+def add_whitespace_to_base16(address):
+    address = insert_space(address, 4)
+    address = insert_space(address, 9)
+    address = insert_space(address, 14)
+    return address
 
 
 def hasMoreCommands():
@@ -74,9 +105,10 @@ def hasMoreCommands():
         boolean
     """
     currentLocation = AppState.inFile().tell()
-    returnVal = True if AppState.inFile().read() else False
+    fileContents = AppState.inFile().read()
+    isEndOfFile = False if fileContents else True
     AppState.inFile().seek(currentLocation)
-    return returnVal
+    return not isEndOfFile
 
 
 def advance():
@@ -89,7 +121,7 @@ def advance():
 
 
 def isEmptyLine(line):
-    return line[:2] == "//" or line == "/n" or line.isspace()
+    return line[:2] == "//" or line == "/n" or line.isspace() or not len(line.strip())
 
 
 def commandType():
@@ -127,7 +159,7 @@ def symbol():
     """
     word = ""
     for char in AppState.current:
-        if char.isalnum():
+        if char.isalnum() or char == "_":
             word = word + char
     return word
 
@@ -136,11 +168,14 @@ def dest():
     """
     Returns the dest mnemonic in the current C-command (8 possibilities). Should be called only when commandType() is C_COMMAND.
     """
-    word = AppState.current
+    word = AppState.current.strip()
+    print("word:", word)
     if len(word) == 0:
-        return ""
+        return "0"
+    if ";" in word:
+        return "0"
     for i, char in enumerate(word):
-        if(char == "=" or char == ";"):
+        if(char == "="):
             if(i == 1):
                 return word[0]
             if(i == 2):
@@ -155,8 +190,8 @@ def comp():
     Returns:
         string
     """
-    word = AppState.current
-    if len(word) == 0:
+    word = AppState.current.strip()
+    if (len(word)) == 0:
         return ""
 
     compCommand = ""
@@ -167,8 +202,8 @@ def comp():
         if(char == ";"):
             return compCommand
         if(bool(count)):
-            if(not char.isspace()):
-                compCommand = compCommand + char
+            # if(not char.isspace()):
+            compCommand = compCommand + char
         if(char == "="):
             count = True
 
@@ -182,14 +217,16 @@ def jump():
     Returns:
         string
     """
-    word = AppState.current
+    word = AppState.current.strip()
+    if len(word) == 0:
+        return ""
     if ";" in word:
         return word[-3:]
     return ""
 
 
 if __name__ == '__main__':
-    outputPath = 'output.txt'
+    outputPath = 'output.hack'
     if len(sys.argv) == 3:
         outputPath = sys.argv[2]
 
