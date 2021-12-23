@@ -14,30 +14,36 @@ def main(filename, outputPath):
     parse()
 
 
-def parse():
+def scanOne():
     instSym = ""
     romAddress = 0
+    symbolsFound = 0
     # scan one
     # loop through all commands
     while hasMoreCommands():
+        # load the command
         advance()
-        # check what kind of instruction
+        # check what kind of command
         AppState.instructionType = commandType()
-        # Each time a pseudocommand (Xxx) is encountered, add a new entry to the symbol table
+        # print(romAddress, AppState.current)
+        # Each time a pseudocommand / L_COMMAND (Xxx) is encountered, add a new entry to the symbol table
         if AppState.instructionType == "L_COMMAND":
-            instSym = symbol()
             # add the symbol to the table
+            instSym = symbol()
             AppState.addSymbolToTable(instSym, str(romAddress))
         # if instruction is A_COMMAND or C_COMMAND count
-        if AppState.instructionType == "C_COMMAND" or "A_COMMAND":
+        if AppState.instructionType == "C_COMMAND" or AppState.instructionType == "A_COMMAND":
             romAddress += 1
 
+
+def scanTwo():
+    instSym = ""
+    # start at 16 because this is where the variables are stored in the RAM
+    romAddress = 16
     # scan two
     # go back to the begginning of the file
     AppState.inFile().seek(0)
-    # # start at 16 because this is where the variables are stored in the RAM
-    romAddress = 16
-    # # loop through all commands
+    # loop through all commands
     while hasMoreCommands():
         advance()
         # check what kind of instruction
@@ -53,25 +59,27 @@ def parse():
                 # if the symbol is not found add it to the table
                 else:
                     AppState.addSymbolToTable(instSym, romAddress)
+                    romAddress += 1
             else:
-                # add the symbol to the table
+                # if it is a numeric symbol add it to the table
                 AppState.addSymbolToTable(instSym, instSym)
-            # set the current instruction binary
+            # print(instSym, AppState._symbolTable.getAddress(instSym))
+            # set the current instruction to a binary value
             address = int(AppState._symbolTable.getAddress(instSym))
             AppState.instructionBin = convert_to_base16_and_format(address)
-            romAddress += 1
         elif AppState.instructionType == "C_COMMAND":
             AppState.instructionBin = determine_c_instruction()
-        print(AppState.current, AppState.instructionBin)
-        AppState.write_to_output_file()
+        if AppState.instructionType == "C_COMMAND" or AppState.instructionType == "A_COMMAND":
+            AppState.write_to_output_file()
     AppState.close_output_file()
 
 
+def parse():
+    scanOne()
+    scanTwo()
+
+
 def determine_c_instruction():
-    # print("AppCurrent:", AppState.current)
-    # print("comp:", comp())
-    # print("dest:", dest())
-    # print("jump:", jump())
     compI = code_comp(comp())
     destI = code_dest(dest())
     jumpI = code_jump(jump())
@@ -135,17 +143,17 @@ def commandType():
         the type of the current command A_COMMAND | C_COMMAND | L_COMMAND
     """
     word = ""
-    currentCommand = AppState.current
+    currentCommand = AppState.current.strip()
     for char in currentCommand:
         if(not char.isspace()):
             word = word + char
     AppState.current = word
     if bool(word):
-        if word[0] == "@":
+        if "@" in word:
             return "A_COMMAND"
-        if word[0] == "(" and word[1].isalpha():
+        if "(" in word or ")" in word:
             return "L_COMMAND"
-        if word[0].isalpha():
+        if word[0].isalpha() or ";" in word:
             return "C_COMMAND"
     return "NO_COMMAND"
 
@@ -169,7 +177,6 @@ def dest():
     Returns the dest mnemonic in the current C-command (8 possibilities). Should be called only when commandType() is C_COMMAND.
     """
     word = AppState.current.strip()
-    print("word:", word)
     if len(word) == 0:
         return "0"
     if ";" in word:
@@ -202,7 +209,6 @@ def comp():
         if(char == ";"):
             return compCommand
         if(bool(count)):
-            # if(not char.isspace()):
             compCommand = compCommand + char
         if(char == "="):
             count = True
