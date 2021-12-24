@@ -22,11 +22,10 @@ def parse():
 def scan_one():
     rom_address = 0
     while has_more_commands():
-        # load the command
+        # load the command / advance to the next command
         advance()
         # check what kind of command
-        app_state.instruction_type = command_type()
-        instruction_type = app_state.instruction_type
+        instruction_type = command_type()
         # Each time a pseudocommand / L_COMMAND (Xxx) is encountered, add a new entry to the symbol table
         if instruction_type == "L_COMMAND":
             # add the symbol to the table
@@ -46,8 +45,7 @@ def scan_two():
     while has_more_commands():
         advance()
         # check what kind of instruction
-        app_state.instruction_type = command_type()
-        instruction_type = app_state.instruction_type
+        instruction_type = command_type()
         # if instruction is A_COMMAND
         if instruction_type == "A_COMMAND":
             add_symbols_and_get_addresses()

@@ -7,7 +7,6 @@ class ParserAppState:
         self._infile = file_handler.infile()
         self._outfile = file_handler.outfile()
         self._current = ""
-        self._instruction_type = ""
         self._instruction_bin = ""
 
     def write_output(self):
@@ -34,12 +33,6 @@ class ParserAppState:
 
     def infile(self):
         return self._infile
-
-    def instruction_type(self):
-        return self._instruction_type
-
-    def instruction_type(self, new_val):
-        self._instruction_type = new_val
 
     def instruction_bin(self):
         return self._instruction_bin
