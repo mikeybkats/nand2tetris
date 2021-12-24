@@ -7,76 +7,75 @@ from code import *
 
 
 def main(filename, outputPath):
-    fileHandler = ParserFileHandler(filename, outputPath)
-    symbolTable = SymbolTable()
-    global AppState
-    AppState = ParserAppState(fileHandler, symbolTable)
+    file_handler = ParserFileHandler(filename, outputPath)
+    symbol_table = SymbolTable()
+    global app_state
+    app_state = ParserAppState(file_handler, symbol_table)
     parse()
 
 
-def scanOne():
-    instSym = ""
-    romAddress = 0
-    symbolsFound = 0
-    # scan one
-    # loop through all commands
-    while hasMoreCommands():
+def parse():
+    scan_one()
+    scan_two()
+
+
+def scan_one():
+    rom_address = 0
+    while has_more_commands():
         # load the command
         advance()
         # check what kind of command
-        AppState.instructionType = commandType()
-        # print(romAddress, AppState.current)
+        app_state.instruction_type = command_type()
+        instruction_type = app_state.instruction_type
         # Each time a pseudocommand / L_COMMAND (Xxx) is encountered, add a new entry to the symbol table
-        if AppState.instructionType == "L_COMMAND":
+        if instruction_type == "L_COMMAND":
             # add the symbol to the table
-            instSym = symbol()
-            AppState.addSymbolToTable(instSym, str(romAddress))
+            inst_sym = symbol()
+            app_state.symbol_table_add_symbol(inst_sym, str(rom_address))
         # if instruction is A_COMMAND or C_COMMAND count
-        if AppState.instructionType == "C_COMMAND" or AppState.instructionType == "A_COMMAND":
-            romAddress += 1
+        if instruction_type == "C_COMMAND" or instruction_type == "A_COMMAND":
+            rom_address += 1
 
 
-def scanTwo():
-    instSym = ""
+def scan_two():
     # start at 16 because this is where the variables are stored in the RAM
-    romAddress = 16
-    # scan two
+    rom_address = 16
     # go back to the begginning of the file
-    AppState.inFile().seek(0)
+    app_state.infile().seek(0)
     # loop through all commands
-    while hasMoreCommands():
+    while has_more_commands():
         advance()
         # check what kind of instruction
-        AppState.instructionType = commandType()
+        app_state.instruction_type = command_type()
+        instruction_type = app_state.instruction_type
         # if instruction is A_COMMAND
-        if AppState.instructionType == "A_COMMAND":
-            instSym = symbol()
-            if not bool(instSym.isnumeric()):
-                # if the symbol is in the table
-                if bool(AppState._symbolTable.contains(instSym)):
-                    # If the symbol is found in the table, get the address
-                    address = AppState._symbolTable.getAddress(instSym)
-                # if the symbol is not found add it to the table
-                else:
-                    AppState.addSymbolToTable(instSym, romAddress)
-                    romAddress += 1
-            else:
-                # if it is a numeric symbol add it to the table
-                AppState.addSymbolToTable(instSym, instSym)
-            # print(instSym, AppState._symbolTable.getAddress(instSym))
-            # set the current instruction to a binary value
-            address = int(AppState._symbolTable.getAddress(instSym))
-            AppState.instructionBin = convert_to_base16_and_format(address)
-        elif AppState.instructionType == "C_COMMAND":
-            AppState.instructionBin = determine_c_instruction()
-        if AppState.instructionType == "C_COMMAND" or AppState.instructionType == "A_COMMAND":
-            AppState.write_to_output_file()
-    AppState.close_output_file()
+        if instruction_type == "A_COMMAND":
+            add_symbols_and_get_addresses()
+        elif instruction_type == "C_COMMAND":
+            app_state.instruction_bin = determine_c_instruction()
+        if instruction_type == "C_COMMAND" or instruction_type == "A_COMMAND":
+            # write the instruction binary to output file
+            app_state.write_output()
+    app_state.close_output()
 
 
-def parse():
-    scanOne()
-    scanTwo()
+def add_symbols_and_get_addresses():
+    inst_sym = symbol()
+    if not bool(inst_sym.isnumeric()):
+        # if the symbol is in the table
+        if bool(app_state.symbol_table_contains(inst_sym)):
+            # If the symbol is found in the table, get the address
+            address = app_state.symbol_table_get_address(inst_sym)
+        # if the symbol is not found add it to the table
+        else:
+            app_state.symbol_table_add_symbol(inst_sym, rom_address)
+            rom_address += 1
+    else:
+        # if it is a numeric symbol add it to the table
+        app_state.symbol_table_add_symbol(inst_sym, inst_sym)
+    # set the current instruction to a binary value
+    address = int(app_state.symbol_table_get_address(inst_sym))
+    app_state.instruction_bin = convert_to_base16_and_format(address)
 
 
 def determine_c_instruction():
@@ -105,34 +104,34 @@ def add_whitespace_to_base16(address):
     return address
 
 
-def hasMoreCommands():
+def has_more_commands():
     """
     Are there more commands in the input?
 
     Returns:
         boolean
     """
-    currentLocation = AppState.inFile().tell()
-    fileContents = AppState.inFile().read()
+    currentLocation = app_state.infile().tell()
+    fileContents = app_state.infile().read()
     isEndOfFile = False if fileContents else True
-    AppState.inFile().seek(currentLocation)
+    app_state.infile().seek(currentLocation)
     return not isEndOfFile
 
 
 def advance():
     """
-    Reads the next command from the input and makes it the current command. Should be called only if hasMoreCommands() is true. Initially there is no current command.
+    Reads the next command from the input and makes it the current command. Should be called only if has_more_commands() is true. Initially there is no current command.
     """
-    AppState.current = AppState.inFile().readline()
-    while(isEmptyLine(AppState.current)):
-        AppState.current = AppState.inFile().readline()
+    app_state.current = remove_comments(app_state.infile().readline().strip())
+    while(is_empty_line(app_state.current)):
+        app_state.current = app_state.infile().readline()
 
 
-def isEmptyLine(line):
+def is_empty_line(line):
     return line[:2] == "//" or line == "/n" or line.isspace() or not len(line.strip())
 
 
-def commandType():
+def command_type():
     """
     Returns the type of the current command:
         - A_COMMAND for @Xxx where Xxx is either a symbol or a decimal number
@@ -143,11 +142,11 @@ def commandType():
         the type of the current command A_COMMAND | C_COMMAND | L_COMMAND
     """
     word = ""
-    currentCommand = AppState.current.strip()
+    currentCommand = app_state.current.strip()
     for char in currentCommand:
         if(not char.isspace()):
             word = word + char
-    AppState.current = word
+    app_state.current = word
     if bool(word):
         if "@" in word:
             return "A_COMMAND"
@@ -160,13 +159,13 @@ def commandType():
 
 def symbol():
     """
-    Returns the symbol or decimal Xxx of the current command @Xxx or (Xxx). Should be called only when commandType() is A_COMMAND or L_COMMAND.
+    Returns the symbol or decimal Xxx of the current command @Xxx or (Xxx). Should be called only when command_type() is A_COMMAND or L_COMMAND.
 
     Returns:
         string
     """
     word = ""
-    for char in AppState.current:
+    for char in app_state.current:
         if char.isalnum() or char == "_":
             word = word + char
     return word
@@ -174,9 +173,9 @@ def symbol():
 
 def dest():
     """
-    Returns the dest mnemonic in the current C-command (8 possibilities). Should be called only when commandType() is C_COMMAND.
+    Returns the dest mnemonic in the current C-command (8 possibilities). Should be called only when command_type() is C_COMMAND.
     """
-    word = AppState.current.strip()
+    word = app_state.current
     if len(word) == 0:
         return "0"
     if ";" in word:
@@ -192,38 +191,49 @@ def dest():
 
 
 def comp():
-    """Returns the comp mnemonic in the current C-command (28 possibilities). Should be called only when commandType() is C_COMMAND.
+    """Returns the comp mnemonic in the current C-command (28 possibilities). Should be called only when command_type() is C_COMMAND.
 
     Returns:
         string
     """
-    word = AppState.current.strip()
+    word = app_state.current
     if (len(word)) == 0:
         return ""
 
-    compCommand = ""
+    comp_command = ""
     count = False
     if ";" in word:
         count = True
     for i, char in enumerate(word):
         if(char == ";"):
-            return compCommand
+            return comp_command
         if(bool(count)):
-            compCommand = compCommand + char
+            comp_command = comp_command + char
         if(char == "="):
             count = True
 
-    return compCommand
+    return comp_command
+
+
+def remove_comments(word):
+    newWord = ""
+    addLetter = True
+    for char in word:
+        if char == "/":
+            addLetter = False
+        if addLetter == True:
+            newWord += char
+    return newWord
 
 
 def jump():
     """
-    Returns the jump mnemonic in the current C-command (8 possibilities). Should be called only when commandType() is C_COMMAND.
+    Returns the jump mnemonic in the current C-command (8 possibilities). Should be called only when command_type() is C_COMMAND.
 
     Returns:
         string
     """
-    word = AppState.current.strip()
+    word = app_state.current
     if len(word) == 0:
         return ""
     if ";" in word:

@@ -19,7 +19,7 @@ class SymbolTable:
 
         return symbols
 
-    def addEntry(self, symbol, address):
+    def add_entry(self, symbol, address):
         """Adds the pair (symbol, address) to the table."""
         self._table[symbol] = address
 
@@ -34,7 +34,7 @@ class SymbolTable:
         else:
             return False
 
-    def getAddress(self, symbol):
+    def get_address(self, symbol):
         """Returns the address associated with the symbol.
 
         Returns:

@@ -1,42 +1,48 @@
 
 class ParserAppState:
-    def __init__(self, fileHandler, symbolTable):
-        self._fileHandler = fileHandler
-        self._symbolTable = symbolTable
+    def __init__(self, file_handler, symbol_table):
+        self._file_handler = file_handler
+        self._symbol_table = symbol_table
 
-        self._inFile = fileHandler.inFile()
-        self._outFile = fileHandler.outFile()
+        self._infile = file_handler.infile()
+        self._outfile = file_handler.outfile()
         self._current = ""
-        self._instructionType = ""
-        self._instructionBin = ""
+        self._instruction_type = ""
+        self._instruction_bin = ""
 
-    def write_to_output_file(self):
-        self._fileHandler.write_to_output_file(self.instructionBin)
-        self._fileHandler.write_to_output_file("\n")
+    def write_output(self):
+        self._file_handler.write_to_output_file(self.instruction_bin)
+        self._file_handler.write_to_output_file("\n")
 
-    def close_output_file(self):
-        self._outFile.close()
+    def close_output(self):
+        self._outfile.close()
 
-    def addSymbolToTable(self, symbol, address):
-        self._symbolTable.addEntry(symbol, address)
+    def symbol_table_add_symbol(self, symbol, address):
+        self._symbol_table.add_entry(symbol, address)
+
+    def symbol_table_contains(self, symbol):
+        return self._symbol_table.contains(symbol)
+
+    def symbol_table_get_address(self, symbol):
+        return self._symbol_table.get_address(symbol)
 
     def current(self):
         return self._current
 
-    def current(self, newVal):
-        self._current = newVal
+    def current(self, new_val):
+        self._current = new_val
 
-    def inFile(self):
-        return self._inFile
+    def infile(self):
+        return self._infile
 
-    def instructionType(self):
-        return self._instructionType
+    def instruction_type(self):
+        return self._instruction_type
 
-    def instructionType(self, newVal):
-        self._instructionType = newVal
+    def instruction_type(self, new_val):
+        self._instruction_type = new_val
 
-    def instructionBin(self):
-        return self._instructionBin
+    def instruction_bin(self):
+        return self._instruction_bin
 
-    def instructionBin(self, newVal):
-        self._instructionBin = newVal
+    def instruction_bin(self, new_val):
+        self._instruction_bin = new_val

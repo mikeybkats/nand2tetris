@@ -8,30 +8,30 @@ class ParserFileHandler:
         """
         initializer - Opens the input file/stream and gets ready to parse it
         """
-        self._inFile = self.open_input_file(filename)
-        self._outFile = self.create_output_file(outputPath)
-        self._outFilePath = outputPath
+        self._infile = self.open_input_file(filename)
+        self._outfile = self.create_output_file(outputPath)
+        self._outfile_path = outputPath
 
-    def inFile(self):
-        return self._inFile
+    def infile(self):
+        return self._infile
 
-    def outFile(self):
-        return self._outFile
+    def outfile(self):
+        return self._outfile
 
-    def outFilePath(self):
-        return self._outFilePath
+    def outfile_path(self):
+        return self._outfile_path
 
-    def open_input_file(self, inputFile):
-        return open(inputFile, mode='rt', encoding='utf-8')
+    def open_input_file(self, input_file):
+        return open(input_file, mode='rt', encoding='utf-8')
 
     def create_output_file(self, filename):
         return open(filename, mode='w+', encoding='utf-8')
 
     def write_to_output_file(self, value):
-        self._outFile.write(value)
+        self._outfile.write(value)
 
     def print_output_file(self):
-        outputFileContents = open(
-            self._outFilePath, mode='rt', encoding='utf-8')
-        for line in outputFileContents:
+        output_file_contents = open(
+            self._outfile_path, mode='rt', encoding='utf-8')
+        for line in output_file_contents:
             sys.stdout.write(line)
