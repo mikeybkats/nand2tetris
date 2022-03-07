@@ -4,13 +4,13 @@ import sys
 
 class ParserFileHandler:
 
-    def __init__(self, filename, outputPath):
+    def __init__(self, filename, outfile_path):
         """
         initializer - Opens the input file/stream and gets ready to parse it
         """
         self._infile = self.open_input_file(filename)
-        self._outfile = self.create_output_file(outputPath)
-        self._outfile_path = outputPath
+        self._outfile = self.create_output_file(outfile_path)
+        self._outfile_path = outfile_path
 
     def infile(self):
         return self._infile
