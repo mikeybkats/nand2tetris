@@ -10,4 +10,5 @@
   "python.linting.enabled": true,
   "python.linting.banditEnabled": true,
   "python.testing.autoTestDiscoverOnSaveEnabled": true,
+  "python.testing.pytestEnabled": false,
 }
