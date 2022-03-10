@@ -4,13 +4,17 @@ import sys
 
 class FileHandler:
 
-    def __init__(self, filename, outfile_path):
+    def __init__(self, infile_path, outfile_path):
         """
         initializer - Opens the input file/stream and gets ready to parse it
         """
-        self._infile = self.open_input_file(filename)
+        self._infile_path = infile_path
+        self._infile = self.open_input_file(infile_path)
         self._outfile = self.create_output_file(outfile_path)
         self._outfile_path = outfile_path
+
+    def infile_path(self):
+        return self._infile_path
 
     def infile(self):
         return self._infile
@@ -24,8 +28,8 @@ class FileHandler:
     def open_input_file(self, input_file):
         return open(input_file, mode='rt', encoding='utf-8')
 
-    def create_output_file(self, filename):
-        return open(filename, mode='w+', encoding='utf-8')
+    def create_output_file(self, infile_path):
+        return open(infile_path, mode='w+', encoding='utf-8')
 
     def write_to_output_file(self, value):
         self._outfile.write(value)

@@ -2,9 +2,9 @@
   "python.testing.unittestArgs": [
     "-v",
     "-s",
-    ".",
+    "./projects/VMTranslator/",
     "-p",
-    "*_test.py"
+    "*_test.py",
   ],
   "python.testing.unittestEnabled": true,
   "python.linting.enabled": true,

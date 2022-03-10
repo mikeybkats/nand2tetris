@@ -1,6 +1,6 @@
 # parser: unpacks each instruction into its underlying field
 import sys
-from init import ParserFileHandler
+from parserFileHandler import ParserFileHandler
 from symbol_table import SymbolTable
 from parserAppState import ParserAppState
 from code import *

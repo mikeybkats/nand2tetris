@@ -1,8 +1,8 @@
-# this import is not working
-from projects.VMTranslator.parser import Parser
-
 # import test framework
 import unittest
+from parser import Parser
+import sys
+import os
 
 
 class TestParser(unittest.TestCase):
@@ -10,9 +10,10 @@ class TestParser(unittest.TestCase):
         self.assertEqual('foo'.upper(), 'FOO')
 
     def test_parser_infile(self):
-        parser = Parser(infile_path="helloVM.vm",
-                        outfile_path="helloVM.asm")
-        self.assertEqual(parser.infile(), 'helloVM.vm')
+        cwd = os.getcwd() + "/projects/VMTranslator"
+        parser = Parser(infile_path=cwd + "/testVM.vm",
+                        outfile_path=cwd + "/testOutputVM.asm")
+        self.assertEqual(parser.infile_path(), 'testVM.vm')
 
 
 if __name__ == '__main__':

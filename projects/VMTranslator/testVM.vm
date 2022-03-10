@@ -1,0 +1,3 @@
+push local 10
+push local 5
+add
