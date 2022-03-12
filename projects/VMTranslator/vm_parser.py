@@ -1,25 +1,15 @@
 import sys
 import os
-from file_handler import FileHandler
-from parser_state import ParserState
 from commands import Commands, CommandTable
 
 
-class Parser:
-    def __init__(self, infile_path, outfile_path):
-        self._infile_path = infile_path
-        self._command_table = CommandTable()
-        self._file_handler = FileHandler(infile_path, outfile_path)
-        self._state = ParserState(self._file_handler, self._command_table)
+class VMParser:
+    def __init__(self, app_state, command_table):
+        self._command_table = command_table
+        self._state = app_state
 
     def state(self):
         return self._state
-
-    def infile_path(self):
-        return os.path.basename(os.path.normpath(self._infile_path))
-
-    def file_handler(self):
-        return self._file_handler
 
     def current_command(self):
         return self._state.current_command
@@ -53,6 +43,7 @@ class Parser:
     def advance(self):
         """
         reads the next command from input and makes it the current command. should be called only if has_more_commands is true. initially there is no current command
+
         returns undefined
         """
         word = self._state.infile().readline()
@@ -62,14 +53,17 @@ class Parser:
         while(self.is_empty_line(self._state.current_command)):
             self._state.current = self._state.infile().readline()
 
-    def command_type(self):
+    def command_type(self) -> Commands:
         """
         Returns the type of the current VM command C_ARITHMETIC is returned for all the arithmetic commands
 
         Returns: 
-            COMMAND
+            Command
         """
-        return self._state.current_command()
+        command = self.current_command().split()[0]
+        if command:
+            return self._command_table.get_command_type(command.lower())
+        return "NO_COMMAND"
 
     def arg1(self):
         """
@@ -78,7 +72,10 @@ class Parser:
         Returns:
             string
         """
-        return ""
+        current = self._state.current_command
+        if current:
+            return current.split()[1]
+        return "NO_COMMAND"
 
     def arg2(self):
         """
@@ -87,13 +84,15 @@ class Parser:
         Returns: 
             int
         """
+        current = self._state.current_command
+        if current:
+            return int(current.split()[2])
         return 0
 
 
-if __name__ == '__main__':
-    outfile_path = 'output.asm'
-    if len(sys.argv) == 3:
-        outfile_path = sys.argv[2]
+# if __name__ == '__main__':
+#     outfile_path = 'output.asm'
+#     if len(sys.argv) == 3:
+#         outfile_path = sys.argv[2]
 
-    parser = Parser(infile_path=sys.argv[1], outfile_path=outfile_path)
-    # parser.
+    # Parser(infile_path=sys.argv[1], outfile_path=outfile_path)

@@ -3,7 +3,6 @@ import sys
 
 
 class FileHandler:
-
     def __init__(self, infile_path, outfile_path):
         """
         initializer - Opens the input file/stream and gets ready to parse it
@@ -24,6 +23,9 @@ class FileHandler:
 
     def outfile_path(self):
         return self._outfile_path
+
+    def outfile_path(self, filename):
+        self._outfile_path = filename
 
     def open_input_file(self, input_file):
         return open(input_file, mode='rt', encoding='utf-8')
