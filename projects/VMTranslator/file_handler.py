@@ -11,18 +11,23 @@ class FileHandler:
         self._outfile = self.create_output_file(outfile_path)
         self._outfile_path = outfile_path
 
+    @property
     def infile_path(self):
         return self._infile_path
 
+    @property
     def infile(self):
         return self._infile
 
+    @property
     def outfile(self):
         return self._outfile
 
+    @property
     def outfile_path(self):
         return self._outfile_path
 
+    @outfile_path.setter
     def outfile_path(self, filename):
         self._outfile_path = filename
 
@@ -34,6 +39,9 @@ class FileHandler:
 
     def write_to_output_file(self, value):
         self._outfile.write(value)
+
+    def close_and_write(self):
+        self._outfile.close()
 
     def print_output_file(self):
         output_file_contents = open(

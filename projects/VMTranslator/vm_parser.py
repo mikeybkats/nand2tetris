@@ -11,6 +11,7 @@ class VMParser:
     def state(self):
         return self._state
 
+    @property
     def current_command(self):
         return self._state.current_command
 
@@ -21,10 +22,10 @@ class VMParser:
         Returns: 
             boolean
         """
-        currentLocation = self._state.infile().tell()
-        fileContents = self._state.infile().read()
+        currentLocation = self._state.infile.tell()
+        fileContents = self._state.infile.read()
         isEndOfFile = False if fileContents else True
-        self._state.infile().seek(currentLocation)
+        self._state.infile.seek(currentLocation)
         return not isEndOfFile
 
     def is_empty_line(self, line):
@@ -46,12 +47,13 @@ class VMParser:
 
         returns undefined
         """
-        word = self._state.infile().readline()
+        word = self._state.infile.readline()
         if word:
             self._state.current_command = self.remove_comments(word)
+            self._state.current_command_type = self.command_type()
 
-        while(self.is_empty_line(self._state.current_command)):
-            self._state.current = self._state.infile().readline()
+        while(self.is_empty_line(self._state.current_command) and self.has_more_commands()):
+            self._state.current = self._state.infile.readline()
 
     def command_type(self) -> Commands:
         """
@@ -60,9 +62,9 @@ class VMParser:
         Returns: 
             Command
         """
-        command = self.current_command().split()[0]
+        command = self._state.current_command
         if command:
-            return self._command_table.get_command_type(command.lower())
+            return self._command_table.get_command_type(command.split()[0].lower())
         return "NO_COMMAND"
 
     def arg1(self):
@@ -73,9 +75,10 @@ class VMParser:
             string
         """
         current = self._state.current_command
-        if current:
+        print(current)
+        if len(current.split()) != 1:
             return current.split()[1]
-        return "NO_COMMAND"
+        return current.split()[0]
 
     def arg2(self):
         """
@@ -85,9 +88,9 @@ class VMParser:
             int
         """
         current = self._state.current_command
-        if current:
+        if len(current.split()[2]):
             return int(current.split()[2])
-        return 0
+        return ""
 
 
 # if __name__ == '__main__':
