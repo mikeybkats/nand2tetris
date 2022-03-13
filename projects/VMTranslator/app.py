@@ -14,10 +14,17 @@ class VMTranslator:
         command_table = CommandTable()
         app_state = AppState(file_handler, command_table)
 
-        self._parser = Parser(app_state, command_table)
+        self._parser = VMParser(app_state, command_table)
         self._codeWriter = CodeWriter(app_state, file_handler)
 
     def parseInput(self):
+        if self._parser.has_more_commands():
+            self._parser.advance()
+            cur = self._parser.current_command()
+            arg1 = self._parser.arg1()
+            arg2 = self._parser.arg2()
+            self._codeWriter.command_router(
+                self._parser.command_type(), arg1, arg2)
         pass
 
     def writeOutput(self):

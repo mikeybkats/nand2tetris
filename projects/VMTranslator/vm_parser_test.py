@@ -40,17 +40,17 @@ class TestParser(unittest.TestCase):
         parser.state().infile().seek(0, 0)
         parser.advance()
         command = parser.current_command()
-        self.assertEqual(command, "push local 10")
+        self.assertEqual(command, "push constant 10")
 
     def test_advance(self):
         parser.state().infile().seek(0, 0)
         parser.advance()
         word = parser.state().current_command
-        self.assertEqual(word, "push local 10")
+        self.assertEqual(word, "push constant 10")
 
         parser.advance()
         word = parser.state().current_command
-        self.assertEqual(word, "push local 5")
+        self.assertEqual(word, "push constant 5")
 
         parser.advance()
         word = parser.state().current_command
@@ -61,7 +61,7 @@ class TestParser(unittest.TestCase):
         parser.state().infile().seek(0, 0)
         parser.advance()
         arg1 = parser.arg1()
-        self.assertEqual(arg1, "local")
+        self.assertEqual(arg1, "constant")
 
     def test_arg2(self):
         parser.state().infile().seek(0, 0)
