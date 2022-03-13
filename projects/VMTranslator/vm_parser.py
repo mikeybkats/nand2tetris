@@ -75,10 +75,9 @@ class VMParser:
             string
         """
         current = self._state.current_command
-        print(current)
-        if len(current.split()) != 1:
+        if len(current.split()) > 1:
             return current.split()[1]
-        return current.split()[0]
+        return None
 
     def arg2(self):
         """
@@ -88,9 +87,9 @@ class VMParser:
             int
         """
         current = self._state.current_command
-        if len(current.split()[2]):
+        if len(current.split()[2]) == 3:
             return int(current.split()[2])
-        return ""
+        return None
 
 
 # if __name__ == '__main__':
