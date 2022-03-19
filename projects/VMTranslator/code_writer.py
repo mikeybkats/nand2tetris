@@ -18,6 +18,8 @@ class CodeWriter:
             ('this', '3'),  # RAM[3] this segment pointer
             ('that', '4'),  # RAM[4] that segment pointer
         ])
+        self._file_handler.write_to_output_file(
+            self.get_arithmetic_assembly_header())
 
     def filename(self, filename):
         '''
@@ -38,19 +40,45 @@ class CodeWriter:
         if command_type == Commands.C_ARITHMETIC:
             self.write_arithmetic(command)
 
-    def get_arithmetic_assembly(self, command):
-        if command == "add":
-            return dedent("""\
+    def get_arithmetic_assembly_header(self):
+        return dedent("""\
+            @EQ
+            M=1
             @0
-            A=M-1
-            D=M
-            M=0
+            A=M
+
+            @NEQ
+            M=-1
             @0
-            M=M-1
-            A=M-1
-            M=D+M
+            A=M
             """)
-        return ""
+
+    def get_arithmetic_assembly(self, command):
+        # stores value of RAM[SP-1] in D register
+        spFirstOp = "@0\nA=M-1\nD=M\nM=0\n"
+        # sets value of RAM[0] to (RAM[0]-1) and targets 1 minus the stack pointer
+        spSecOp = "@0\nM=M-1\nA=M-1\n"
+        if command == "add":
+            return spFirstOp + spSecOp + "M=D+M\n"
+        if command == "sub":
+            return spFirstOp + spSecOp + "M=M-D\n"
+        if command == "neg":
+            return spFirstOp + "M=M-D\n"
+        if command == "eq":
+            # get the first value into D Register
+            # get the second value
+            # @0\nA=M\nM=1\n@0\nM=M-1\n
+            # D=M-D
+            # @0
+            # 0;JEQ
+            # M=-1
+            return spFirstOp + spSecOp + dedent("""\
+                D=M-D    
+                @EQ
+                D;JEQ
+                @NEQ
+                D;JMP
+                """)
 
     def write_arithmetic(self, command):
         '''
@@ -65,21 +93,12 @@ class CodeWriter:
 
     def get_push_pop_assembly(self, command, segment, index):
         segment = self._segments.get(segment)
-        # pushOrPopOp = "+" if command == "push" else "-"
-
-        # push segment index
-        # set d reg to index
-        # @index
-        # D=A
-        # goto the address of stack pointer @0 is the stack pointer address
-        # @0
-        # A=M
-        # set value of ram address to d reg
-        # M=D
-        # increment the stack pointer
-        # @0
-        # D=D+1
-        return "@{}\nD=A\n@{}\nA=M\nM=D\n@{}\nM=M+1\n".format(index, segment, segment)
+        # pushes to the top of the stack
+        if self._app_state.current_command_type == Commands.C_PUSH:
+            return "@{}\nD=A\n@{}\nA=M\nM=D\n@{}\nM=M+1\n".format(index, segment, segment)
+        else:
+            # get the address of the pop destination segments are described above in constructor
+            return None
 
     def write_push_pop(self, command, segment, index):
         '''

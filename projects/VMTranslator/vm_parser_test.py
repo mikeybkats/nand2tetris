@@ -1,4 +1,5 @@
 import unittest
+from textwrap import dedent
 from vm_parser import VMParser
 from app_state import AppState
 from file_handler import FileHandler
@@ -7,9 +8,8 @@ import sys
 import os
 
 cwd = os.getcwd() + "/projects/VMTranslator"
-
-file_handler = FileHandler(infile_path=cwd + "/testVM.vm",
-                           outfile_path=cwd + "/testOutputVM.asm")
+file_handler = FileHandler(infile_path=cwd + "/commandTests/testFile.vm",
+                           outfile_path=cwd + "/commandTests/testFile.asm")
 command_table = CommandTable()
 app_state = AppState(file_handler, command_table)
 parser = VMParser(app_state, command_table)
@@ -55,14 +55,14 @@ class TestParser(unittest.TestCase):
         parser.advance()
         word = parser.state().current_command
         self.assertEqual(word, "add")
-        self.assertEqual(parser.has_more_commands(), True)
+        self.assertEqual(parser.has_more_commands(), False)
 
     def test_while_has_more_commands(self):
         count = 0
         while parser.has_more_commands():
             parser.advance()
             count = count + 1
-        self.assertEqual(count, 13)
+        self.assertEqual(count, 3)
 
     def test_arg1(self):
         parser.state().infile.seek(0, 0)

@@ -53,7 +53,7 @@ class VMParser:
             self._state.current_command_type = self.command_type()
 
         while(self.is_empty_line(self._state.current_command) and self.has_more_commands()):
-            self._state.current = self._state.infile.readline()
+            self._state.current_command = self._state.infile.readline()
 
     def command_type(self) -> Commands:
         """
@@ -87,9 +87,8 @@ class VMParser:
             int
         """
         current = self._state.current_command
-        if len(current.split()[2]) == 3:
+        if current.split()[2]:
             return int(current.split()[2])
-        return None
 
 
 # if __name__ == '__main__':

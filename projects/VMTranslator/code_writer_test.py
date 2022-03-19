@@ -7,8 +7,8 @@ from file_handler import FileHandler
 from commands import CommandTable
 
 cwd = os.getcwd() + "/projects/VMTranslator"
-outfile_path = cwd + "/testOutputVM.asm"
-file_handler = FileHandler(infile_path=cwd + "/testVM.vm",
+outfile_path = cwd + "/commandTests/testFile.asm"
+file_handler = FileHandler(infile_path=cwd + "/commandTests/testFile.vm",
                            outfile_path=outfile_path)
 app_state = AppState(file_handler, CommandTable())
 code_writer = CodeWriter(app_state, file_handler)

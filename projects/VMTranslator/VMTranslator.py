@@ -22,9 +22,13 @@ class VMTranslator:
             self._parser.advance()
             arg1 = self._parser.arg1()
             arg2 = ""
-            if self._app_state.current_command_type == Commands.C_PUSH or self._app_state.current_command_type == Commands.C_POP or self._app_state.current_command_type == Commands.C_FUNCTION or self._app_state.current_command_type == Commands.C_CALL:
+            if (self._app_state.current_command_type == Commands.C_PUSH or
+                self._app_state.current_command_type == Commands.C_POP or
+                self._app_state.current_command_type == Commands.C_FUNCTION or
+                self._app_state.current_command_type == Commands.C_CALL
+                ):
                 arg2 = self._parser.arg2()
-            if self._parser.current_command and arg1:
+            if self._parser.current_command:
                 self._codeWriter.command_router(
                     self._parser.current_command, arg1, arg2)
 
@@ -33,7 +37,7 @@ class VMTranslator:
 
 
 if __name__ == '__main__':
-    outfile_path = 'output.asm'
+    outfile_path = sys.argv[1].replace(".vm", ".asm")
     if len(sys.argv) == 3:
         outfile_path = sys.argv[2]
 
