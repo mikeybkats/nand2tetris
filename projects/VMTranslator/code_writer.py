@@ -1,5 +1,6 @@
 from commands import Commands
 from textwrap import dedent
+import uuid
 
 
 class CodeWriter:
@@ -18,8 +19,6 @@ class CodeWriter:
             ('this', '3'),  # RAM[3] this segment pointer
             ('that', '4'),  # RAM[4] that segment pointer
         ])
-        self._file_handler.write_to_output_file(
-            self.get_arithmetic_assembly_header())
 
     def filename(self, filename):
         '''
@@ -40,19 +39,6 @@ class CodeWriter:
         if command_type == Commands.C_ARITHMETIC:
             self.write_arithmetic(command)
 
-    def get_arithmetic_assembly_header(self):
-        return dedent("""\
-            @EQ
-            M=1
-            @0
-            A=M
-
-            @NEQ
-            M=-1
-            @0
-            A=M
-            """)
-
     def get_arithmetic_assembly(self, command):
         # stores value of RAM[SP-1] in D register
         spFirstOp = "@0\nA=M-1\nD=M\nM=0\n"
@@ -65,20 +51,29 @@ class CodeWriter:
         if command == "neg":
             return spFirstOp + "M=M-D\n"
         if command == "eq":
-            # get the first value into D Register
-            # get the second value
-            # @0\nA=M\nM=1\n@0\nM=M-1\n
-            # D=M-D
-            # @0
-            # 0;JEQ
-            # M=-1
+            neq_id = uuid.uuid4()
             return spFirstOp + spSecOp + dedent("""\
                 D=M-D    
-                @EQ
-                D;JEQ
-                @NEQ
-                D;JMP
-                """)
+                M=-1
+                @NE_{}
+                D;JNE
+                @0
+                A=M-1
+                M=1
+                (NE_{})
+                """).format(neq_id, neq_id)
+        if command == "gt":
+            le_id = uuid.uuid4()
+            return spFirstOp + spSecOp + dedent("""\
+                D=M-D
+                M=-1
+                @LE_{}
+                D;JLE
+                @0
+                A=M-1
+                M=1
+                (LE_{})
+                """).format(le_id, le_id)
 
     def write_arithmetic(self, command):
         '''
@@ -87,7 +82,7 @@ class CodeWriter:
         Arg1:
             C_ARITHMETIC command
         '''
-        c_arithmetic_assembly = self.get_arithmetic_assembly(command)
+        c_arithmetic_assembly = self.get_arithmetic_assembly(command.lower())
         self._file_handler.write_to_output_file(c_arithmetic_assembly)
         pass
 

@@ -1,0 +1,6 @@
+push constant 12
+push constant 11
+gt
+push constant 1
+push constant 2
+gt
