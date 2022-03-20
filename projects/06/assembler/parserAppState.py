@@ -4,7 +4,7 @@ class ParserAppState:
         self._file_handler = file_handler
         self._symbol_table = symbol_table
 
-        self._infile = file_handler.infile()
+        self._infile = file_handler.infile
         self._outfile = file_handler.outfile()
         self._current = ""
         self._instruction_bin = ""

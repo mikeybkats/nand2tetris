@@ -40,7 +40,7 @@ def scan_two():
     # start at 16 because this is where the variables are stored in the RAM
     rom_address = 16
     # go back to the begginning of the file
-    app_state.infile().seek(0)
+    app_state.infile.seek(0)
     # loop through all commands
     while has_more_commands():
         advance()
@@ -109,10 +109,10 @@ def has_more_commands():
     Returns:
         boolean
     """
-    currentLocation = app_state.infile().tell()
-    fileContents = app_state.infile().read()
+    currentLocation = app_state.infile.tell()
+    fileContents = app_state.infile.read()
     isEndOfFile = False if fileContents else True
-    app_state.infile().seek(currentLocation)
+    app_state.infile.seek(currentLocation)
     return not isEndOfFile
 
 
@@ -120,9 +120,9 @@ def advance():
     """
     Reads the next command from the input and makes it the current command. Should be called only if has_more_commands() is true. Initially there is no current command.
     """
-    app_state.current = remove_comments(app_state.infile().readline().strip())
+    app_state.current = remove_comments(app_state.infile.readline().strip())
     while(is_empty_line(app_state.current)):
-        app_state.current = app_state.infile().readline()
+        app_state.current = app_state.infile.readline()
 
 
 def is_empty_line(line):
