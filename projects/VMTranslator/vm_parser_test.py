@@ -8,8 +8,8 @@ import sys
 import os
 
 cwd = os.getcwd() + "/projects/VMTranslator"
-file_handler = FileHandler(infile_path=cwd + "/commandTests/testFile.vm",
-                           outfile_path=cwd + "/commandTests/testFile.asm")
+file_handler = FileHandler(infile_path=cwd + "/commandTests/testFile_DO_NOT_EDIT.vm",
+                           outfile_path=cwd + "/commandTests/testFile_DO_NOT_EDIT.asm")
 command_table = CommandTable()
 app_state = AppState(file_handler, command_table)
 parser = VMParser(app_state, command_table)
