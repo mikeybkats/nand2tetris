@@ -23,11 +23,8 @@ class CodeWriter:
             ('that', '4'),  # RAM[4] THAT segment pointer
             # ('static', 'x'),  #
             ('temp', '5'),  # RAM[5 - 12]
-            ('pointer', "xxx")  # Arbitrary rule of the game can only be 0 or 1
-            # push pointer 0/1 (this/that)
-            # pop pointer 0/1 (this/that)
-            # pointer 0 should result in accessing this
-            # pointer 1 should result in accessing that
+            ('pointer0', "3")  # push pointer 0/1 (this/that)
+            ('pointer1', "4")  # push pointer 0/1 (this/that)
         ])
 
     def get_segment(self, segment_name):
@@ -121,7 +118,11 @@ class CodeWriter:
 
     def get_push_pop_assembly(self, command, segment, index):
         if segment != "static":
-            segment_index = int(self.get_segment(segment))
+            if segment == "pointer":
+                segment_index = int(self.get_segment(
+                    segment_name + str(index)))
+            else:
+                segment_index = int(self.get_segment(segment))
         if self._app_state.current_command_type == Commands.C_PUSH:
             if segment == "constant":
                 return "@{}\nD=A\n@{}\nA=M\nM=D\n@{}\nM=M+1\n".format(index, segment_index, segment_index)
@@ -129,8 +130,7 @@ class CodeWriter:
                 return "@{}\nD=A\n@{}\nA=D+M\nD=M\n@0\nA=M\nM=D\n".format(index, segment_index)
             if segment == "static":
                 # stored in global space!
-                # TODO static index in FOO.vm assembles to reference FOO.i
-                # @Foo.5 ect
+                # static index in FOO.vm assembles to reference FOO.i -> @Foo.5 ect
                 variableName = self._file_handler.infile_name() + "." + str(index)
                 return dedent("""\
                 @{}
