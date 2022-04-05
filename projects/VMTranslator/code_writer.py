@@ -21,7 +21,13 @@ class CodeWriter:
             ('argument', '2'),  # RAM[2] ARG argument segment pointer
             ('this', '3'),  # RAM[3] THIS segment pointer
             ('that', '4'),  # RAM[4] THAT segment pointer
-            ('static', 'x'),  #
+            # ('static', 'x'),  #
+            ('temp', '5'),  # RAM[5 - 12]
+            ('pointer', "xxx")  # Arbitrary rule of the game can only be 0 or 1
+            # push pointer 0/1 (this/that)
+            # pop pointer 0/1 (this/that)
+            # pointer 0 should result in accessing this
+            # pointer 1 should result in accessing that
         ])
 
     def get_segment(self, segment_name):
@@ -114,7 +120,8 @@ class CodeWriter:
         pass
 
     def get_push_pop_assembly(self, command, segment, index):
-        segment_index = int(self.get_segment(segment))
+        if segment != "static":
+            segment_index = int(self.get_segment(segment))
         if self._app_state.current_command_type == Commands.C_PUSH:
             if segment == "constant":
                 return "@{}\nD=A\n@{}\nA=M\nM=D\n@{}\nM=M+1\n".format(index, segment_index, segment_index)
@@ -122,9 +129,33 @@ class CodeWriter:
                 return "@{}\nD=A\n@{}\nA=D+M\nD=M\n@0\nA=M\nM=D\n".format(index, segment_index)
             if segment == "static":
                 # stored in global space!
-                # TODO static i in FOO.vm assembles to reference FOO.i
-                pass
+                # TODO static index in FOO.vm assembles to reference FOO.i
+                # @Foo.5 ect
+                variableName = self._file_handler.infile_name() + "." + str(index)
+                return dedent("""\
+                @{}
+                D=M
+                @0
+                A=M
+                M=D
+                @0
+                M=M+1
+                """).format(variableName)
         if self._app_state.current_command_type == Commands.C_POP:
+            if segment == "static":
+                variableName = self._file_handler.infile_name() + "." + str(index)
+                return dedent("""\
+                @0
+                A=M-1
+                D=M
+                @{}
+                M=D
+                @0
+                M=M-1
+                A=M
+                M=0
+                """).format(variableName)
+
             return "@{}\nD=A\n@{}\nM=M+D\n@0\nM=M-1\nA=M\nD=M\nM=0\n@{}\nA=M\nM=D\n@{}\nD=A\n@{}\nM=M-D\n".format(index, segment_index, segment_index, index, segment_index)
 
     def write_push_pop(self, command, segment, index):

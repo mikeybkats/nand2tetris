@@ -1,4 +1,5 @@
 import sys
+import os
 
 
 class FileHandler:
@@ -48,3 +49,6 @@ class FileHandler:
             self._outfile_path, mode='rt', encoding='utf-8')
         for line in output_file_contents:
             sys.stdout.write(line)
+
+    def infile_name(self):
+        return os.path.basename(self.infile_path)
