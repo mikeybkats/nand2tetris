@@ -1,0 +1,12 @@
+push constant 17
+push constant 17 
+gt
+push constant 16
+push constant 17 
+gt
+push constant 17
+push constant 16 
+gt
+push constant 15
+push constant 15 
+gt
