@@ -126,37 +126,89 @@ class CodeWriter:
         if self._app_state.current_command_type == Commands.C_PUSH:
             if segment == "constant":
                 return "@{}\nD=A\n@{}\nA=M\nM=D\n@{}\nM=M+1\n".format(index, segment_index, segment_index)
-            if segment == "local" or segment == "argument" or segment == "this" or segment == "that":
-                return "@{}\nD=A\n@{}\nA=D+M\nD=M\n@0\nA=M\nM=D\n".format(index, segment_index)
             if segment == "static":
                 # stored in global space!
                 # static index in FOO.vm assembles to reference FOO.i -> @Foo.5 ect
                 variableName = self._file_handler.infile_name() + "." + str(index)
                 return dedent("""\
-                @{}
-                D=M
-                @0
-                A=M
-                M=D
-                @0
-                M=M+1
+                    @{}
+                    D=M
+                    @0
+                    A=M
+                    M=D
+                    @0
+                    M=M+1
                 """).format(variableName)
+            if segment == "temp":
+                tempAddress = index + int(self._segments.get("temp"))
+                return dedent("""\
+                    @{}
+                    D=M
+                    @0
+                    A=M
+                    M=D
+                    @0
+                    M=M+1
+                """).format(tempAddress)
+            else:
+                return dedent("""\
+                    @{}
+                    D=A
+                    @{}
+                    A=D+M
+                    D=M
+                    @0
+                    A=M
+                    M=D
+                    @0
+                    M=M+1
+                """).format(index, segment_index)
         if self._app_state.current_command_type == Commands.C_POP:
             if segment == "static":
                 variableName = self._file_handler.infile_name() + "." + str(index)
                 return dedent("""\
-                @0
-                A=M-1
-                D=M
+                    @0
+                    A=M-1
+                    D=M
+                    @{}
+                    M=D
+                    @0
+                    M=M-1
+                    A=M
+                    M=0
+                """).format(variableName)
+
+            if segment == "temp":
+                tempAddress = index + int(self._segments.get("temp"))
+                return dedent("""\
+                    @0
+                    M=M-1
+                    A=M
+                    D=M
+                    M=0
+
+                    @{}
+                    M=D
+                    """).format(tempAddress)
+
+            return dedent("""\
                 @{}
-                M=D
+                D=A
+                @{}
+                M=M+D
                 @0
                 M=M-1
                 A=M
+                D=M
                 M=0
-                """).format(variableName)
-
-            return "@{}\nD=A\n@{}\nM=M+D\n@0\nM=M-1\nA=M\nD=M\nM=0\n@{}\nA=M\nM=D\n@{}\nD=A\n@{}\nM=M-D\n".format(index, segment_index, segment_index, index, segment_index)
+                @{}
+                A=M
+                M=D
+                @{}
+                D=A
+                @{}
+                M=M-D
+            """).format(index, segment_index, segment_index, index, segment_index)
 
     def write_push_pop(self, command, segment, index):
         '''

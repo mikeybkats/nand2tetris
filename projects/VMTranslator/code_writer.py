@@ -116,99 +116,147 @@ class CodeWriter:
         self._file_handler.write_to_output_file(c_arithmetic_assembly)
         pass
 
-    def get_push_pop_assembly(self, command, segment, index):
+    def get_segment_index(self, index, segment):
+        if segment == "pointer":
+            return int(self.get_segment(
+                segment + str(index)))
+        else:
+            return int(self.get_segment(segment))
+
+    def get_push_assembly(self, command, segment, index):
         if segment != "static":
-            if segment == "pointer":
-                segment_index = int(self.get_segment(
-                    segment_name + str(index)))
-            else:
-                segment_index = int(self.get_segment(segment))
-        if self._app_state.current_command_type == Commands.C_PUSH:
-            if segment == "constant":
-                return "@{}\nD=A\n@{}\nA=M\nM=D\n@{}\nM=M+1\n".format(index, segment_index, segment_index)
-            if segment == "static":
-                # stored in global space!
-                # static index in FOO.vm assembles to reference FOO.i -> @Foo.5 ect
-                variableName = self._file_handler.infile_name() + "." + str(index)
-                return dedent("""\
-                    @{}
-                    D=M
-                    @0
-                    A=M
-                    M=D
-                    @0
-                    M=M+1
-                """).format(variableName)
-            if segment == "temp":
-                tempAddress = index + int(self._segments.get("temp"))
-                return dedent("""\
-                    @{}
-                    D=M
-                    @0
-                    A=M
-                    M=D
-                    @0
-                    M=M+1
-                """).format(tempAddress)
-            else:
-                return dedent("""\
-                    @{}
-                    D=A
-                    @{}
-                    A=D+M
-                    D=M
-                    @0
-                    A=M
-                    M=D
-                    @0
-                    M=M+1
-                """).format(index, segment_index)
-        if self._app_state.current_command_type == Commands.C_POP:
-            if segment == "static":
-                variableName = self._file_handler.infile_name() + "." + str(index)
-                return dedent("""\
-                    @0
-                    A=M-1
-                    D=M
-                    @{}
-                    M=D
-                    @0
-                    M=M-1
-                    A=M
-                    M=0
-                """).format(variableName)
+            segment_index = self.get_segment_index(index, segment)
 
-            if segment == "temp":
-                tempAddress = index + int(self._segments.get("temp"))
-                return dedent("""\
-                    @0
-                    M=M-1
-                    A=M
-                    D=M
-                    M=0
-
-                    @{}
-                    M=D
-                    """).format(tempAddress)
-
+        if segment == "constant":
             return dedent("""\
                 @{}
                 D=A
                 @{}
-                M=M+D
+                A=M
+                M=D
+                @{}
+                M=M+1
+            """).format(index, segment_index, segment_index)
+
+        if segment == "static":
+            # stored in global space!
+            # static index in FOO.vm assembles to reference FOO.i -> @Foo.5 ect
+            variableName = self._file_handler.infile_name() + "." + str(index)
+            return dedent("""\
+                @{}
+                D=M
+                @0
+                A=M
+                M=D
+                @0
+                M=M+1
+            """).format(variableName)
+
+        if segment == "temp":
+            tempAddress = index + int(self._segments.get("temp"))
+            return dedent("""\
+                @{}
+                D=M
+                @0
+                A=M
+                M=D
+                @0
+                M=M+1
+            """).format(tempAddress)
+
+        if segment == "pointer":
+            return dedent("""\
+                @{}
+                D=M
+                @0
+                A=M
+                M=D
+                @0
+                M=M+1
+            """).format(segment_index)
+
+        else:
+            return dedent("""\
+                @{}
+                D=A
+                @{}
+                A=D+M
+                D=M
+                @0
+                A=M
+                M=D
+                @0
+                M=M+1
+            """).format(index, segment_index)
+
+    def get_pop_assembly(self, command, segment, index):
+        if segment != "static":
+            segment_index = self.get_segment_index(index, segment)
+
+        if segment == "static":
+            variableName = self._file_handler.infile_name() + "." + str(index)
+            return dedent("""\
+                @0
+                A=M-1
+                D=M
+                @{}
+                M=D
+                @0
+                M=M-1
+                A=M
+                M=0
+            """).format(variableName)
+
+        if segment == "temp":
+            tempAddress = index + int(self._segments.get("temp"))
+            return dedent("""\
                 @0
                 M=M-1
                 A=M
                 D=M
                 M=0
                 @{}
-                A=M
                 M=D
+                """).format(tempAddress)
+
+        if segment == "pointer":
+            return dedent("""\
+                @0
+                A=M-1
+                D=M
                 @{}
-                D=A
-                @{}
-                M=M-D
-            """).format(index, segment_index, segment_index, index, segment_index)
+                M=D
+                @0
+                M=M-1
+                A=M
+                M=0
+                """).format(segment_index)
+
+        return dedent("""\
+            @{}
+            D=A
+            @{}
+            M=M+D
+            @0
+            M=M-1
+            A=M
+            D=M
+            M=0
+            @{}
+            A=M
+            M=D
+            @{}
+            D=A
+            @{}
+            M=M-D
+        """).format(index, segment_index, segment_index, index, segment_index)
+
+    def get_push_pop_assembly(self, command, segment, index):
+        if self._app_state.current_command_type == Commands.C_PUSH:
+            return self.get_push_assembly(command, segment, index)
+
+        if self._app_state.current_command_type == Commands.C_POP:
+            return self.get_pop_assembly(command, segment, index)
 
     def write_push_pop(self, command, segment, index):
         '''

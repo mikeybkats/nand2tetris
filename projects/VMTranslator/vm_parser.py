@@ -52,8 +52,10 @@ class VMParser:
         # TODO: why is this not working correctly?
         # while (self.is_empty_line(self._state.current_command) and self.has_more_commands()):
         # self._state.current_command = self._state.infile.readline()
+        while word[:2] == "//" and self.has_more_commands():
+            word = self._state.infile.readline()
 
-        if word and word[:2] != "//":
+        if word and (word[:2] != "//"):
             self._state.current_command = self.remove_comments(word)
             self._state.current_command_type = self.command_type()
             print(self._state.current_command)
