@@ -51,7 +51,11 @@ class CodeWriter:
         if command_type == Commands.C_ARITHMETIC:
             self.write_arithmetic(command)
         if command_type == Commands.C_LABEL:
-            self.write_label(command)
+            self.write_label(arg1)
+        if command_type == Commands.C_IF:
+            self.write_if(arg1)
+        if command_type == Commands.C_GOTO:
+            self.write_go_to(arg1)
 
     def get_arithmetic_assembly(self, command):
         # stores value of RAM[SP-1] in D register
@@ -144,13 +148,11 @@ class CodeWriter:
         '''
         Writes the assembly code that is the translation of the given command, where command is either C_PUSH or C_POP
 
-        Arg1:
+        command:
             C_PUSH or C_POP
-
-        Arg2:
+        segment:
             Str
-
-        Arg3: 
+        index: 
             int
         '''
         assembly = ""
@@ -175,7 +177,8 @@ class CodeWriter:
         label: 
             string
         '''
-        # TODO: implement
+        assembly = self._assembly.get_assembly("label").format(label)
+        self._file_handler.write_to_output_file(assembly)
         pass
 
     def write_go_to(self, label):
@@ -183,7 +186,8 @@ class CodeWriter:
         label: 
             string
         '''
-        # TODO: implement
+        assembly = self._assembly.get_assembly("goto").format(label)
+        self._file_handler.write_to_output_file(assembly)
         pass
 
     def write_if(self, label):
@@ -191,7 +195,8 @@ class CodeWriter:
         label: 
             string
         '''
-        # TODO: implement
+        assembly = self._assembly.get_assembly("if_goto").format(label)
+        self._file_handler.write_to_output_file(assembly)
         pass
 
     def write_call(self, function_name, num_args):

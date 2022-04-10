@@ -1,0 +1,7 @@
+label loop
+push constant 10
+push constant 10
+add
+push constant 500
+lt
+if-goto loop

@@ -143,7 +143,18 @@ class CodeWriterDict:
                 M=M-D
             """)
              ),
-            ("bootstrap", "@256\nD=A\n@0\nM=D\n")
+            ("bootstrap", "@256\nD=A\n@0\nM=D\n"),
+            ("label", "({})\n"),
+            ("goto", "@{}\n0;JMP\n"),
+            ("if_goto", dedent("""\
+                @0
+                M=M-1
+                A=M
+                D=M+1
+                @{}
+                D;JEQ
+            """)
+             ),
         ])
 
     def get_assembly(self, command):
