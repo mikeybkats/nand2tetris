@@ -1,6 +1,7 @@
 from commands import Commands
 from textwrap import dedent
 import uuid
+from code_writer_dict import CodeWriterDict
 
 
 class CodeWriter:
@@ -26,6 +27,7 @@ class CodeWriter:
             ('pointer0', '3'),  # push pointer 0/1 (this/that)
             ('pointer1', '4')  # push pointer 0/1 (this/that)
         ])
+        self._assembly = CodeWriterDict()
 
     def get_segment(self, segment_name):
         return self._segments.get(segment_name)
@@ -48,6 +50,8 @@ class CodeWriter:
             self.write_push_pop(command, arg1, arg2)
         if command_type == Commands.C_ARITHMETIC:
             self.write_arithmetic(command)
+        if command_type == Commands.C_LABEL:
+            self.write_label(command)
 
     def get_arithmetic_assembly(self, command):
         # stores value of RAM[SP-1] in D register
@@ -62,40 +66,13 @@ class CodeWriter:
             return spFirstOp + "M=M-D\n"
         if command == "eq":
             neq_id = uuid.uuid4()
-            return spFirstOp + spSecOp + dedent("""\
-                D=M-D    
-                M=-1
-                @EQ_{}
-                D;JEQ
-                @0
-                A=M-1
-                M=0
-                (EQ_{})
-                """).format(neq_id, neq_id)
+            return spFirstOp + spSecOp + self._assembly.get_assembly(command).format(neq_id, neq_id)
         if command == "gt":
             gt_id = uuid.uuid4()
-            return spFirstOp + spSecOp + dedent("""\
-                D=M-D
-                M=-1
-                @GT_{}
-                D;JGT
-                @0
-                A=M-1
-                M=0
-                (GT_{})
-                """).format(gt_id, gt_id)
+            return spFirstOp + spSecOp + self._assembly.get_assembly(command).format(gt_id, gt_id)
         if command == "lt":
             lt_id = uuid.uuid4()
-            return spFirstOp + spSecOp + dedent("""\
-                D=M-D
-                M=-1
-                @LT_{}
-                D;JLT
-                @0
-                A=M-1
-                M=0
-                (LT_{})
-                """).format(lt_id, lt_id)
+            return spFirstOp + spSecOp + self._assembly.get_assembly(command).format(lt_id, lt_id)
         if command == "and":
             # 16 bitwise and
             return spFirstOp + spSecOp + "M=D&M\n"
@@ -128,66 +105,23 @@ class CodeWriter:
             segment_index = self.get_segment_index(index, segment)
 
         if segment == "constant":
-            return dedent("""\
-                @{}
-                D=A
-                @{}
-                A=M
-                M=D
-                @{}
-                M=M+1
-            """).format(index, segment_index, segment_index)
+            return self._assembly.get_assembly("push_" + segment).format(index, segment_index, segment_index)
 
         if segment == "static":
             # stored in global space!
             # static index in FOO.vm assembles to reference FOO.i -> @Foo.5 ect
             variableName = self._file_handler.infile_name() + "." + str(index)
-            return dedent("""\
-                @{}
-                D=M
-                @0
-                A=M
-                M=D
-                @0
-                M=M+1
-            """).format(variableName)
+            return self._assembly.get_assembly("push_" + segment).format(variableName)
 
         if segment == "temp":
             tempAddress = index + int(self._segments.get("temp"))
-            return dedent("""\
-                @{}
-                D=M
-                @0
-                A=M
-                M=D
-                @0
-                M=M+1
-            """).format(tempAddress)
+            return self._assembly.get_assembly("push_" + segment).format(tempAddress)
 
         if segment == "pointer":
-            return dedent("""\
-                @{}
-                D=M
-                @0
-                A=M
-                M=D
-                @0
-                M=M+1
-            """).format(segment_index)
+            return self._assembly.get_assembly("push_" + segment).format(segment_index)
 
         else:
-            return dedent("""\
-                @{}
-                D=A
-                @{}
-                A=D+M
-                D=M
-                @0
-                A=M
-                M=D
-                @0
-                M=M+1
-            """).format(index, segment_index)
+            return self._assembly.get_assembly("push_default").format(index, segment_index)
 
     def get_pop_assembly(self, command, segment, index):
         if segment != "static":
@@ -195,68 +129,16 @@ class CodeWriter:
 
         if segment == "static":
             variableName = self._file_handler.infile_name() + "." + str(index)
-            return dedent("""\
-                @0
-                A=M-1
-                D=M
-                @{}
-                M=D
-                @0
-                M=M-1
-                A=M
-                M=0
-            """).format(variableName)
+            return self._assembly.get_assembly("pop_" + segment).format(variableName)
 
         if segment == "temp":
             tempAddress = index + int(self._segments.get("temp"))
-            return dedent("""\
-                @0
-                M=M-1
-                A=M
-                D=M
-                M=0
-                @{}
-                M=D
-                """).format(tempAddress)
+            return self._assembly.get_assembly("pop_" + segment).format(tempAddress)
 
         if segment == "pointer":
-            return dedent("""\
-                @0
-                A=M-1
-                D=M
-                @{}
-                M=D
-                @0
-                M=M-1
-                A=M
-                M=0
-                """).format(segment_index)
+            return self._assembly.get_assembly("pop_" + segment).format(segment_index)
 
-        return dedent("""\
-            @{}
-            D=A
-            @{}
-            M=M+D
-            @0
-            M=M-1
-            A=M
-            D=M
-            M=0
-            @{}
-            A=M
-            M=D
-            @{}
-            D=A
-            @{}
-            M=M-D
-        """).format(index, segment_index, segment_index, index, segment_index)
-
-    def get_push_pop_assembly(self, command, segment, index):
-        if self._app_state.current_command_type == Commands.C_PUSH:
-            return self.get_push_assembly(command, segment, index)
-
-        if self._app_state.current_command_type == Commands.C_POP:
-            return self.get_pop_assembly(command, segment, index)
+        return self._assembly.get_assembly("pop_default").format(index, segment_index, segment_index, index, segment_index)
 
     def write_push_pop(self, command, segment, index):
         '''
@@ -271,9 +153,72 @@ class CodeWriter:
         Arg3: 
             int
         '''
-        # self._file_handler.outfile.truncate()
-        assembly = self.get_push_pop_assembly(command, segment, index)
+        assembly = ""
+        if self._app_state.current_command_type == Commands.C_PUSH:
+            assembly = self.get_push_assembly(command, segment, index)
+
+        if self._app_state.current_command_type == Commands.C_POP:
+            assembly = self.get_pop_assembly(command, segment, index)
+
         self._file_handler.write_to_output_file(assembly)
+
+    def write_init(self):
+        '''
+        Writes assembly code that effects the VM initialization, also called bootstrap code. This code must be placed at the beginning of the output file.
+        '''
+        self._file_handler.write_to_output_file(
+            self._assembly.get_assembly("bootstrap"))
+        pass
+
+    def write_label(self, label):
+        '''
+        label: 
+            string
+        '''
+        # TODO: implement
+        pass
+
+    def write_go_to(self, label):
+        '''
+        label: 
+            string
+        '''
+        # TODO: implement
+        pass
+
+    def write_if(self, label):
+        '''
+        label: 
+            string
+        '''
+        # TODO: implement
+        pass
+
+    def write_call(self, function_name, num_args):
+        '''
+        function_name: 
+            string
+
+        num_args:
+            int
+        '''
+        # TODO: implement
+        pass
+
+    def write_return(self):
+        # TODO: implement
+        pass
+
+    def write_function(self, function_name, num_locals):
+        '''
+        function_name: 
+            string
+
+        num_locals:
+            int
+        '''
+        # TODO: implement
+        pass
 
     def close_write_output(self):
         self._file_handler.close_and_write()
