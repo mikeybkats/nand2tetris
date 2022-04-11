@@ -58,6 +58,8 @@ class CodeWriter:
             self.write_go_to(arg1)
         if command_type == Commands.C_FUNCTION:
             self.write_function(function_name=arg1, num_locals=arg2)
+        if command_type == Commands.C_RETURN:
+            self.write_return()
 
     def get_arithmetic_assembly(self, command):
         # stores value of RAM[SP-1] in D register
@@ -239,8 +241,38 @@ class CodeWriter:
 
     def write_return(self):
         # TODO: implement
-        FRAME = "@{}\n".format(self._segments("local"))
-        RET = "@5\nD=A\n{}\nD=M-D\n".format(FRAME)
+        END_FRAME = "@{}\n".format(self.get_segment("local"))
+
+        # store return address in temp var
+        RET_ADDRESS = dedent("""\
+            @5
+            D=A
+            {}
+            D=M-D
+            A=D
+            """).format(END_FRAME)
+        POINTER_ARG = dedent("""\
+            @0
+            A=M
+            D=M
+            @{}
+            A=M
+            M=D
+            """).format(self.get_segment("argument"))
+        # SP = ARG + 1
+        SP = dedent("""\
+            @{}
+            D=M+1
+            @0
+            A=D
+            """).format(self.get_segment("argument"))
+        # THAT = END_FRAME - 1
+        # THIS = END_FRAME - 2
+        # ARG = END_FRAME - 3
+        # LCL = END_FRAME - 4
+        # GOTO RET_ADDRESS
+        assembly = RET_ADDRESS
+        self._file_handler.write_to_output_file(assembly)
         pass
 
     def close_write_output(self):
