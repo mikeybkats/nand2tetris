@@ -56,6 +56,8 @@ class CodeWriter:
             self.write_if(arg1)
         if command_type == Commands.C_GOTO:
             self.write_go_to(arg1)
+        if command_type == Commands.C_FUNCTION:
+            self.write_function(function_name=arg1, num_locals=arg2)
 
     def get_arithmetic_assembly(self, command):
         # stores value of RAM[SP-1] in D register
@@ -199,6 +201,31 @@ class CodeWriter:
         self._file_handler.write_to_output_file(assembly)
         pass
 
+    def write_function(self, function_name, num_locals):
+        '''
+        function_name: 
+            string
+
+        num_locals:
+            int
+        '''
+        functionSymbolb = repr(uuid.uuid1().hex)
+        functionSymbol = function_name + "$" + functionSymbolb
+
+        count = 0
+        localAssembly = ""
+        while (count < num_locals):
+            localAssembly = localAssembly + \
+                self.get_push_assembly(
+                    command="push local {}".format(count), segment="local", index=count)
+            count = count + 1
+
+        assembly = dedent("""\
+            ({})
+            """).format(function_name) + localAssembly
+        self._file_handler.write_to_output_file(assembly)
+        pass
+
     def write_call(self, function_name, num_args):
         '''
         function_name: 
@@ -212,17 +239,8 @@ class CodeWriter:
 
     def write_return(self):
         # TODO: implement
-        pass
-
-    def write_function(self, function_name, num_locals):
-        '''
-        function_name: 
-            string
-
-        num_locals:
-            int
-        '''
-        # TODO: implement
+        FRAME = "@{}\n".format(self._segments("local"))
+        RET = "@5\nD=A\n{}\nD=M-D\n".format(FRAME)
         pass
 
     def close_write_output(self):

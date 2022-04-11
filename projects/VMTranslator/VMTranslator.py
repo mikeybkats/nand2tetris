@@ -33,9 +33,9 @@ class VMTranslator:
             arg1 = self._parser.arg1()
             arg2 = ""
             if (self._app_state.current_command_type == Commands.C_PUSH or
-                self._app_state.current_command_type == Commands.C_POP or
-                self._app_state.current_command_type == Commands.C_FUNCTION or
-                self._app_state.current_command_type == Commands.C_CALL
+                    self._app_state.current_command_type == Commands.C_POP or
+                    self._app_state.current_command_type == Commands.C_FUNCTION or
+                    self._app_state.current_command_type == Commands.C_CALL
                 ):
                 arg2 = self._parser.arg2()
             if self._parser.current_command:
@@ -43,8 +43,10 @@ class VMTranslator:
                     self._parser.current_command, arg1, arg2)
 
     def parseDirectoryInput(self, infile_path):
+        hasFiles = False
         for fileName in self._fileList:
             if fileName == "Sys.vm":
+                hasFiles = True
                 new_infile_path = infile_path + "/" + fileName
                 self._file_handler.infile_path = new_infile_path
                 self._file_handler.open_input_file()
@@ -54,13 +56,18 @@ class VMTranslator:
                 self._fileList.remove("Sys.vm")
         for fileName in self._fileList:
             if fileName.endswith(".vm"):
+                hasFiles = True
                 new_infile_path = infile_path + "/" + fileName
                 self._file_handler.infile_path = new_infile_path
                 self._file_handler.open_input_file()
                 print(self._app_state.infile_path)
 
                 vmTrans.parseFileInput()
-        vmTrans.writeOutput()
+
+        if hasFiles:
+            vmTrans.writeOutput()
+        else:
+            print("No input at given location.")
 
     def writeOutput(self):
         self._codeWriter.close_write_output()
@@ -82,6 +89,6 @@ if __name__ == '__main__':
     if os.path.isdir(infile_path):
         vmTrans.parseDirectoryInput(infile_path)
     else:
-        vmTrans.writeFileInit()
+        # vmTrans.writeFileInit()
         vmTrans.parseFileInput()
         vmTrans.writeOutput()
