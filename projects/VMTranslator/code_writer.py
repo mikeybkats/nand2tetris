@@ -5,6 +5,9 @@ from code_writer_dict import CodeWriterDict
 
 
 class CodeWriter:
+    is_function = False
+    function_name = ""
+
     def __init__(self, app_state, file_handler):
         '''
         Opens the output file/stream and gets ready to write into it
@@ -51,7 +54,9 @@ class CodeWriter:
         if command_type == Commands.C_ARITHMETIC:
             self.write_arithmetic(command)
         if command_type == Commands.C_LABEL:
-            self.write_label(arg1)
+            if self.is_function and arg1:
+                label = self.function_name + "$" + arg1
+            self.write_label(label)
         if command_type == Commands.C_IF:
             self.write_if(arg1)
         if command_type == Commands.C_GOTO:
@@ -60,6 +65,8 @@ class CodeWriter:
             self.write_function(function_name=arg1, num_locals=arg2)
         if command_type == Commands.C_RETURN:
             self.write_return()
+        if command_type == Commands.C_CALL:
+            self.write_call(function_name=arg1, num_args=arg2)
 
     def get_arithmetic_assembly(self, command):
         # stores value of RAM[SP-1] in D register
@@ -192,7 +199,6 @@ class CodeWriter:
         '''
         assembly = self._assembly.get_assembly("goto").format(label)
         self._file_handler.write_to_output_file(assembly)
-        pass
 
     def write_if(self, label):
         '''
@@ -201,7 +207,6 @@ class CodeWriter:
         '''
         assembly = self._assembly.get_assembly("if_goto").format(label)
         self._file_handler.write_to_output_file(assembly)
-        pass
 
     def write_function(self, function_name, num_locals):
         '''
@@ -211,9 +216,8 @@ class CodeWriter:
         num_locals:
             int
         '''
-        functionSymbolb = repr(uuid.uuid1().hex)
-        functionSymbol = function_name + "$" + functionSymbolb
-
+        self.function_name = function_name
+        self.is_function = True
         count = 0
         localAssembly = ""
         while (count < num_locals):
@@ -226,7 +230,6 @@ class CodeWriter:
             ({})
             """).format(function_name) + localAssembly
         self._file_handler.write_to_output_file(assembly)
-        pass
 
     def write_call(self, function_name, num_args):
         '''
@@ -236,8 +239,58 @@ class CodeWriter:
         num_args:
             int
         '''
-        # TODO: implement
-        pass
+        self.function_name = function_name
+        id = uuid.uuid1().hex
+        return_address = function_name + "$" + id
+
+        PUSH_RETURN_ADDR = dedent("""\
+            @{}
+            D=M
+            @0
+            M=M+1
+            A=M
+            M=D
+            """).format(return_address)
+        PUSH_LCL = self._assembly.get_assembly(
+            "push_segment").format(self.get_segment("local"))
+        PUSH_ARG = self._assembly.get_assembly(
+            "push_segment").format(self.get_segment("argument"))
+        PUSH_THIS = self._assembly.get_assembly(
+            "push_segment").format(self.get_segment("this"))
+        PUSH_THAT = self._assembly.get_assembly(
+            "push_segment").format(self.get_segment("that"))
+
+        # ARG = SP - n - 5
+        ARG = dedent("""\
+            @0
+            D=M
+            @{}
+            M=D
+
+            @{}
+            D=A
+            @{}
+            M=M-D
+
+            @5
+            D=A
+            @{}
+            M=M-D
+            """).format(self.get_segment("argument"), num_args, self.get_segment("argument"), self.get_segment("argument"))
+
+        LCL = "@0\nD=M\n@{}\nM=D\n".format(self.get_segment("local"))
+
+        # remember A jumps around the RAM (runtime env)
+        # jmp jumps around the ROM (program)
+        GOTO_FUNCTION = dedent("""\
+            @{}
+            0;JMP
+            """).format(function_name)
+
+        assembly = PUSH_RETURN_ADDR + PUSH_LCL + PUSH_ARG + \
+            PUSH_THIS + PUSH_THAT + ARG + LCL + GOTO_FUNCTION
+        self._file_handler.write_to_output_file(assembly)
+        self.write_label(return_address)
 
     def write_return(self):
         # set endframe in temp 5
@@ -251,11 +304,13 @@ class CodeWriter:
 
         # pointer of endframe - 5
         # sets D register to RET ADDRESS
-        GET_RET_ADDRESS = dedent("""\
+        RET_ADDRESS = dedent("""\
             @5
             D=A
             @endframe
             D=M-D
+            A=D
+            A=M
             """)
 
         # *ARG = pop() reposition the return value (last value on current stack) for the caller (put it on arg)
@@ -263,7 +318,6 @@ class CodeWriter:
             @0
             A=M-1
             D=M
-
             @{}
             A=M
             M=D
@@ -282,7 +336,6 @@ class CodeWriter:
             @endframe
             A=M-1
             D=M
-
             @{}
             M=D
             """).format(self.get_segment("that"))
@@ -291,11 +344,9 @@ class CodeWriter:
         THIS = dedent("""\
             @2
             D=A
-
             @endframe
             A=M-D
             D=M
-
             @{}
             M=D
             """).format(self.get_segment("this"))
@@ -304,11 +355,9 @@ class CodeWriter:
         ARG = dedent("""\
             @3
             D=A
-
             @endframe
             A=M-D
             D=M
-
             @{}
             M=D
             """).format(self.get_segment("argument"))
@@ -317,23 +366,18 @@ class CodeWriter:
         LCL = dedent("""\
             @4
             D=A
-
             @endframe
             A=M-D
             D=M
-
             @{}
             M=D
             """).format(self.get_segment("local"))
 
-        # GOTO RET_ADDRESS
-        RET_ADDRESS = GET_RET_ADDRESS + "A=D\nA=M\n"
-
         assembly = SET_END_FRAME + POINTER_ARG_POP + SP + \
             THAT + THIS + ARG + LCL + RET_ADDRESS
-        # + CLEAR_TEMP
+
         self._file_handler.write_to_output_file(assembly)
-        pass
+        self.is_function = False
 
     def close_write_output(self):
         self._file_handler.close_and_write()

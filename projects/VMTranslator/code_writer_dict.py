@@ -5,7 +5,7 @@ class CodeWriterDict:
     def __init__(self):
         self._assembly = dict([
             ("eq", dedent("""\
-                D=M-D    
+                D=M-D
                 M=-1
                 @EQ_{}
                 D;JEQ
@@ -155,6 +155,15 @@ class CodeWriterDict:
                 D;JEQ
             """)
              ),
+            ("push_segment", dedent("""\
+                @{}
+                D=M
+                @0
+                A=M
+                M=D
+                @0
+                M=M+1
+            """)),
         ])
 
     def get_assembly(self, command):

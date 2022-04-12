@@ -33,10 +33,10 @@ class VMTranslator:
             arg1 = self._parser.arg1()
             arg2 = ""
             if (self._app_state.current_command_type == Commands.C_PUSH or
-                    self._app_state.current_command_type == Commands.C_POP or
-                    self._app_state.current_command_type == Commands.C_FUNCTION or
-                    self._app_state.current_command_type == Commands.C_CALL
-                ):
+                        self._app_state.current_command_type == Commands.C_POP or
+                        self._app_state.current_command_type == Commands.C_FUNCTION or
+                        self._app_state.current_command_type == Commands.C_CALL
+                    ):
                 arg2 = self._parser.arg2()
             if self._parser.current_command:
                 self._codeWriter.command_router(
@@ -75,15 +75,16 @@ class VMTranslator:
 
 if __name__ == '__main__':
     infile_path = sys.argv[1]
-    outfile_path = "outfile.asm"
+    outfile_path = "Sys.asm"
 
     if len(sys.argv) == 3:
-        outfile_path = sys.argv[2]
-
-    if os.path.isdir(infile_path):
-        outfile_path = infile_path + "/" + outfile_path
+        outfile_path = os.path.dirname(infile_path) + "/" + sys.argv[2]
     else:
-        outfile_path = infile_path.replace(".vm", ".asm")
+        if os.path.isdir(infile_path):
+            outfile_path = infile_path + "/" + outfile_path
+        else:
+            outfile_path = infile_path.replace(".vm", ".asm")
+
     vmTrans = VMTranslator(infile_path=infile_path, outfile_path=outfile_path)
 
     if os.path.isdir(infile_path):
