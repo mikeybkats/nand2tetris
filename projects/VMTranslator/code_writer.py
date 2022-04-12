@@ -240,38 +240,98 @@ class CodeWriter:
         pass
 
     def write_return(self):
-        # TODO: implement
-        END_FRAME = "@{}\n".format(self.get_segment("local"))
+        # set endframe in temp 5
+        SET_END_FRAME = dedent("""\
+            (endframe)
+            @1
+            D=M
+            @endframe
+            M=D
+            """)
 
-        # store return address in temp var
-        RET_ADDRESS = dedent("""\
+        # pointer of endframe - 5
+        # sets D register to RET ADDRESS
+        GET_RET_ADDRESS = dedent("""\
             @5
             D=A
-            {}
+            @endframe
             D=M-D
-            A=D
-            """).format(END_FRAME)
-        POINTER_ARG = dedent("""\
+            """)
+
+        # *ARG = pop() reposition the return value (last value on current stack) for the caller (put it on arg)
+        POINTER_ARG_POP = dedent("""\
             @0
-            A=M
+            A=M-1
             D=M
+
             @{}
             A=M
             M=D
             """).format(self.get_segment("argument"))
+
         # SP = ARG + 1
         SP = dedent("""\
             @{}
             D=M+1
             @0
-            A=D
+            M=D
             """).format(self.get_segment("argument"))
+
         # THAT = END_FRAME - 1
+        THAT = dedent("""\
+            @endframe
+            A=M-1
+            D=M
+
+            @{}
+            M=D
+            """).format(self.get_segment("that"))
+
         # THIS = END_FRAME - 2
+        THIS = dedent("""\
+            @2
+            D=A
+
+            @endframe
+            A=M-D
+            D=M
+
+            @{}
+            M=D
+            """).format(self.get_segment("this"))
+
         # ARG = END_FRAME - 3
+        ARG = dedent("""\
+            @3
+            D=A
+
+            @endframe
+            A=M-D
+            D=M
+
+            @{}
+            M=D
+            """).format(self.get_segment("argument"))
+
         # LCL = END_FRAME - 4
+        LCL = dedent("""\
+            @4
+            D=A
+
+            @endframe
+            A=M-D
+            D=M
+
+            @{}
+            M=D
+            """).format(self.get_segment("local"))
+
         # GOTO RET_ADDRESS
-        assembly = RET_ADDRESS
+        RET_ADDRESS = GET_RET_ADDRESS + "A=D\nA=M\n"
+
+        assembly = SET_END_FRAME + POINTER_ARG_POP + SP + \
+            THAT + THIS + ARG + LCL + RET_ADDRESS
+        # + CLEAR_TEMP
         self._file_handler.write_to_output_file(assembly)
         pass
 
