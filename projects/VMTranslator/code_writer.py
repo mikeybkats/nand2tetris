@@ -26,7 +26,14 @@ class CodeWriter:
             ('this', '3'),  # RAM[3] THIS segment pointer
             ('that', '4'),  # RAM[4] THAT segment pointer
             # ('static', 'x'),  #
-            ('temp', '5'),  # RAM[5 - 12]
+            ('temp0', '5'),  # RAM[5 - 12]
+            ('temp1', '6'),  # RAM[5 - 12]
+            ('temp2', '7'),  # RAM[5 - 12]
+            ('temp3', '8'),  # RAM[5 - 12]
+            ('temp4', '9'),  # RAM[5 - 12]
+            ('temp5', '10'),  # RAM[5 - 12]
+            ('temp6', '11'),  # RAM[5 - 12]
+            ('temp7', '12'),  # RAM[5 - 12]
             ('pointer0', '3'),  # push pointer 0/1 (this/that)
             ('pointer1', '4')  # push pointer 0/1 (this/that)
         ])
@@ -112,6 +119,8 @@ class CodeWriter:
         if segment == "pointer":
             return int(self.get_segment(
                 segment + str(index)))
+        if segment == "temp":
+            return int(self.get_segment(segment + str(index)))
         else:
             return int(self.get_segment(segment))
 
@@ -129,7 +138,7 @@ class CodeWriter:
             return self._assembly.get_assembly("push_" + segment).format(variableName)
 
         if segment == "temp":
-            tempAddress = index + int(self._segments.get("temp"))
+            tempAddress = int(self.get_segment("temp" + str(index)))
             return self._assembly.get_assembly("push_" + segment).format(tempAddress)
 
         if segment == "pointer":
@@ -147,7 +156,8 @@ class CodeWriter:
             return self._assembly.get_assembly("pop_" + segment).format(variableName)
 
         if segment == "temp":
-            tempAddress = index + int(self._segments.get("temp"))
+            # tempAddress = index + int(self._segments.get("temp"))
+            tempAddress = int(self.get_segment("temp" + str(index)))
             return self._assembly.get_assembly("pop_" + segment).format(tempAddress)
 
         if segment == "pointer":
@@ -244,9 +254,8 @@ class CodeWriter:
         num_args:
             int
         '''
-        self.function_name = function_name
-        id = uuid.uuid1().hex
-        return_address = function_name + "$" + id
+        # id = uuid.uuid1().hex
+        return_address = function_name + "$ret." + str(num_args)
 
         PUSH_RETURN_ADDR = dedent("""\
             @{}
@@ -290,34 +299,44 @@ class CodeWriter:
         # jmp jumps around the ROM (program)
         GOTO_FUNCTION = dedent("""\
             @{}
+            D=A
             0;JMP
             """).format(function_name)
 
         assembly = PUSH_RETURN_ADDR + PUSH_LCL + PUSH_ARG + \
             PUSH_THIS + PUSH_THAT + ARG + LCL + GOTO_FUNCTION
         self._file_handler.write_to_output_file(assembly)
+
+        # write label for return address
         self.write_label(return_address)
 
     def write_return(self):
-        # set endframe in temp 5
+        endframe = self.function_name + "$endframe"
+        # set endframe in temp
         SET_END_FRAME = dedent("""\
-            (endframe)
             @1
             D=M
-            @endframe
+            @{}
             M=D
-            """)
+            """).format(endframe)
 
         # pointer of endframe - 5
-        # sets D register to RET ADDRESS
-        RET_ADDRESS = dedent("""\
+        # put return address in temp variable
+        RET = dedent("""\
             @5
             D=A
-            @endframe
+            @{}
             D=M-D
-            A=D
-            A=M
-            """)
+            @returnAddress
+            M=D
+            """).format(endframe)
+
+        # @5
+        # D=A
+        # @{}
+        # D=M-D
+        # A=D
+        # A=M
 
         # *ARG = pop() reposition the return value (last value on current stack) for the caller (put it on arg)
         POINTER_ARG_POP = dedent("""\
@@ -339,48 +358,51 @@ class CodeWriter:
 
         # THAT = END_FRAME - 1
         THAT = dedent("""\
-            @endframe
+            @{}
             A=M-1
             D=M
             @{}
             M=D
-            """).format(self.get_segment("that"))
+            """).format(endframe, self.get_segment("that"))
 
         # THIS = END_FRAME - 2
         THIS = dedent("""\
             @2
             D=A
-            @endframe
+            @{}
             A=M-D
             D=M
             @{}
             M=D
-            """).format(self.get_segment("this"))
+            """).format(endframe, self.get_segment("this"))
 
         # ARG = END_FRAME - 3
         ARG = dedent("""\
             @3
             D=A
-            @endframe
+            @{}
             A=M-D
             D=M
             @{}
             M=D
-            """).format(self.get_segment("argument"))
+            """).format(endframe, self.get_segment("argument"))
 
         # LCL = END_FRAME - 4
         LCL = dedent("""\
             @4
             D=A
-            @endframe
+            @{}
             A=M-D
             D=M
             @{}
             M=D
-            """).format(self.get_segment("local"))
+            """).format(endframe, self.get_segment("local"))
 
-        assembly = SET_END_FRAME + POINTER_ARG_POP + SP + \
-            THAT + THIS + ARG + LCL + RET_ADDRESS
+        # jump to return address in callers code
+        JMP_RET = "@returnAddress\nA;JMP\n"
+
+        assembly = SET_END_FRAME + RET + POINTER_ARG_POP + SP + \
+            THAT + THIS + ARG + LCL + JMP_RET
 
         self._file_handler.write_to_output_file(assembly)
         self.is_function = False

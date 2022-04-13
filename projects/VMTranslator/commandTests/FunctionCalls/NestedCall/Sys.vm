@@ -36,6 +36,7 @@ push constant 6
 pop local 3
 push constant 123
 call Sys.add12 1
+// declare global return address
 pop temp 0
 push local 0
 push local 1
@@ -60,4 +61,5 @@ pop pointer 1
 push argument 0
 push constant 12
 add
+// implement global return address to uniqueID
 return

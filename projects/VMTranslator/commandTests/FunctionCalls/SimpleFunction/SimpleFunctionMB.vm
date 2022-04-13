@@ -1,0 +1,10 @@
+push constant 10
+push constant 15
+pop temp 0
+push constant 11
+push constant 12
+add
+pop temp 1
+push constant 8
+push temp 0
+add
