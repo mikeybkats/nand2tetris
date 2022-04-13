@@ -221,14 +221,19 @@ class CodeWriter:
         count = 0
         localAssembly = ""
         while (count < num_locals):
-            localAssembly = localAssembly + \
-                self.get_push_assembly(
-                    command="push local {}".format(count), segment="local", index=count)
+            print("push local {}".format(count))
+            localAssembly = localAssembly + dedent("""\
+                @0
+                A=M
+                M=0
+                @0
+                M=M+1
+                """)
+            # self.get_push_assembly(
+            #     command="push local {}".format(count), segment="local", index=count)
             count = count + 1
 
-        assembly = dedent("""\
-            ({})
-            """).format(function_name) + localAssembly
+        assembly = "({})\n".format(function_name) + localAssembly
         self._file_handler.write_to_output_file(assembly)
 
     def write_call(self, function_name, num_args):
@@ -245,11 +250,12 @@ class CodeWriter:
 
         PUSH_RETURN_ADDR = dedent("""\
             @{}
-            D=M
+            D=A
             @0
-            M=M+1
             A=M
             M=D
+            @0
+            M=M+1
             """).format(return_address)
         PUSH_LCL = self._assembly.get_assembly(
             "push_segment").format(self.get_segment("local"))
