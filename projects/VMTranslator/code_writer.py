@@ -5,7 +5,6 @@ from code_writer_dict import CodeWriterDict
 
 
 class CodeWriter:
-    is_function = False
     function_name = ""
 
     def __init__(self, app_state, file_handler):
@@ -61,9 +60,7 @@ class CodeWriter:
         if command_type == Commands.C_ARITHMETIC:
             self.write_arithmetic(command)
         if command_type == Commands.C_LABEL:
-            if self.is_function and arg1:
-                label = self.function_name + "$" + arg1
-            self.write_label(label)
+            self.write_label(arg1)
         if command_type == Commands.C_IF:
             self.write_if(arg1)
         if command_type == Commands.C_GOTO:
@@ -200,7 +197,6 @@ class CodeWriter:
         '''
         assembly = self._assembly.get_assembly("label").format(label)
         self._file_handler.write_to_output_file(assembly)
-        pass
 
     def write_go_to(self, label):
         '''
@@ -226,24 +222,19 @@ class CodeWriter:
         num_locals:
             int
         '''
-        self.function_name = function_name
-        self.is_function = True
         count = 0
-        localAssembly = ""
+        assembly = ""
         while (count < num_locals):
-            print("push local {}".format(count))
-            localAssembly = localAssembly + dedent("""\
+            assembly = assembly + dedent("""\
                 @0
                 A=M
                 M=0
                 @0
                 M=M+1
                 """)
-            # self.get_push_assembly(
-            #     command="push local {}".format(count), segment="local", index=count)
             count = count + 1
 
-        assembly = "({})\n".format(function_name) + localAssembly
+        assembly = "({})\n".format(function_name) + assembly
         self._file_handler.write_to_output_file(assembly)
 
     def write_call(self, function_name, num_args):
@@ -254,7 +245,6 @@ class CodeWriter:
         num_args:
             int
         '''
-        # id = uuid.uuid1().hex
         return_address = function_name + "$ret." + str(num_args)
 
         PUSH_RETURN_ADDR = dedent("""\
@@ -275,7 +265,8 @@ class CodeWriter:
         PUSH_THAT = self._assembly.get_assembly(
             "push_segment").format(self.get_segment("that"))
 
-        # ARG = SP - n - 5
+        # ARG = SP - nArgs - 5
+        arg_memory = self.get_segment("argument")
         ARG = dedent("""\
             @0
             D=M
@@ -291,7 +282,7 @@ class CodeWriter:
             D=A
             @{}
             M=M-D
-            """).format(self.get_segment("argument"), num_args, self.get_segment("argument"), self.get_segment("argument"))
+            """).format(arg_memory, num_args, arg_memory, arg_memory)
 
         LCL = "@0\nD=M\n@{}\nM=D\n".format(self.get_segment("local"))
 
@@ -299,8 +290,7 @@ class CodeWriter:
         # jmp jumps around the ROM (program)
         GOTO_FUNCTION = dedent("""\
             @{}
-            D=A
-            0;JMP
+            A;JMP
             """).format(function_name)
 
         assembly = PUSH_RETURN_ADDR + PUSH_LCL + PUSH_ARG + \
@@ -311,14 +301,15 @@ class CodeWriter:
         self.write_label(return_address)
 
     def write_return(self):
-        endframe = self.function_name + "$endframe"
+        # endframe = self.function_name + "$endframe"
+        endframe = "R14"
         # set endframe in temp
         SET_END_FRAME = dedent("""\
-            @1
+            @{}
             D=M
             @{}
             M=D
-            """).format(endframe)
+            """).format(self.get_segment("local"), endframe)
 
         # pointer of endframe - 5
         # put return address in temp variable
@@ -326,17 +317,11 @@ class CodeWriter:
             @5
             D=A
             @{}
-            D=M-D
-            @returnAddress
+            A=M-D
+            D=M
+            @R13
             M=D
             """).format(endframe)
-
-        # @5
-        # D=A
-        # @{}
-        # D=M-D
-        # A=D
-        # A=M
 
         # *ARG = pop() reposition the return value (last value on current stack) for the caller (put it on arg)
         POINTER_ARG_POP = dedent("""\
@@ -399,13 +384,12 @@ class CodeWriter:
             """).format(endframe, self.get_segment("local"))
 
         # jump to return address in callers code
-        JMP_RET = "@returnAddress\nA;JMP\n"
+        JMP_RET = "@R13\nA=M\nA;JMP\n"
 
         assembly = SET_END_FRAME + RET + POINTER_ARG_POP + SP + \
             THAT + THIS + ARG + LCL + JMP_RET
 
         self._file_handler.write_to_output_file(assembly)
-        self.is_function = False
 
     def close_write_output(self):
         self._file_handler.close_and_write()
