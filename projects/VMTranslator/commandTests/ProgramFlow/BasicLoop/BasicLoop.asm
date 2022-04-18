@@ -13,7 +13,7 @@ M=M+D
 M=M-1
 A=M
 D=M
-M=0
+// M=0
 @1
 A=M
 M=D
@@ -45,7 +45,6 @@ M=M+1
 @0
 A=M-1
 D=M
-M=0
 @0
 M=M-1
 A=M-1
@@ -58,7 +57,7 @@ M=M+D
 M=M-1
 A=M
 D=M
-M=0
+// M=0
 @1
 A=M
 M=D
@@ -86,7 +85,6 @@ M=M+1
 @0
 A=M-1
 D=M
-M=0
 @0
 M=M-1
 A=M-1
@@ -99,7 +97,7 @@ M=M+D
 M=M-1
 A=M
 D=M
-M=0
+// M=0
 @2
 A=M
 M=D
@@ -120,9 +118,9 @@ M=M+1
 @0
 M=M-1
 A=M
-D=M+1
+D=M
 @LOOP_START
-D;JEQ
+D;JNE
 @0
 D=A
 @1

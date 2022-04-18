@@ -9,9 +9,9 @@ class CodeWriterDict:
                 M=-1
                 @EQ_{}
                 D;JEQ
-                @0
-                A=M-1
-                M=0
+                // @0
+                // A=M-1
+                // M=0
                 (EQ_{})
                 """)
              ),
@@ -20,9 +20,9 @@ class CodeWriterDict:
                 M=-1
                 @GT_{}
                 D;JGT
-                @0
-                A=M-1
-                M=0
+                // @0
+                // A=M-1
+                // M=0
                 (GT_{})
                 """)
              ),
@@ -31,9 +31,9 @@ class CodeWriterDict:
                 M=-1
                 @LT_{}
                 D;JLT
-                @0
-                A=M-1
-                M=0
+                // @0
+                // A=M-1
+                // M=0
                 (LT_{})
                 """)
              ),
@@ -68,11 +68,11 @@ class CodeWriterDict:
             """)
              ),
             ("push_pointer", dedent("""\
-                @{}
-                D=M
+                @{} 
+                D=M // take the value of this or that
                 @0
                 A=M
-                M=D
+                M=D // push it ontop of the stack
                 @0
                 M=M+1
             """)
@@ -98,8 +98,8 @@ class CodeWriterDict:
                 M=D
                 @0
                 M=M-1
-                A=M
-                M=0
+                // A=M
+                // M=0
             """)
              ),
             ("pop_temp", dedent("""\
@@ -107,38 +107,35 @@ class CodeWriterDict:
                 M=M-1
                 A=M
                 D=M
-                M=0
+                // M=0
                 @{}
                 M=D
             """)
              ),
+            # popping the pointer means putting it onto this/that RAM[3/4]
             ("pop_pointer", dedent("""\
                 @0
-                A=M-1
-                D=M
-                @{}
-                M=D
-                @0
                 M=M-1
                 A=M
-                M=0
+                D=M // get the topmost value from the stack
+                @{}
+                M=D // insert the value into this/that
             """)
              ),
+            # popping takes one below the stack pointer
             ("pop_default", dedent("""\
-                @{}
+                @{} // get the index
                 D=A
-                @{}
+                @{} // set the destination at this/that (will change this back later) 
                 M=M+D
                 @0
-                M=M-1
+                A=M-1 // go to SP
+                D=M // set D reg to RAM[SP]
+                @{} // go to this/that
                 A=M
-                D=M
-                M=0
+                M=D // set RAM[THIS/THAT] to RAM[SP]
                 @{}
-                A=M
-                M=D
-                @{}
-                D=A
+                D=A // set this/that back to what it was originally
                 @{}
                 M=M-D
             """)
@@ -150,9 +147,9 @@ class CodeWriterDict:
                 @0
                 M=M-1
                 A=M
-                D=M+1
+                D=M
                 @{}
-                D;JEQ
+                D;JNE
             """)
              ),
             ("push_segment", dedent("""\

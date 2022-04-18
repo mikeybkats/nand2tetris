@@ -6,6 +6,8 @@ from code_writer_dict import CodeWriterDict
 
 class CodeWriter:
     function_name = ""
+    write_return_count = 0
+    has_sys_init = False
 
     def __init__(self, app_state, file_handler):
         '''
@@ -74,7 +76,7 @@ class CodeWriter:
 
     def get_arithmetic_assembly(self, command):
         # stores value of RAM[SP-1] in D register
-        spFirstOp = "@0\nA=M-1\nD=M\nM=0\n"
+        spFirstOp = "@0\nA=M-1\nD=M\n"
         # sets value of RAM[0] to (RAM[0]-1) and targets 1 minus the stack pointer
         spSecOp = "@0\nM=M-1\nA=M-1\n"
         if command == "add":
@@ -84,13 +86,13 @@ class CodeWriter:
         if command == "neg":
             return spFirstOp + "M=M-D\n"
         if command == "eq":
-            neq_id = uuid.uuid4()
+            neq_id = uuid.uuid4().hex[0:-8:1]
             return spFirstOp + spSecOp + self._assembly.get_assembly(command).format(neq_id, neq_id)
         if command == "gt":
-            gt_id = uuid.uuid4()
+            gt_id = uuid.uuid4().hex[0:-8:1]
             return spFirstOp + spSecOp + self._assembly.get_assembly(command).format(gt_id, gt_id)
         if command == "lt":
-            lt_id = uuid.uuid4()
+            lt_id = uuid.uuid4().hex[0:-8:1]
             return spFirstOp + spSecOp + self._assembly.get_assembly(command).format(lt_id, lt_id)
         if command == "and":
             # 16 bitwise and
@@ -188,13 +190,15 @@ class CodeWriter:
         '''
         self._file_handler.write_to_output_file(
             self._assembly.get_assembly("bootstrap"))
-        pass
+        self.write_call("Sys.init", 0)
 
     def write_label(self, label):
         '''
         label: 
             string
         '''
+        if self.function_name and self.function_name != "Sys.init":
+            label = self.function_name + "$" + label
         assembly = self._assembly.get_assembly("label").format(label)
         self._file_handler.write_to_output_file(assembly)
 
@@ -203,6 +207,8 @@ class CodeWriter:
         label: 
             string
         '''
+        if self.function_name and self.function_name != "Sys.init":
+            label = self.function_name + "$" + label
         assembly = self._assembly.get_assembly("goto").format(label)
         self._file_handler.write_to_output_file(assembly)
 
@@ -211,6 +217,8 @@ class CodeWriter:
         label: 
             string
         '''
+        if self.function_name and self.function_name != "Sys.init":
+            label = self.function_name + "$" + label
         assembly = self._assembly.get_assembly("if_goto").format(label)
         self._file_handler.write_to_output_file(assembly)
 
@@ -222,6 +230,9 @@ class CodeWriter:
         num_locals:
             int
         '''
+        self.function_name = function_name
+        if function_name == "Sys.init":
+            self.has_sys_init = True
         count = 0
         assembly = ""
         while (count < num_locals):
@@ -245,7 +256,10 @@ class CodeWriter:
         num_args:
             int
         '''
+        # add a unique id for the return address
+        # id = uuid.uuid4().hex[0:-10:1]
         return_address = function_name + "$ret." + str(num_args)
+        # return_address = self.function_name + "$" + return_address_base
 
         PUSH_RETURN_ADDR = dedent("""\
             @{}
@@ -294,16 +308,22 @@ class CodeWriter:
             """).format(function_name)
 
         assembly = PUSH_RETURN_ADDR + PUSH_LCL + PUSH_ARG + \
-            PUSH_THIS + PUSH_THAT + ARG + LCL + GOTO_FUNCTION
+            PUSH_THIS + PUSH_THAT + ARG + LCL + \
+            GOTO_FUNCTION + "({})\n".format(return_address)
         self._file_handler.write_to_output_file(assembly)
 
         # write label for return address
-        self.write_label(return_address)
+        # self.write_label(return_address)
 
     def write_return(self):
+        if not self.has_sys_init:
+            return
+
         # endframe = self.function_name + "$endframe"
-        endframe = "R14"
         # set endframe in temp
+        # endframe = "R" + uuid.uuid4().hex[0:-10:1]
+        endframe = "endframe_" + str(self.write_return_count)
+        # endframe = "R14"
         SET_END_FRAME = dedent("""\
             @{}
             D=M
@@ -313,15 +333,18 @@ class CodeWriter:
 
         # pointer of endframe - 5
         # put return address in temp variable
+        # retAddr = "R" + uuid.uuid4().hex[0:-10:1]
+        retAddr = "return_" + str(self.write_return_count)
+        self.write_return_count = self.write_return_count + 1
         RET = dedent("""\
             @5
             D=A
             @{}
             A=M-D
             D=M
-            @R13
+            @{}
             M=D
-            """).format(endframe)
+            """).format(endframe, retAddr)
 
         # *ARG = pop() reposition the return value (last value on current stack) for the caller (put it on arg)
         POINTER_ARG_POP = dedent("""\
@@ -384,7 +407,7 @@ class CodeWriter:
             """).format(endframe, self.get_segment("local"))
 
         # jump to return address in callers code
-        JMP_RET = "@R13\nA=M\nA;JMP\n"
+        JMP_RET = "@{}\nA=M\nA;JMP\n".format(retAddr)
 
         assembly = SET_END_FRAME + RET + POINTER_ARG_POP + SP + \
             THAT + THIS + ARG + LCL + JMP_RET

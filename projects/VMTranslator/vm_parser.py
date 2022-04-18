@@ -58,7 +58,6 @@ class VMParser:
         if word and (word[:2] != "//"):
             self._state.current_command = self.remove_comments(word)
             self._state.current_command_type = self.command_type()
-            # print(self._state.current_command)
 
     def command_type(self) -> Commands:
         """
