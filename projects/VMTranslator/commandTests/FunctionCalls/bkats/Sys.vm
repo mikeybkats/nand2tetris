@@ -1,6 +1,4 @@
 function Sys.init 0
-push constant 20
-push constant 10
-sub
-push constant 10
-sub
+push constant 11
+push constant 12
+eq
