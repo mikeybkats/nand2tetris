@@ -1,0 +1,11 @@
+/** 
+class Card
+    field suit: "clubs" | "diamonds" | "hearts" | "spades"
+    field value: "2.. 10" | "jack" | "queen" | "king" | "ace"
+    field locationX: int
+    field locationY: int
+
+    method renderCard: void
+*/
+
+class Card {}

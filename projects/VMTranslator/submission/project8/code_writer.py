@@ -310,8 +310,8 @@ class CodeWriter:
 
     def write_return(self):
 
-        if not self.has_sys_init:
-            return
+        # if not self.has_sys_init:
+        #     return
 
         endframe = "endframe_" + str(self.call_count)
         SET_END_FRAME = dedent("""\

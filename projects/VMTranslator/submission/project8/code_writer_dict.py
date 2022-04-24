@@ -129,7 +129,8 @@ class CodeWriterDict:
                 @{} // set the destination at this/that (will change this back later) 
                 M=M+D
                 @0  // goto topmost value on stack 
-                A=M-1 
+                M=M-1 // decrement the stack pointer for pop default
+                A=M 
                 D=M // set D reg to RAM[SP-1]
                 @{} // go to this/that
                 A=M

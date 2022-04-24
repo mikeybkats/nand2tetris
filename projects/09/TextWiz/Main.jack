@@ -1,0 +1,14 @@
+class Main {
+    function void main() {
+        var TextWiz foo;
+        let foo = TextWiz.new(5, 0);
+        do foo.printMessage("hello deary", 2);
+
+        // do Output.moveCursor(4,3);
+        // do Output.printChar(68);
+        // do Output.moveCursor(8,3);
+        // do Output.printChar(70);
+
+        return;
+    }
+}

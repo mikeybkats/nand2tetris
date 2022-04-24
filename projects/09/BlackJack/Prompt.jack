@@ -1,0 +1,31 @@
+/** Prompts the play with a message and asks for input 
+
+*/
+
+class Prompt {
+    static String message;
+    field Char keyPressed;
+
+    constructor Prompt new(){
+        let message = "empty message";
+        let keyPressed = 0;
+        return this;
+    }
+
+    function void setMessage(String newMessage){
+        let message = newMessage;
+        return;
+    }
+
+    method void promptUser(){
+        while(keyPressed = 0){
+            let keyPressed = Keyboard.keyPressed();
+            do Output.moveCursor(5, 8);
+            do Output.printString(message);
+        }
+        do Output.printString("loading");
+        let keyPressed = 0;
+
+        return;
+    }
+}

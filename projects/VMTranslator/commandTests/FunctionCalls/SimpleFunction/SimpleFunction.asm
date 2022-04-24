@@ -74,3 +74,53 @@ D=M
 M=M-1
 A=M-1
 M=M-D
+@1 
+D=M // set RAM[local] into D reg
+@endframe_0 
+M=D // store RAM[local] into RAM[endframe] 
+@5
+D=A
+@endframe_0
+A=M-D  // goto RAM[endframe] - 5
+D=M    // set D to *(RAM[endframe] - 5)
+@return_0 
+M=D    // set RAM[retAddr] = to *(RAM[endframe] - 5)
+@0
+A=M-1 // goto the SP-1 addr
+D=M   // set D reg to SP-1
+@2
+A=M   // set the location of ARG to D reg
+M=D 
+@2
+D=M+1
+@0
+M=D
+@endframe_0
+A=M-1
+D=M
+@4
+M=D
+@2
+D=A
+@endframe_0
+A=M-D
+D=M
+@3
+M=D
+@3
+D=A
+@endframe_0
+A=M-D
+D=M
+@2
+M=D
+@4
+D=A
+@endframe_0
+A=M-D
+D=M
+@1
+M=D
+@return_0
+A=M
+A;JMP

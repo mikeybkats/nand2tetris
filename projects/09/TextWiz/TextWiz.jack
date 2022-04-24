@@ -1,0 +1,47 @@
+
+
+/**
+Prints text to a location on the screen
+*/
+class TextWiz {
+    field int gridX;
+    field int gridY;
+
+    /** x and y must be less than 23 */ 
+    constructor TextWiz new(int x, int y) {
+        let gridX = x;
+        let gridY = y;
+        return this;
+    }
+
+    method void printMessage(String message, int mod) {
+        var int i;
+        var char c;
+        var int len;
+
+        let i = 0;
+        let len = message.length();
+        
+        while(~(i = len)){
+            let c = message[i + 2];
+
+            do Output.moveCursor(gridX, gridY);
+            do Output.printChar(c);
+
+            let i = i + 1;
+
+            if(gridX > 20){
+                let gridX = 0;
+            }
+            if(gridY > 20){
+                let gridY = 0;
+            }
+
+            let gridX = gridX + mod;
+            let gridY = gridY + mod;
+        }
+
+        // do Output.printInt(len);
+        return;
+    }
+}

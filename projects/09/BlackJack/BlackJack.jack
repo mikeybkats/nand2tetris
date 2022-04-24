@@ -1,0 +1,65 @@
+/** Runs the black jack game
+
+- Deck class - creates the cards
+- Deck class - shuffles the deck
+- BlackJack class prompts for player to start the game
+- Dealer class - deals cards
+- Score class - keeps score for player and dealer
+- when a player goes over 21 they lose the hand
+- when a player loses the game prompts the player if they want to play again.
+- the dealer stands when their score is 17 or higher
+
+class BlackJack
+    field gameActive: boolean
+    field winner: "player" | "dealer"
+    field deck: Array<Card>
+    field turn: "player" | "dealer"
+    field playerCards: Array<Card>
+    field dealerCards: Array<Card>
+    field promptString: String
+    field prompt: Prompt
+
+    method gameLoop: void
+        * show title screen
+        * start game - set gameActive to true
+        * while gameActive:
+            * dealer deals cards. first dealer card remains hidden
+            * calculate score
+            * prompt player: would you like another card?
+            * calculate score
+            * if black jack player wins
+            * if over 21 player bust
+            * if player stays dealer flips hidden card
+            * deals card while < 17
+    
+    method promptPlayerTitle: void
+    method promptPlayerStart: void
+    method loadDeck: void
+    method deal: void
+    method promptPlayerForAnotherCard: void
+    method drawCard: void
+    method checkForWinners: void
+    method dealerPlay: void
+    method revealCard: void
+    method promptPlayerWinner: void
+    method promptPlayerLoser: void
+
+*/
+
+class BlackJack {
+    field Prompt prompt;
+    field string promptString;
+
+    constructor BlackJack new() {
+        let prompt = Prompt.new();
+        return this;
+    }
+
+    method void promptPlayerTitle() {
+        let promptString = "Welcome to Black Jack. Press any key to start.";
+        do Prompt.setMessage(promptString);
+        do prompt.promptUser();
+
+        return;
+    }
+}

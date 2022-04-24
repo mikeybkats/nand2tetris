@@ -1,0 +1,99 @@
+class DrawSuit {
+    field int memAddressDiamond;
+    field int memAddressHeart;
+    field int memAddressClub;
+    field int memAddressSpade;
+
+    constructor DrawSuit new(){
+        let memAddressDiamond = 0;
+        let memAddressClub = 500;
+        let memAddressHeart = 1000;
+        let memAddressSpade = 1500;
+
+        return this;
+    }
+
+    method void diamond(int location) {
+        let memAddressDiamond = 16384+location;
+        do Memory.poke(memAddressDiamond+0, 0);
+        do Memory.poke(memAddressDiamond+32, 256);
+        do Memory.poke(memAddressDiamond+64, 896);
+        do Memory.poke(memAddressDiamond+96, 1984);
+        do Memory.poke(memAddressDiamond+128, 4064);
+        do Memory.poke(memAddressDiamond+160, 8176);
+        do Memory.poke(memAddressDiamond+192, 16376);
+        do Memory.poke(memAddressDiamond+224, 16376);
+        do Memory.poke(memAddressDiamond+256, 16376);
+        do Memory.poke(memAddressDiamond+288, 8176);
+        do Memory.poke(memAddressDiamond+320, 4064);
+        do Memory.poke(memAddressDiamond+352, 1984);
+        do Memory.poke(memAddressDiamond+384, 896);
+        do Memory.poke(memAddressDiamond+416, 256);
+        do Memory.poke(memAddressDiamond+448, 0);
+        do Memory.poke(memAddressDiamond+480, 0);
+        return;
+    }
+
+    method void heart(int location) {
+        let memAddressHeart = 16384+location;
+        do Memory.poke(memAddressHeart+0, 0);
+        do Memory.poke(memAddressHeart+32, 7224);
+        do Memory.poke(memAddressHeart+64, 15996);
+        do Memory.poke(memAddressHeart+96, 32766);
+        do Memory.poke(memAddressHeart+128, -1);
+        do Memory.poke(memAddressHeart+160, -1);
+        do Memory.poke(memAddressHeart+192, -1);
+        do Memory.poke(memAddressHeart+224, 32766);
+        do Memory.poke(memAddressHeart+256, 16380);
+        do Memory.poke(memAddressHeart+288, 16380);
+        do Memory.poke(memAddressHeart+320, 8184);
+        do Memory.poke(memAddressHeart+352, 4080);
+        do Memory.poke(memAddressHeart+384, 2016);
+        do Memory.poke(memAddressHeart+416, 960);
+        do Memory.poke(memAddressHeart+448, 384);
+        do Memory.poke(memAddressHeart+480, 0);
+        return;
+    }
+
+    method void spade(int location) {
+        let memAddressSpade = 16384+location;
+        do Memory.poke(memAddressSpade+0, 0);
+        do Memory.poke(memAddressSpade+32, 384);
+        do Memory.poke(memAddressSpade+64, 960);
+        do Memory.poke(memAddressSpade+96, 2016);
+        do Memory.poke(memAddressSpade+128, 8184);
+        do Memory.poke(memAddressSpade+160, 8184);
+        do Memory.poke(memAddressSpade+192, 16380);
+        do Memory.poke(memAddressSpade+224, 32766);
+        do Memory.poke(memAddressSpade+256, -1);
+        do Memory.poke(memAddressSpade+288, -1);
+        do Memory.poke(memAddressSpade+320, -1);
+        do Memory.poke(memAddressSpade+352, 32766);
+        do Memory.poke(memAddressSpade+384, 15324);
+        do Memory.poke(memAddressSpade+416, 384);
+        do Memory.poke(memAddressSpade+448, 960);
+        do Memory.poke(memAddressSpade+480, 4080);
+        return;
+    }
+
+    method void club(int location) {
+        let memAddressClub = 16384+location;
+        do Memory.poke(memAddressClub+0, 0);
+        do Memory.poke(memAddressClub+32, 384);
+        do Memory.poke(memAddressClub+64, 960);
+        do Memory.poke(memAddressClub+96, 2016);
+        do Memory.poke(memAddressClub+128, 8184);
+        do Memory.poke(memAddressClub+160, 4080);
+        do Memory.poke(memAddressClub+192, 2016);
+        do Memory.poke(memAddressClub+224, 25542);
+        do Memory.poke(memAddressClub+256, 31134);
+        do Memory.poke(memAddressClub+288, -1);
+        do Memory.poke(memAddressClub+320, -1);
+        do Memory.poke(memAddressClub+352, 32766);
+        do Memory.poke(memAddressClub+384, 29646);
+        do Memory.poke(memAddressClub+416, 384);
+        do Memory.poke(memAddressClub+448, 960);
+        do Memory.poke(memAddressClub+480, 4080);
+        return;
+    }
+}
