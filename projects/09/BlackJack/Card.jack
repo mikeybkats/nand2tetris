@@ -8,4 +8,19 @@ class Card
     method renderCard: void
 */
 
-class Card {}
+class Card {
+    field String suit;
+    field String value;
+    field int locationX;
+    field int locationY;
+
+    constructor Card new(String suit, String value){
+        let suit = suit;
+        let value = value;
+        return this;
+    }
+
+    method void renderCard(){
+        return;
+    }
+}

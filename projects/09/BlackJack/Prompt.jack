@@ -3,11 +3,16 @@
 */
 
 class Prompt {
-    static String message;
     field Char keyPressed;
+    field int offsetX;
+    field int offsetY;
+
+    static String message;
 
     constructor Prompt new(){
         let message = "empty message";
+        let offsetY = 5;
+        let offsetX = 8;
         let keyPressed = 0;
         return this;
     }
@@ -17,15 +22,36 @@ class Prompt {
         return;
     }
 
-    method void promptUser(){
-        while(keyPressed = 0){
-            let keyPressed = Keyboard.keyPressed();
-            do Output.moveCursor(5, 8);
-            do Output.printString(message);
+    function void setOffset(int offsetX, int offsetY){
+        let offsetX = offsetX;
+        let offsetY = offsetY;
+        return;
+    }
+
+    method void eraseLine() {
+        var int count;
+        var int characterLen;
+        let count = 0;
+        let characterLen = 64;
+
+        while (count < characterLen){
+            do Output.moveCursor(offsetY, count);
+            let count = count + 1;
         }
-        do Output.printString("loading");
-        let keyPressed = 0;
+        do Output.moveCursor(offsetY, offsetX);
 
         return;
+    }
+
+    method int promptUser(){
+        while(keyPressed = 0){
+            let keyPressed = Keyboard.keyPressed();
+            do Output.moveCursor(offsetY, offsetX);
+            do Output.printString(message);
+        }
+        do eraseLine();
+        // do Output.printString("loading...");
+        let keyPressed = 0;
+        return 1;
     }
 }
