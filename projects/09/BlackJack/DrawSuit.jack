@@ -1,12 +1,34 @@
 class DrawSuit {
     field int memAddress;
+    field int modifier;
 
-    constructor DrawSuit new(int memAddress){
-        let memAddress = memAddress;
+    constructor DrawSuit new(){
+        let modifier = 256;
         return this;
     }
 
-    method void drawDiamond(int location) {
+    method void drawClubs(int location) {
+        let memAddress = 16384 + location;
+        do Memory.poke(memAddress+0, 0);
+        do Memory.poke(memAddress+32, 384);
+        do Memory.poke(memAddress+64, 960);
+        do Memory.poke(memAddress+96, 2016);
+        do Memory.poke(memAddress+128, 8184);
+        do Memory.poke(memAddress+160, 4080);
+        do Memory.poke(memAddress+192, 2016);
+        do Memory.poke(memAddress+224, 25542);
+        do Memory.poke(memAddress+256, 31134);
+        do Memory.poke(memAddress+288, -1);
+        do Memory.poke(memAddress+320, -1);
+        do Memory.poke(memAddress+352, 32766);
+        do Memory.poke(memAddress+384, 29646);
+        do Memory.poke(memAddress+416, 384);
+        do Memory.poke(memAddress+448, 960);
+        do Memory.poke(memAddress+480, 4080);
+        return;
+    }
+
+    method void drawDiamonds(int location) {
         let memAddress = 16384+location;
         do Memory.poke(memAddress+0, 0);
         do Memory.poke(memAddress+32, 256);
@@ -27,7 +49,7 @@ class DrawSuit {
         return;
     }
 
-    method void drawHeart(int location) {
+    method void drawHearts(int location) {
         let memAddress = 16384+location;
         do Memory.poke(memAddress+0, 0);
         do Memory.poke(memAddress+32, 7224);
@@ -48,7 +70,7 @@ class DrawSuit {
         return;
     }
 
-    method void drawSpade(int location) {
+    method void drawSpades(int location) {
         let memAddress = 16384+location;
         do Memory.poke(memAddress+0, 0);
         do Memory.poke(memAddress+32, 384);
@@ -63,27 +85,6 @@ class DrawSuit {
         do Memory.poke(memAddress+320, -1);
         do Memory.poke(memAddress+352, 32766);
         do Memory.poke(memAddress+384, 15324);
-        do Memory.poke(memAddress+416, 384);
-        do Memory.poke(memAddress+448, 960);
-        do Memory.poke(memAddress+480, 4080);
-        return;
-    }
-
-    method void drawClub(int location) {
-        let memAddress = 16384+location;
-        do Memory.poke(memAddress+0, 0);
-        do Memory.poke(memAddress+32, 384);
-        do Memory.poke(memAddress+64, 960);
-        do Memory.poke(memAddress+96, 2016);
-        do Memory.poke(memAddress+128, 8184);
-        do Memory.poke(memAddress+160, 4080);
-        do Memory.poke(memAddress+192, 2016);
-        do Memory.poke(memAddress+224, 25542);
-        do Memory.poke(memAddress+256, 31134);
-        do Memory.poke(memAddress+288, -1);
-        do Memory.poke(memAddress+320, -1);
-        do Memory.poke(memAddress+352, 32766);
-        do Memory.poke(memAddress+384, 29646);
         do Memory.poke(memAddress+416, 384);
         do Memory.poke(memAddress+448, 960);
         do Memory.poke(memAddress+480, 4080);

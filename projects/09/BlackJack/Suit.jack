@@ -1,0 +1,27 @@
+class Suit {
+    field String clubs;
+    field String diamonds;
+    field String hearts;
+    field String spades;
+
+    constructor Suit new(){
+        let clubs = "clubs";
+        let diamonds = "diamonds";
+        let hearts = "hearts";
+        let spades = "spades";
+        return this;
+    }
+
+    method String getClubs() {
+        return clubs;
+    }
+    method String getDiamonds() {
+        return diamonds;
+    }
+    method String getHearts() {
+        return hearts;
+    }
+    method String getSpades() {
+        return spades;
+    }
+}

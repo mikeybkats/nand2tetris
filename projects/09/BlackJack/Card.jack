@@ -13,14 +13,63 @@ class Card {
     field String value;
     field int locationX;
     field int locationY;
+    field Suit suitObj;
 
-    constructor Card new(String suit, String value){
-        let suit = suit;
-        let value = value;
+    constructor Card new(String suitName, String valueName, Suit suitObjArg){
+        let suit = suitName;
+        let value = valueName;
+        let suitObj = suitObjArg;
+        let locationX = 0;
+        let locationY = 0;
         return this;
     }
 
-    method void renderCard(){
+    method void setLocationX(int locX){
+        let locationX = locX;
+        return;
+    }
+
+    method void setLocationY(int locY){
+        let locationY = locY;
+        return;
+    }
+
+    method String getName(){
+        return value;
+    }
+    
+    method String getSuit(){
+        return suit;
+    }
+
+    method void render(){
+        var DrawSuit suitDrawing;
+        var int y;
+        var int x;
+        let suitDrawing = DrawSuit.new();
+        let y = locationY * 32;
+        let y = y + 256;
+        let x = locationX / 16;
+        let x = x + 1;
+
+        do Screen.drawRectangle(locationX, locationY, locationX + 36, locationY + 42);
+        do Screen.setColor(false);
+        do Screen.drawRectangle(locationX+2, locationY+2, locationX + 34, locationY + 40);
+
+        if(suit = suitObj.getClubs()){
+            do suitDrawing.drawClubs(y + x);
+            do Output.moveCursor(5,3);
+            do Output.printChar(value[2]);
+        }
+        if(suit = suitObj.getDiamonds()){
+            do suitDrawing.drawDiamonds(locationX);
+        }
+        if(suit = suitObj.getHearts()){
+            do suitDrawing.drawHearts(locationX);
+        }
+        if(suit = suitObj.getSpades()){
+            do suitDrawing.drawSpades(locationX);
+        }
         return;
     }
 }

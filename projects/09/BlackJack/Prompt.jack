@@ -1,13 +1,22 @@
-/** Prompts the play with a message and asks for input 
+/** 
+class Prompt
+Prompts the play with a message and asks for input 
 
+field keyPressed: Char - sets a value to which key has been pressed
+field offsetX: int - sets offset for text print max value of 23
+field offsetY: int - sets offset for text print max value of 64
+static message: String - message to print on screen
+
+setMessage(string newMessage) - setter for message
+eraseLine() - erases the line according to the offset value 
+promptUser() - prints the message to screen
 */
 
 class Prompt {
     field Char keyPressed;
     field int offsetX;
     field int offsetY;
-
-    static String message;
+    field String message;
 
     constructor Prompt new(){
         let message = "empty message";
@@ -17,12 +26,12 @@ class Prompt {
         return this;
     }
 
-    function void setMessage(String newMessage){
+    method void setMessage(String newMessage){
         let message = newMessage;
         return;
     }
 
-    function void setOffset(int offsetX, int offsetY){
+    method void setOffset(int offsetX, int offsetY){
         let offsetX = offsetX;
         let offsetY = offsetY;
         return;
@@ -49,8 +58,7 @@ class Prompt {
             do Output.moveCursor(offsetY, offsetX);
             do Output.printString(message);
         }
-        do eraseLine();
-        // do Output.printString("loading...");
+
         let keyPressed = 0;
         return 1;
     }
