@@ -18,6 +18,7 @@ class Deck {
         var Card newCard;
         var String cardName;
         var Suit suitObj;
+        var CardValue cardValue;
 
         let suits = Array.new(4);
         let suitObj = Suit.new();
@@ -27,19 +28,20 @@ class Deck {
         let suits[3] = suitObj.getSpades();
 
         let cardNames = Array.new(13);
-        let cardNames[0] = "2";
-        let cardNames[1] = "3";
-        let cardNames[2] = "4";
-        let cardNames[3] = "5";
-        let cardNames[4] = "6";
-        let cardNames[5] = "7";
-        let cardNames[6] = "8";
-        let cardNames[7] = "9";
-        let cardNames[8] = "10";
-        let cardNames[9] = "jack";
-        let cardNames[10] = "queen";
-        let cardNames[11] = "king";
-        let cardNames[12] = "ace";
+        let cardValue = CardValue.new();
+        let cardNames[0] = cardValue.getDeuce();
+        let cardNames[1] = cardValue.getThree();
+        let cardNames[2] = cardValue.getFour();
+        let cardNames[3] = cardValue.getFive();
+        let cardNames[4] = cardValue.getSix();
+        let cardNames[5] = cardValue.getSeven();
+        let cardNames[6] = cardValue.getEight();
+        let cardNames[7] = cardValue.getNine();
+        let cardNames[8] = cardValue.getTen();
+        let cardNames[9] = cardValue.getJack();
+        let cardNames[10] = cardValue.getQueen();
+        let cardNames[11] = cardValue.getKing();
+        let cardNames[12] = cardValue.getAce();
 
         let deck = Array.new(52);
         let deckCount = 0;
@@ -48,11 +50,8 @@ class Deck {
         while(suitCount < 4){
             let nameCount = 0;
             while(nameCount < 13){
-                let newCard = Card.new(suits[suitCount], cardNames[nameCount], suitObj);
+                let newCard = Card.new(suits[suitCount], cardNames[nameCount], suitObj, cardValue);
                 let deck[deckCount] = newCard;
-
-                // do Output.printString(newCard.getName());
-                // do Output.printString(newCard.getSuit());
 
                 let deckCount = deckCount + 1;
                 let nameCount = nameCount + 1;
@@ -79,9 +78,9 @@ class Deck {
             // move the card by increments of 16
             // 256 is one row
             // 512 rows total 256 x 512 = 131,072
-            do card.setLocationY(28);
+            do card.setLocationY(2);
             // middle of screen is 16 
-            do card.setLocationX(16);
+            do card.setLocationX(2);
             do card.render();
             let count = count + 1;
         }

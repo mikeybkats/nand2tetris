@@ -1,0 +1,84 @@
+class CardValue {
+    field String deuce;
+    field String three;
+    field String four;
+    field String five;
+    field String six;
+    field String seven;
+    field String eight;
+    field String nine;
+    field String ten;
+    field String jack;
+    field String queen;
+    field String king;
+    field String ace;
+
+    constructor CardValue new(){
+        let deuce = "deuce";
+        let three = "three";
+        let four = "four";
+        let five = "five";
+        let six = "six";
+        let seven = "seven";
+        let eight = "eight";
+        let nine = "nine";
+        let ten = "ten";
+        let jack = "jack";
+        let queen = "queen";
+        let king = "king";
+        let ace = "ace";
+        return this;
+    }
+
+    method String getDeuce(){
+        return deuce;
+    }
+
+    method String getThree(){
+        return three;
+    }
+
+    method String getFour(){
+        return four;
+    }
+
+    method String getFive(){
+        return five;
+    }
+
+    method String getSix(){
+        return six;
+    }
+
+    method String getSeven(){
+        return seven;
+    }
+
+    method String getEight(){
+        return eight;
+    }
+
+    method String getNine(){
+        return nine;
+    }
+
+    method String getTen(){
+        return ten;
+    }
+
+    method String getJack(){
+        return jack;
+    }
+
+    method String getQueen(){
+        return queen;
+    }
+
+    method String getKing(){
+        return king;
+    }
+
+    method String getAce(){
+        return ace;
+    }
+}

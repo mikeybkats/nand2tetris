@@ -14,11 +14,14 @@ class Card {
     field int locationX;
     field int locationY;
     field Suit suitObj;
+    field CardValue cardValueObj;
+    field DrawSuit suitDrawing;
 
-    constructor Card new(String suitName, String valueName, Suit suitObjArg){
+    constructor Card new(String suitName, String valueName, Suit suitObjArg, CardValue cardValueArg){
         let suit = suitName;
         let value = valueName;
         let suitObj = suitObjArg;
+        let cardValueObj = cardValueArg;
         let locationX = 0;
         let locationY = 0;
         return this;
@@ -42,33 +45,50 @@ class Card {
         return suit;
     }
 
+    method void renderValue(int x, int y){
+        var int base;
+        let base = x + y + 705;
+        if(value = cardValueObj.getDeuce()){
+            do suitDrawing.deuce(base);
+        }
+        if(value = cardValueObj.getThree()){
+            do suitDrawing.three(base);
+        }
+        return;
+    }
+
     method void render(){
-        var DrawSuit suitDrawing;
         var int y;
         var int x;
+        var int rectX;
+        var int rectY;
+
         let suitDrawing = DrawSuit.new();
         let y = locationY * 32;
         let y = y + 256;
-        let x = locationX / 16;
-        let x = x + 1;
+        let x = locationX;
 
-        do Screen.drawRectangle(locationX, locationY, locationX + 36, locationY + 42);
+        let rectX = locationX * 16;
+        let rectX = rectX + 5;
+        let rectY = locationY;
+        let rectY = rectY + 4;
+
+        do Screen.drawRectangle(rectX, rectY, rectX + 36, rectY + 42);
         do Screen.setColor(false);
-        do Screen.drawRectangle(locationX+2, locationY+2, locationX + 34, locationY + 40);
+        do Screen.drawRectangle(rectX+2, rectY+2, rectX + 34, rectY + 40);
 
         if(suit = suitObj.getClubs()){
-            do suitDrawing.drawClubs(y + x);
-            do Output.moveCursor(5,3);
-            do Output.printChar(value[2]);
+            do suitDrawing.clubs(y + x + 1);
+            do renderValue(x, y);
         }
         if(suit = suitObj.getDiamonds()){
-            do suitDrawing.drawDiamonds(locationX);
+            do suitDrawing.diamonds(locationX);
         }
         if(suit = suitObj.getHearts()){
-            do suitDrawing.drawHearts(locationX);
+            do suitDrawing.hearts(locationX);
         }
         if(suit = suitObj.getSpades()){
-            do suitDrawing.drawSpades(locationX);
+            do suitDrawing.spades(locationX);
         }
         return;
     }

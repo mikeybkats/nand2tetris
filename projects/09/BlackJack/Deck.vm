@@ -1,4 +1,4 @@
-function Deck.new 8
+function Deck.new 9
 push constant 1
 call Memory.alloc 1
 pop pointer 0
@@ -46,13 +46,13 @@ pop that 0
 push constant 13
 call Array.new 1
 pop local 3
+call CardValue.new 0
+pop local 8
 push constant 0
 push local 3
 add
-push constant 1
-call String.new 1
-push constant 50
-call String.appendChar 2
+push local 8
+call CardValue.getDeuce 1
 pop temp 0
 pop pointer 1
 push temp 0
@@ -60,10 +60,8 @@ pop that 0
 push constant 1
 push local 3
 add
-push constant 1
-call String.new 1
-push constant 51
-call String.appendChar 2
+push local 8
+call CardValue.getThree 1
 pop temp 0
 pop pointer 1
 push temp 0
@@ -71,10 +69,8 @@ pop that 0
 push constant 2
 push local 3
 add
-push constant 1
-call String.new 1
-push constant 52
-call String.appendChar 2
+push local 8
+call CardValue.getFour 1
 pop temp 0
 pop pointer 1
 push temp 0
@@ -82,10 +78,8 @@ pop that 0
 push constant 3
 push local 3
 add
-push constant 1
-call String.new 1
-push constant 53
-call String.appendChar 2
+push local 8
+call CardValue.getFive 1
 pop temp 0
 pop pointer 1
 push temp 0
@@ -93,10 +87,8 @@ pop that 0
 push constant 4
 push local 3
 add
-push constant 1
-call String.new 1
-push constant 54
-call String.appendChar 2
+push local 8
+call CardValue.getSix 1
 pop temp 0
 pop pointer 1
 push temp 0
@@ -104,10 +96,8 @@ pop that 0
 push constant 5
 push local 3
 add
-push constant 1
-call String.new 1
-push constant 55
-call String.appendChar 2
+push local 8
+call CardValue.getSeven 1
 pop temp 0
 pop pointer 1
 push temp 0
@@ -115,10 +105,8 @@ pop that 0
 push constant 6
 push local 3
 add
-push constant 1
-call String.new 1
-push constant 56
-call String.appendChar 2
+push local 8
+call CardValue.getEight 1
 pop temp 0
 pop pointer 1
 push temp 0
@@ -126,10 +114,8 @@ pop that 0
 push constant 7
 push local 3
 add
-push constant 1
-call String.new 1
-push constant 57
-call String.appendChar 2
+push local 8
+call CardValue.getNine 1
 pop temp 0
 pop pointer 1
 push temp 0
@@ -137,12 +123,8 @@ pop that 0
 push constant 8
 push local 3
 add
-push constant 2
-call String.new 1
-push constant 49
-call String.appendChar 2
-push constant 48
-call String.appendChar 2
+push local 8
+call CardValue.getTen 1
 pop temp 0
 pop pointer 1
 push temp 0
@@ -150,16 +132,8 @@ pop that 0
 push constant 9
 push local 3
 add
-push constant 4
-call String.new 1
-push constant 106
-call String.appendChar 2
-push constant 97
-call String.appendChar 2
-push constant 99
-call String.appendChar 2
-push constant 107
-call String.appendChar 2
+push local 8
+call CardValue.getJack 1
 pop temp 0
 pop pointer 1
 push temp 0
@@ -167,18 +141,8 @@ pop that 0
 push constant 10
 push local 3
 add
-push constant 5
-call String.new 1
-push constant 113
-call String.appendChar 2
-push constant 117
-call String.appendChar 2
-push constant 101
-call String.appendChar 2
-push constant 101
-call String.appendChar 2
-push constant 110
-call String.appendChar 2
+push local 8
+call CardValue.getQueen 1
 pop temp 0
 pop pointer 1
 push temp 0
@@ -186,16 +150,8 @@ pop that 0
 push constant 11
 push local 3
 add
-push constant 4
-call String.new 1
-push constant 107
-call String.appendChar 2
-push constant 105
-call String.appendChar 2
-push constant 110
-call String.appendChar 2
-push constant 103
-call String.appendChar 2
+push local 8
+call CardValue.getKing 1
 pop temp 0
 pop pointer 1
 push temp 0
@@ -203,14 +159,8 @@ pop that 0
 push constant 12
 push local 3
 add
-push constant 3
-call String.new 1
-push constant 97
-call String.appendChar 2
-push constant 99
-call String.appendChar 2
-push constant 101
-call String.appendChar 2
+push local 8
+call CardValue.getAce 1
 pop temp 0
 pop pointer 1
 push temp 0
@@ -247,7 +197,8 @@ add
 pop pointer 1
 push that 0
 push local 7
-call Card.new 3
+push local 8
+call Card.new 4
 pop local 5
 push local 0
 push this 0
@@ -297,11 +248,11 @@ pop pointer 1
 push that 0
 pop local 1
 push local 1
-push constant 28
+push constant 2
 call Card.setLocationY 2
 pop temp 0
 push local 1
-push constant 16
+push constant 2
 call Card.setLocationX 2
 pop temp 0
 push local 1

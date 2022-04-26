@@ -1,13 +1,11 @@
 class DrawSuit {
     field int memAddress;
-    field int modifier;
 
     constructor DrawSuit new(){
-        let modifier = 256;
         return this;
     }
 
-    method void drawClubs(int location) {
+    method void clubs(int location) {
         let memAddress = 16384 + location;
         do Memory.poke(memAddress+0, 0);
         do Memory.poke(memAddress+32, 384);
@@ -28,7 +26,7 @@ class DrawSuit {
         return;
     }
 
-    method void drawDiamonds(int location) {
+    method void diamonds(int location) {
         let memAddress = 16384+location;
         do Memory.poke(memAddress+0, 0);
         do Memory.poke(memAddress+32, 256);
@@ -49,7 +47,7 @@ class DrawSuit {
         return;
     }
 
-    method void drawHearts(int location) {
+    method void hearts(int location) {
         let memAddress = 16384+location;
         do Memory.poke(memAddress+0, 0);
         do Memory.poke(memAddress+32, 7224);
@@ -70,7 +68,7 @@ class DrawSuit {
         return;
     }
 
-    method void drawSpades(int location) {
+    method void spades(int location) {
         let memAddress = 16384+location;
         do Memory.poke(memAddress+0, 0);
         do Memory.poke(memAddress+32, 384);
@@ -88,6 +86,179 @@ class DrawSuit {
         do Memory.poke(memAddress+416, 384);
         do Memory.poke(memAddress+448, 960);
         do Memory.poke(memAddress+480, 4080);
+        return;
+    }
+    
+    method void one(int location) {
+        let memAddress = 16384+location;
+        do Memory.poke(memAddress+0, 0);
+        do Memory.poke(memAddress+32, 16);
+        do Memory.poke(memAddress+64, 24);
+        do Memory.poke(memAddress+96, 16);
+        do Memory.poke(memAddress+128, 16);
+        do Memory.poke(memAddress+160, 16);
+        do Memory.poke(memAddress+192, 16);
+        do Memory.poke(memAddress+224, 56);
+        return;
+    }
+
+    method void deuce(int location) {
+        let memAddress = 16384+location;
+        do Memory.poke(memAddress+0, 960);
+        do Memory.poke(memAddress+32, 1648);
+        do Memory.poke(memAddress+64, 1584);
+        do Memory.poke(memAddress+96, 1584);
+        do Memory.poke(memAddress+128, 1536);
+        do Memory.poke(memAddress+160, 1792);
+        do Memory.poke(memAddress+192, 992);
+        do Memory.poke(memAddress+224, 96);
+        do Memory.poke(memAddress+256, 48);
+        do Memory.poke(memAddress+288, 2032);
+        do Memory.poke(memAddress+320, 2032);
+        return;
+    }    
+
+    method void three(int location) {
+        let memAddress = 16384+location;
+        do Memory.poke(memAddress+0, 12);
+        do Memory.poke(memAddress+32, 18);
+        do Memory.poke(memAddress+64, 16);
+        do Memory.poke(memAddress+96, 28);
+        do Memory.poke(memAddress+128, 16);
+        do Memory.poke(memAddress+160, 18);
+        do Memory.poke(memAddress+192, 14);
+        return;
+    }
+
+    method void four(int location) {
+        let memAddress = 16384+location;
+        do Memory.poke(memAddress+0, 16);
+        do Memory.poke(memAddress+32, 18);
+        do Memory.poke(memAddress+64, 18);
+        do Memory.poke(memAddress+96, 62);
+        do Memory.poke(memAddress+128, 16);
+        do Memory.poke(memAddress+160, 16);
+        do Memory.poke(memAddress+192, 16);
+        return;
+    }
+
+    method void five(int location) {
+        let memAddress = 16384+location;
+        do Memory.poke(memAddress+0, 30);
+        do Memory.poke(memAddress+32, 2);
+        do Memory.poke(memAddress+64, 2);
+        do Memory.poke(memAddress+96, 30);
+        do Memory.poke(memAddress+128, 16);
+        do Memory.poke(memAddress+160, 16);
+        do Memory.poke(memAddress+192, 30);
+        return;
+    }
+
+    method void six(int location) {
+        let memAddress = 16384+location;
+        do Memory.poke(memAddress+0, 28);
+        do Memory.poke(memAddress+32, 4);
+        do Memory.poke(memAddress+64, 2);
+        do Memory.poke(memAddress+96, 30);
+        do Memory.poke(memAddress+128, 18);
+        do Memory.poke(memAddress+160, 18);
+        do Memory.poke(memAddress+192, 30);
+        return;
+    }
+
+    method void seven(int location) {
+        let memAddress = 16384+location;
+        do Memory.poke(memAddress+0, 31);
+        do Memory.poke(memAddress+32, 16);
+        do Memory.poke(memAddress+64, 8);
+        do Memory.poke(memAddress+96, 4);
+        do Memory.poke(memAddress+128, 6);
+        do Memory.poke(memAddress+160, 2);
+        do Memory.poke(memAddress+192, 2);
+        return;
+    }
+
+    method void eight(int location) {
+        let memAddress = 16384+location;
+        do Memory.poke(memAddress+0, 14);
+        do Memory.poke(memAddress+32, 17);
+        do Memory.poke(memAddress+64, 17);
+        do Memory.poke(memAddress+96, 14);
+        do Memory.poke(memAddress+128, 17);
+        do Memory.poke(memAddress+160, 17);
+        do Memory.poke(memAddress+192, 14);
+        return;
+    }
+
+    method void nine(int location) {
+        let memAddress = 16384+location;
+        do Memory.poke(memAddress+0, 14);
+        do Memory.poke(memAddress+32, 17);
+        do Memory.poke(memAddress+64, 17);
+        do Memory.poke(memAddress+96, 30);
+        do Memory.poke(memAddress+128, 16);
+        do Memory.poke(memAddress+160, 16);
+        do Memory.poke(memAddress+192, 14);
+        return;
+    }
+
+    method void ten(int location) {
+        let memAddress = 16384+location;
+        do Memory.poke(memAddress+0, 98);
+        do Memory.poke(memAddress+32, 147);
+        do Memory.poke(memAddress+64, 146);
+        do Memory.poke(memAddress+96, 146);
+        do Memory.poke(memAddress+128, 146);
+        do Memory.poke(memAddress+160, 146);
+        do Memory.poke(memAddress+192, 103);
+        return;
+    }
+
+    method void jack(int location) {
+        let memAddress = 16384+location;
+        do Memory.poke(memAddress+0, 16);
+        do Memory.poke(memAddress+32, 16);
+        do Memory.poke(memAddress+64, 16);
+        do Memory.poke(memAddress+96, 16);
+        do Memory.poke(memAddress+128, 17);
+        do Memory.poke(memAddress+160, 17);
+        do Memory.poke(memAddress+192, 14);
+        return;
+    }
+
+    method void queen(int location) {
+        let memAddress = 16384+location;
+        do Memory.poke(memAddress+0, 14);
+        do Memory.poke(memAddress+32, 17);
+        do Memory.poke(memAddress+64, 17);
+        do Memory.poke(memAddress+96, 21);
+        do Memory.poke(memAddress+128, 25);
+        do Memory.poke(memAddress+160, 17);
+        do Memory.poke(memAddress+192, 46);
+        return;
+    }
+
+    method void king(int location) {
+        let memAddress = 16384+location;
+        do Memory.poke(memAddress+0, 1);
+        do Memory.poke(memAddress+32, 9);
+        do Memory.poke(memAddress+64, 5);
+        do Memory.poke(memAddress+96, 3);
+        do Memory.poke(memAddress+128, 5);
+        do Memory.poke(memAddress+160, 9);
+        do Memory.poke(memAddress+192, 17);
+        return;
+    }
+
+    method void ace(int location) {
+        let memAddress = 16384+location;
+        do Memory.poke(memAddress+0, 12);
+        do Memory.poke(memAddress+32, 18);
+        do Memory.poke(memAddress+64, 18);
+        do Memory.poke(memAddress+96, 30);
+        do Memory.poke(memAddress+128, 51);
+        do Memory.poke(memAddress+160, 33);
+        do Memory.poke(memAddress+192, 33);
         return;
     }
 }
