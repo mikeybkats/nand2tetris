@@ -54,6 +54,53 @@ class Card {
         if(value = cardValueObj.getThree()){
             do suitDrawing.three(base);
         }
+        if(value = cardValueObj.getFour()){
+            do suitDrawing.four(base);
+        }
+        if(value = cardValueObj.getFive()){
+            do suitDrawing.five(base);
+        }
+        if(value = cardValueObj.getSix()){
+            do suitDrawing.six(base);
+        }
+        if(value = cardValueObj.getSeven()){
+            do suitDrawing.seven(base);
+        }
+        if(value = cardValueObj.getEight()){
+            do suitDrawing.eight(base);
+        }
+        if(value = cardValueObj.getNine()){
+            do suitDrawing.nine(base);
+        }
+        if(value = cardValueObj.getTen()){
+            do suitDrawing.ten(base);
+        }
+        if(value = cardValueObj.getJack()){
+            do suitDrawing.jack(base);
+        }
+        if(value = cardValueObj.getQueen()){
+            do suitDrawing.queen(base);
+        }
+        if(value = cardValueObj.getKing()){
+            do suitDrawing.king(base);
+        }
+        if(value = cardValueObj.getAce()){
+            do suitDrawing.ace(base);
+        }
+        return;
+    }
+
+    method void renderBorder(int x, int y) {
+        var int base;
+        let base = x + y;
+        do suitDrawing.topLeft(base - 256);
+        do suitDrawing.topRight(base - 255);
+
+        do suitDrawing.borderLeft(base + 256);
+        do suitDrawing.borderRight(base + 257);
+
+        do suitDrawing.bottomLeft(base + 768);
+        do suitDrawing.bottomRight(base + 769);
         return;
     }
 
@@ -64,31 +111,46 @@ class Card {
         var int rectY;
 
         let suitDrawing = DrawSuit.new();
+
         let y = locationY * 32;
         let y = y + 256;
         let x = locationX;
 
-        let rectX = locationX * 16;
-        let rectX = rectX + 5;
         let rectY = locationY;
         let rectY = rectY + 4;
+        let rectX = locationX * 16;
+        let rectX = rectX + 5;
 
-        do Screen.drawRectangle(rectX, rectY, rectX + 36, rectY + 42);
-        do Screen.setColor(false);
-        do Screen.drawRectangle(rectX+2, rectY+2, rectX + 34, rectY + 40);
+        do renderBorder(x, y);
+        do renderValue(x, y);
 
         if(suit = suitObj.getClubs()){
-            do suitDrawing.clubs(y + x + 1);
-            do renderValue(x, y);
+            do suitDrawing.clubTopRight(y + x - 255);
+            do suitDrawing.clubTopLeft(y + x - 256);
+
+            do suitDrawing.clubRight(y + x + 257);
+            do suitDrawing.clubLeft(y + x + 256);
         }
         if(suit = suitObj.getDiamonds()){
-            do suitDrawing.diamonds(locationX);
+            do suitDrawing.diamondsTopRight(y + x - 255);
+            do suitDrawing.diamondsTopLeft(y + x - 256);
+
+            do suitDrawing.diamondsBottomRight(y + x + 257);
+            do suitDrawing.diamondsBottomLeft(y + x + 256);
         }
         if(suit = suitObj.getHearts()){
-            do suitDrawing.hearts(locationX);
+            do suitDrawing.heartsTopRight(y + x - 255);
+            do suitDrawing.heartsTopLeft(y + x - 256);
+
+            do suitDrawing.heartsBottomRight(y + x + 257);
+            do suitDrawing.heartsBottomLeft(y + x + 256);
         }
         if(suit = suitObj.getSpades()){
-            do suitDrawing.spades(locationX);
+            do suitDrawing.spadesTopRight(y + x - 255);
+            do suitDrawing.spadesTopLeft(y + x - 256);
+
+            do suitDrawing.spadesBottomRight(y + x + 257);
+            do suitDrawing.spadesBottomLeft(y + x + 256);
         }
         return;
     }

@@ -73,6 +73,183 @@ push local 0
 call DrawSuit.three 2
 pop temp 0
 label IF_FALSE1
+push this 1
+push this 5
+call CardValue.getFour 1
+eq
+if-goto IF_TRUE2
+goto IF_FALSE2
+label IF_TRUE2
+push this 6
+push local 0
+call DrawSuit.four 2
+pop temp 0
+label IF_FALSE2
+push this 1
+push this 5
+call CardValue.getFive 1
+eq
+if-goto IF_TRUE3
+goto IF_FALSE3
+label IF_TRUE3
+push this 6
+push local 0
+call DrawSuit.five 2
+pop temp 0
+label IF_FALSE3
+push this 1
+push this 5
+call CardValue.getSix 1
+eq
+if-goto IF_TRUE4
+goto IF_FALSE4
+label IF_TRUE4
+push this 6
+push local 0
+call DrawSuit.six 2
+pop temp 0
+label IF_FALSE4
+push this 1
+push this 5
+call CardValue.getSeven 1
+eq
+if-goto IF_TRUE5
+goto IF_FALSE5
+label IF_TRUE5
+push this 6
+push local 0
+call DrawSuit.seven 2
+pop temp 0
+label IF_FALSE5
+push this 1
+push this 5
+call CardValue.getEight 1
+eq
+if-goto IF_TRUE6
+goto IF_FALSE6
+label IF_TRUE6
+push this 6
+push local 0
+call DrawSuit.eight 2
+pop temp 0
+label IF_FALSE6
+push this 1
+push this 5
+call CardValue.getNine 1
+eq
+if-goto IF_TRUE7
+goto IF_FALSE7
+label IF_TRUE7
+push this 6
+push local 0
+call DrawSuit.nine 2
+pop temp 0
+label IF_FALSE7
+push this 1
+push this 5
+call CardValue.getTen 1
+eq
+if-goto IF_TRUE8
+goto IF_FALSE8
+label IF_TRUE8
+push this 6
+push local 0
+call DrawSuit.ten 2
+pop temp 0
+label IF_FALSE8
+push this 1
+push this 5
+call CardValue.getJack 1
+eq
+if-goto IF_TRUE9
+goto IF_FALSE9
+label IF_TRUE9
+push this 6
+push local 0
+call DrawSuit.jack 2
+pop temp 0
+label IF_FALSE9
+push this 1
+push this 5
+call CardValue.getQueen 1
+eq
+if-goto IF_TRUE10
+goto IF_FALSE10
+label IF_TRUE10
+push this 6
+push local 0
+call DrawSuit.queen 2
+pop temp 0
+label IF_FALSE10
+push this 1
+push this 5
+call CardValue.getKing 1
+eq
+if-goto IF_TRUE11
+goto IF_FALSE11
+label IF_TRUE11
+push this 6
+push local 0
+call DrawSuit.king 2
+pop temp 0
+label IF_FALSE11
+push this 1
+push this 5
+call CardValue.getAce 1
+eq
+if-goto IF_TRUE12
+goto IF_FALSE12
+label IF_TRUE12
+push this 6
+push local 0
+call DrawSuit.ace 2
+pop temp 0
+label IF_FALSE12
+push constant 0
+return
+function Card.renderBorder 1
+push argument 0
+pop pointer 0
+push argument 1
+push argument 2
+add
+pop local 0
+push this 6
+push local 0
+push constant 256
+sub
+call DrawSuit.topLeft 2
+pop temp 0
+push this 6
+push local 0
+push constant 255
+sub
+call DrawSuit.topRight 2
+pop temp 0
+push this 6
+push local 0
+push constant 256
+add
+call DrawSuit.borderLeft 2
+pop temp 0
+push this 6
+push local 0
+push constant 257
+add
+call DrawSuit.borderRight 2
+pop temp 0
+push this 6
+push local 0
+push constant 768
+add
+call DrawSuit.bottomLeft 2
+pop temp 0
+push this 6
+push local 0
+push constant 769
+add
+call DrawSuit.bottomRight 2
+pop temp 0
 push constant 0
 return
 function Card.render 4
@@ -90,6 +267,12 @@ add
 pop local 0
 push this 2
 pop local 1
+push this 3
+pop local 3
+push local 3
+push constant 4
+add
+pop local 3
 push this 2
 push constant 16
 call Math.multiply 2
@@ -98,38 +281,15 @@ push local 2
 push constant 5
 add
 pop local 2
-push this 3
-pop local 3
-push local 3
-push constant 4
-add
-pop local 3
-push local 2
-push local 3
-push local 2
-push constant 36
-add
-push local 3
-push constant 42
-add
-call Screen.drawRectangle 4
+push pointer 0
+push local 1
+push local 0
+call Card.renderBorder 3
 pop temp 0
-push constant 0
-call Screen.setColor 1
-pop temp 0
-push local 2
-push constant 2
-add
-push local 3
-push constant 2
-add
-push local 2
-push constant 34
-add
-push local 3
-push constant 40
-add
-call Screen.drawRectangle 4
+push pointer 0
+push local 1
+push local 0
+call Card.renderValue 3
 pop temp 0
 push this 0
 push this 4
@@ -142,14 +302,33 @@ push this 6
 push local 0
 push local 1
 add
-push constant 1
-add
-call DrawSuit.clubs 2
+push constant 255
+sub
+call DrawSuit.clubTopRight 2
 pop temp 0
-push pointer 0
-push local 1
+push this 6
 push local 0
-call Card.renderValue 3
+push local 1
+add
+push constant 256
+sub
+call DrawSuit.clubTopLeft 2
+pop temp 0
+push this 6
+push local 0
+push local 1
+add
+push constant 257
+add
+call DrawSuit.clubRight 2
+pop temp 0
+push this 6
+push local 0
+push local 1
+add
+push constant 256
+add
+call DrawSuit.clubLeft 2
 pop temp 0
 label IF_FALSE0
 push this 0
@@ -160,8 +339,36 @@ if-goto IF_TRUE1
 goto IF_FALSE1
 label IF_TRUE1
 push this 6
-push this 2
-call DrawSuit.diamonds 2
+push local 0
+push local 1
+add
+push constant 255
+sub
+call DrawSuit.diamondsTopRight 2
+pop temp 0
+push this 6
+push local 0
+push local 1
+add
+push constant 256
+sub
+call DrawSuit.diamondsTopLeft 2
+pop temp 0
+push this 6
+push local 0
+push local 1
+add
+push constant 257
+add
+call DrawSuit.diamondsBottomRight 2
+pop temp 0
+push this 6
+push local 0
+push local 1
+add
+push constant 256
+add
+call DrawSuit.diamondsBottomLeft 2
 pop temp 0
 label IF_FALSE1
 push this 0
@@ -172,8 +379,36 @@ if-goto IF_TRUE2
 goto IF_FALSE2
 label IF_TRUE2
 push this 6
-push this 2
-call DrawSuit.hearts 2
+push local 0
+push local 1
+add
+push constant 255
+sub
+call DrawSuit.heartsTopRight 2
+pop temp 0
+push this 6
+push local 0
+push local 1
+add
+push constant 256
+sub
+call DrawSuit.heartsTopLeft 2
+pop temp 0
+push this 6
+push local 0
+push local 1
+add
+push constant 257
+add
+call DrawSuit.heartsBottomRight 2
+pop temp 0
+push this 6
+push local 0
+push local 1
+add
+push constant 256
+add
+call DrawSuit.heartsBottomLeft 2
 pop temp 0
 label IF_FALSE2
 push this 0
@@ -184,8 +419,36 @@ if-goto IF_TRUE3
 goto IF_FALSE3
 label IF_TRUE3
 push this 6
-push this 2
-call DrawSuit.spades 2
+push local 0
+push local 1
+add
+push constant 255
+sub
+call DrawSuit.spadesTopRight 2
+pop temp 0
+push this 6
+push local 0
+push local 1
+add
+push constant 256
+sub
+call DrawSuit.spadesTopLeft 2
+pop temp 0
+push this 6
+push local 0
+push local 1
+add
+push constant 257
+add
+call DrawSuit.spadesBottomRight 2
+pop temp 0
+push this 6
+push local 0
+push local 1
+add
+push constant 256
+add
+call DrawSuit.spadesBottomLeft 2
 pop temp 0
 label IF_FALSE3
 push constant 0

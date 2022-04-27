@@ -66,21 +66,43 @@ class Deck {
         var int count;
         var Card card;
         var String cardName;
+        var int modifier;
+        var int row;
 
-        // let card = deck[0];       
-        // let cardName = card.getName();
-        // do card.render();
         let count = 0;
+        let row = 20;
 
         do Output.moveCursor(0,0);
-        while(count < 1) {
+        while(count < 52) {
+            let modifier = count * 2;
+            let modifier = modifier + 1;
             let card = deck[count];       
-            // move the card by increments of 16
-            // 256 is one row
-            // 512 rows total 256 x 512 = 131,072
-            do card.setLocationY(2);
-            // middle of screen is 16 
-            do card.setLocationX(2);
+
+            if(count = 13){
+                let row = 80;
+            }
+            if(count > 12){
+                let modifier = modifier + 6;
+            }
+
+            if(count = 26){
+                let row = 140;
+            }
+            if(count > 25){
+                let modifier = modifier + 6;
+            }
+
+            if(count = 39){
+                let row = 200;
+            }
+            if(count > 38){
+                let modifier = modifier + 6;
+            }
+
+            do card.setLocationY(row);
+            do card.setLocationX(2 + modifier);
+            // do card.setLocationY(200);
+            // do card.setLocationX(3 + modifier);
             do card.render();
             let count = count + 1;
         }
