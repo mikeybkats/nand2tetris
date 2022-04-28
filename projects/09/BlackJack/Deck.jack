@@ -8,6 +8,7 @@ reload() - reloads all cards back into deck
 */
 class Deck {
     field Array deck;
+    field int seedCount;
 
     constructor Deck new() {
         var int deckCount;
@@ -20,6 +21,7 @@ class Deck {
         var Suit suitObj;
         var CardValue cardValue;
 
+        let seedCount = 11;
         let suits = Array.new(4);
         let suitObj = Suit.new();
         let suits[0] = suitObj.getClubs();
@@ -62,6 +64,49 @@ class Deck {
         return this;
     }
 
+	// const linearRandomGenerator = (x0, a, b, m, n) => {
+    // x0=seed; a=multiplier; b=increment; m=modulus; n=desired array length; 
+    // method Array generateRandom(int seed, int multiplier, int increment, int modulus, int length){
+    //     // const results = []
+    //     var Array results;
+    //     var int i;
+    //     var int seedResult;
+    //     var int preSeedResult;
+
+    //     // for (let i = 0; i < n; i++) {
+    //     while(i < length){
+    //         // x0 = (a * x0 + b) % m
+    //         let preSeedResult = (multiplier * seed) + increment;
+    //         let seedResult = preSeedResult / modulus;
+
+    //         // if it's not an even fraction
+    //         if(~(preSeedResult * modulus = seedResult)){
+    //             // set seedResult equal to the remainder
+    //             let seedResult = preSeedResult - (modulus * seedResult);
+    //         }
+    //         let results[i] = seedResult;
+    //         let i = i + 1;
+    //     }
+    //     return results;
+    // }
+
+    method Card getRandomCard(){
+        var int randomNumber;
+        do Random.setSeed(Random.rand() + seedCount);
+        let seedCount = seedCount + 1;
+        let randomNumber = Random.randRange(52);
+        return deck[randomNumber];
+    }
+
+    method void printRandomCard(){
+        var Card randomCard;
+        let randomCard = getRandomCard();
+        do randomCard.setLocationX(5);
+        do randomCard.setLocationY(5);
+        do randomCard.render();
+        return;
+    }
+
     method void print(){
         var int count;
         var Card card;
@@ -72,7 +117,6 @@ class Deck {
         let count = 0;
         let row = 20;
 
-        do Output.moveCursor(0,0);
         while(count < 52) {
             let modifier = count * 2;
             let modifier = modifier + 1;

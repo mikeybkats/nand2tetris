@@ -1,5 +1,5 @@
 function Card.new 0
-push constant 7
+push constant 8
 call Memory.alloc 1
 pop pointer 0
 push argument 0
@@ -14,7 +14,16 @@ push constant 0
 pop this 2
 push constant 0
 pop this 3
+push constant 0
+pop this 7
 push pointer 0
+return
+function Card.setHidden 0
+push argument 0
+pop pointer 0
+push argument 1
+pop this 7
+push constant 0
 return
 function Card.setLocationX 0
 push argument 0
@@ -252,6 +261,171 @@ call DrawSuit.bottomRight 2
 pop temp 0
 push constant 0
 return
+function Card.renderSuit 0
+push argument 0
+pop pointer 0
+push this 0
+push this 4
+call Suit.getClubs 1
+eq
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push this 6
+push argument 2
+push argument 1
+add
+push constant 255
+sub
+call DrawSuit.clubTopRight 2
+pop temp 0
+push this 6
+push argument 2
+push argument 1
+add
+push constant 256
+sub
+call DrawSuit.clubTopLeft 2
+pop temp 0
+push this 6
+push argument 2
+push argument 1
+add
+push constant 257
+add
+call DrawSuit.clubRight 2
+pop temp 0
+push this 6
+push argument 2
+push argument 1
+add
+push constant 256
+add
+call DrawSuit.clubLeft 2
+pop temp 0
+label IF_FALSE0
+push this 0
+push this 4
+call Suit.getDiamonds 1
+eq
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push this 6
+push argument 2
+push argument 1
+add
+push constant 255
+sub
+call DrawSuit.diamondsTopRight 2
+pop temp 0
+push this 6
+push argument 2
+push argument 1
+add
+push constant 256
+sub
+call DrawSuit.diamondsTopLeft 2
+pop temp 0
+push this 6
+push argument 2
+push argument 1
+add
+push constant 257
+add
+call DrawSuit.diamondsBottomRight 2
+pop temp 0
+push this 6
+push argument 2
+push argument 1
+add
+push constant 256
+add
+call DrawSuit.diamondsBottomLeft 2
+pop temp 0
+label IF_FALSE1
+push this 0
+push this 4
+call Suit.getHearts 1
+eq
+if-goto IF_TRUE2
+goto IF_FALSE2
+label IF_TRUE2
+push this 6
+push argument 2
+push argument 1
+add
+push constant 255
+sub
+call DrawSuit.heartsTopRight 2
+pop temp 0
+push this 6
+push argument 2
+push argument 1
+add
+push constant 256
+sub
+call DrawSuit.heartsTopLeft 2
+pop temp 0
+push this 6
+push argument 2
+push argument 1
+add
+push constant 257
+add
+call DrawSuit.heartsBottomRight 2
+pop temp 0
+push this 6
+push argument 2
+push argument 1
+add
+push constant 256
+add
+call DrawSuit.heartsBottomLeft 2
+pop temp 0
+label IF_FALSE2
+push this 0
+push this 4
+call Suit.getSpades 1
+eq
+if-goto IF_TRUE3
+goto IF_FALSE3
+label IF_TRUE3
+push this 6
+push argument 2
+push argument 1
+add
+push constant 255
+sub
+call DrawSuit.spadesTopRight 2
+pop temp 0
+push this 6
+push argument 2
+push argument 1
+add
+push constant 256
+sub
+call DrawSuit.spadesTopLeft 2
+pop temp 0
+push this 6
+push argument 2
+push argument 1
+add
+push constant 257
+add
+call DrawSuit.spadesBottomRight 2
+pop temp 0
+push this 6
+push argument 2
+push argument 1
+add
+push constant 256
+add
+call DrawSuit.spadesBottomLeft 2
+pop temp 0
+label IF_FALSE3
+push constant 0
+return
 function Card.render 4
 push argument 0
 pop pointer 0
@@ -286,170 +460,25 @@ push local 1
 push local 0
 call Card.renderBorder 3
 pop temp 0
+push this 7
+push constant 0
+not
+eq
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push constant 0
+return
+label IF_FALSE0
 push pointer 0
 push local 1
 push local 0
 call Card.renderValue 3
 pop temp 0
-push this 0
-push this 4
-call Suit.getClubs 1
-eq
-if-goto IF_TRUE0
-goto IF_FALSE0
-label IF_TRUE0
-push this 6
-push local 0
+push pointer 0
 push local 1
-add
-push constant 255
-sub
-call DrawSuit.clubTopRight 2
-pop temp 0
-push this 6
 push local 0
-push local 1
-add
-push constant 256
-sub
-call DrawSuit.clubTopLeft 2
+call Card.renderSuit 3
 pop temp 0
-push this 6
-push local 0
-push local 1
-add
-push constant 257
-add
-call DrawSuit.clubRight 2
-pop temp 0
-push this 6
-push local 0
-push local 1
-add
-push constant 256
-add
-call DrawSuit.clubLeft 2
-pop temp 0
-label IF_FALSE0
-push this 0
-push this 4
-call Suit.getDiamonds 1
-eq
-if-goto IF_TRUE1
-goto IF_FALSE1
-label IF_TRUE1
-push this 6
-push local 0
-push local 1
-add
-push constant 255
-sub
-call DrawSuit.diamondsTopRight 2
-pop temp 0
-push this 6
-push local 0
-push local 1
-add
-push constant 256
-sub
-call DrawSuit.diamondsTopLeft 2
-pop temp 0
-push this 6
-push local 0
-push local 1
-add
-push constant 257
-add
-call DrawSuit.diamondsBottomRight 2
-pop temp 0
-push this 6
-push local 0
-push local 1
-add
-push constant 256
-add
-call DrawSuit.diamondsBottomLeft 2
-pop temp 0
-label IF_FALSE1
-push this 0
-push this 4
-call Suit.getHearts 1
-eq
-if-goto IF_TRUE2
-goto IF_FALSE2
-label IF_TRUE2
-push this 6
-push local 0
-push local 1
-add
-push constant 255
-sub
-call DrawSuit.heartsTopRight 2
-pop temp 0
-push this 6
-push local 0
-push local 1
-add
-push constant 256
-sub
-call DrawSuit.heartsTopLeft 2
-pop temp 0
-push this 6
-push local 0
-push local 1
-add
-push constant 257
-add
-call DrawSuit.heartsBottomRight 2
-pop temp 0
-push this 6
-push local 0
-push local 1
-add
-push constant 256
-add
-call DrawSuit.heartsBottomLeft 2
-pop temp 0
-label IF_FALSE2
-push this 0
-push this 4
-call Suit.getSpades 1
-eq
-if-goto IF_TRUE3
-goto IF_FALSE3
-label IF_TRUE3
-push this 6
-push local 0
-push local 1
-add
-push constant 255
-sub
-call DrawSuit.spadesTopRight 2
-pop temp 0
-push this 6
-push local 0
-push local 1
-add
-push constant 256
-sub
-call DrawSuit.spadesTopLeft 2
-pop temp 0
-push this 6
-push local 0
-push local 1
-add
-push constant 257
-add
-call DrawSuit.spadesBottomRight 2
-pop temp 0
-push this 6
-push local 0
-push local 1
-add
-push constant 256
-add
-call DrawSuit.spadesBottomLeft 2
-pop temp 0
-label IF_FALSE3
 push constant 0
 return

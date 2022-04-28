@@ -1,1 +1,39 @@
-class Score {}
+class Score {
+    field int playerScore;
+    field int dealerScore;
+
+    constructor Score new(int player, int dealer){
+        let playerScore = player;
+        let dealerScore = dealer;
+        return this;
+    }
+
+    method void printScores(){
+        do Output.moveCursor(1,1);
+        do Output.printString("Dealer Score: ");
+        do Output.printInt(dealerScore);
+
+        do Output.moveCursor(3,1);
+        do Output.printString("Player Score: ");
+        do Output.printInt(playerScore);
+        return;
+    }
+
+    method void setPlayerScore(int newScore){
+        let playerScore = newScore;
+        return;
+    }
+
+    method int getPlayerScore(){
+        return playerScore;
+    }
+
+    method void setDealerScore(int newScore){
+        let dealerScore = newScore;
+        return;
+    }
+
+    method int getDealerScore(){
+        return dealerScore;
+    }
+}

@@ -41,8 +41,8 @@ class Fraction {
    method Fraction mult(Fraction multiplier){
       var int multNum;
       var int multDen;
-      let multNum = numerator * multiplier.getNumerator;
-      let multDen = denominator * multiplier.getDenominator;
+      let multNum = numerator * multiplier.getNumerator();
+      let multDen = denominator * multiplier.getDenominator();
       return Fraction.new(multNum, multDen);
    }
 
@@ -54,6 +54,12 @@ class Fraction {
       return Fraction.new(divNum, divDen);
    }
 
+   // method int modulus(){
+      // 5%7 = 5
+      // 7%5 = 2
+      // 5%5 = 0
+   // }
+  
    /** Disposes this fraction. */
    method void dispose() {
       do Memory.deAlloc(this);  // uses an OS routine to recycle the memory held by the object

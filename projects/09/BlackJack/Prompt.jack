@@ -53,13 +53,18 @@ class Prompt {
     }
 
     method int promptUser(){
-        while(keyPressed = 0){
+        var int count;
+        let count = 0;
+        let keyPressed = 0;
+        do Output.moveCursor(offsetY, offsetX);
+        do Output.printString(message);
+        while(count = 0){
             let keyPressed = Keyboard.keyPressed();
-            do Output.moveCursor(offsetY, offsetX);
-            do Output.printString(message);
+            if(~(keyPressed = 0)){
+                let count = count + 1;
+            }
         }
 
-        let keyPressed = 0;
-        return 1;
+        return keyPressed;
     }
 }

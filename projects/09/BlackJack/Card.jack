@@ -16,6 +16,7 @@ class Card {
     field Suit suitObj;
     field CardValue cardValueObj;
     field DrawSuit suitDrawing;
+    field Boolean hidden;
 
     constructor Card new(String suitName, String valueName, Suit suitObjArg, CardValue cardValueArg){
         let suit = suitName;
@@ -24,7 +25,13 @@ class Card {
         let cardValueObj = cardValueArg;
         let locationX = 0;
         let locationY = 0;
+        let hidden = false;
         return this;
+    }
+
+    method void setHidden(boolean newHidden){
+        let hidden = newHidden;
+        return;
     }
 
     method void setLocationX(int locX){
@@ -104,26 +111,7 @@ class Card {
         return;
     }
 
-    method void render(){
-        var int y;
-        var int x;
-        var int rectX;
-        var int rectY;
-
-        let suitDrawing = DrawSuit.new();
-
-        let y = locationY * 32;
-        let y = y + 256;
-        let x = locationX;
-
-        let rectY = locationY;
-        let rectY = rectY + 4;
-        let rectX = locationX * 16;
-        let rectX = rectX + 5;
-
-        do renderBorder(x, y);
-        do renderValue(x, y);
-
+    method void renderSuit(int x, int y){
         if(suit = suitObj.getClubs()){
             do suitDrawing.clubTopRight(y + x - 255);
             do suitDrawing.clubTopLeft(y + x - 256);
@@ -152,6 +140,35 @@ class Card {
             do suitDrawing.spadesBottomRight(y + x + 257);
             do suitDrawing.spadesBottomLeft(y + x + 256);
         }
+
+        return;
+    }
+
+    method void render(){
+        var int y;
+        var int x;
+        var int rectX;
+        var int rectY;
+
+        let suitDrawing = DrawSuit.new();
+
+        let y = locationY * 32;
+        let y = y + 256;
+        let x = locationX;
+
+        let rectY = locationY;
+        let rectY = rectY + 4;
+        let rectX = locationX * 16;
+        let rectX = rectX + 5;
+
+        do renderBorder(x, y);
+        
+        if(hidden = true){
+            return;
+        }
+        do renderValue(x, y);
+        do renderSuit(x, y);
+
         return;
     }
 }

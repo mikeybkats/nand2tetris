@@ -13,9 +13,13 @@ class BlackJack
     field gameActive: boolean // 0 or 1
     field winner: "player" | "dealer"
     field deck: Deck
-    field turn: "player" | "dealer"
+    field turn: "player" = 0 | "dealer" = 1 
+
     field playerCards: Array<Card>
     field dealerCards: Array<Card>
+    field playerScore: int
+    field dealerScore: int
+
     field promptString: String
     field prompt: Prompt
 
@@ -48,13 +52,21 @@ class BlackJack
 
 class BlackJack {
     field Prompt prompt;
-    field string promptString;
+    field String promptString;
     field int gameActive;
     field Deck deck;
+
+    field Array playerCards;
+    field Array dealerCards;
+
+    field int playerScore;
+    field int dealerScore;
 
     constructor BlackJack new() {
         let prompt = Prompt.new();
         let gameActive = 0;
+        let playerScore = 0;
+        let dealerScore = 0;
 
         return this;
     }
@@ -66,7 +78,7 @@ class BlackJack {
         do prompt.setMessage(promptString);
 
         let userInput = prompt.promptUser();
-        if (userInput = 1) {
+        if (~(userInput = 0)) {
             do prompt.eraseLine();
             let gameActive = 1;
             do gameLoop();
@@ -75,15 +87,40 @@ class BlackJack {
         return;
     }
 
-    method void gameLoop(){
-        // create deck
-        let deck = Deck.new();
-        do deck.print();
-        // load deck 
-        // 
-        while(gameActive = 1){
-            // dealer deals cards. first dealer card remains hidden
+    method void promptPlayerForAnotherCard() {
+        var int userInput;
 
+        let promptString = "Would you like to draw another card? (press y for yes. press n for no.)";
+        do prompt.setMessage(promptString);
+
+        let userInput = prompt.promptUser();
+
+        if (userInput = 78){
+            let gameActive = 0;
+        }
+
+        if (userInput = 89){
+            do deck.printRandomCard();
+        }
+
+        return;
+    }
+
+    method void loadDeck(){
+        let deck = Deck.new();
+        return;
+    }
+
+    method void gameLoop(){
+        // create deck and load deck
+        do loadDeck();
+        // do deck.print();
+        // do deck.printRandomCard();
+        
+        while(gameActive = 1){
+            do promptPlayerForAnotherCard();
+        }
+            // dealer deals cards. first dealer card remains hidden
             // calculate score
             // prompt player: would you like another card?
             // calculate score
@@ -91,8 +128,7 @@ class BlackJack {
             // if over 21 player bust
             // if player stays dealer flips hidden card
             // deals card while < 17
-            let gameActive = 0;
-        }
+            // let gameActive = 0;
 
         return;
     }
