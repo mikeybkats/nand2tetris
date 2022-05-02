@@ -2,7 +2,7 @@ function Deck.new 9
 push constant 2
 call Memory.alloc 1
 pop pointer 0
-push constant 11
+push constant 0
 pop this 1
 push constant 4
 call Array.new 1
@@ -228,32 +228,56 @@ goto WHILE_EXP0
 label WHILE_END0
 push pointer 0
 return
-function Deck.getRandomCard 1
+function Deck.popCard 1
 push argument 0
 pop pointer 0
-call Random.rand 0
-push this 1
-add
-call Random.setSeed 1
-pop temp 0
-push this 1
-push constant 1
-add
-pop this 1
-push constant 52
-call Random.randRange 1
-pop local 0
-push local 0
+push argument 1
 push this 0
 add
 pop pointer 1
 push that 0
+pop local 0
+push argument 1
+push this 0
+add
+push constant 0
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push local 0
+return
+function Deck.getRandomCard 2
+push argument 0
+pop pointer 0
+push argument 1
+call Random.setSeed 1
+pop temp 0
+push constant 52
+call Random.randRange 1
+pop local 0
+push constant 0
+pop local 1
+label WHILE_EXP0
+push local 1
+push constant 0
+eq
+not
+if-goto WHILE_END0
+push pointer 0
+push local 0
+call Deck.popCard 2
+pop local 1
+goto WHILE_EXP0
+label WHILE_END0
+push local 1
 return
 function Deck.printRandomCard 1
 push argument 0
 pop pointer 0
 push pointer 0
-call Deck.getRandomCard 1
+push argument 1
+call Deck.getRandomCard 2
 pop local 0
 push local 0
 push constant 5

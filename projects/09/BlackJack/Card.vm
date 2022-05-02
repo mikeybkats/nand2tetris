@@ -49,6 +49,141 @@ push argument 0
 pop pointer 0
 push this 0
 return
+function Card.getValue 0
+push argument 0
+pop pointer 0
+push this 1
+push this 5
+call CardValue.getDeuce 1
+eq
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push constant 2
+return
+label IF_FALSE0
+push this 1
+push this 5
+call CardValue.getThree 1
+eq
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push constant 3
+return
+label IF_FALSE1
+push this 1
+push this 5
+call CardValue.getFour 1
+eq
+if-goto IF_TRUE2
+goto IF_FALSE2
+label IF_TRUE2
+push constant 4
+return
+label IF_FALSE2
+push this 1
+push this 5
+call CardValue.getFive 1
+eq
+if-goto IF_TRUE3
+goto IF_FALSE3
+label IF_TRUE3
+push constant 5
+return
+label IF_FALSE3
+push this 1
+push this 5
+call CardValue.getSix 1
+eq
+if-goto IF_TRUE4
+goto IF_FALSE4
+label IF_TRUE4
+push constant 6
+return
+label IF_FALSE4
+push this 1
+push this 5
+call CardValue.getSeven 1
+eq
+if-goto IF_TRUE5
+goto IF_FALSE5
+label IF_TRUE5
+push constant 7
+return
+label IF_FALSE5
+push this 1
+push this 5
+call CardValue.getEight 1
+eq
+if-goto IF_TRUE6
+goto IF_FALSE6
+label IF_TRUE6
+push constant 8
+return
+label IF_FALSE6
+push this 1
+push this 5
+call CardValue.getNine 1
+eq
+if-goto IF_TRUE7
+goto IF_FALSE7
+label IF_TRUE7
+push constant 9
+return
+label IF_FALSE7
+push this 1
+push this 5
+call CardValue.getTen 1
+eq
+if-goto IF_TRUE8
+goto IF_FALSE8
+label IF_TRUE8
+push constant 10
+return
+label IF_FALSE8
+push this 1
+push this 5
+call CardValue.getJack 1
+eq
+if-goto IF_TRUE9
+goto IF_FALSE9
+label IF_TRUE9
+push constant 10
+return
+label IF_FALSE9
+push this 1
+push this 5
+call CardValue.getQueen 1
+eq
+if-goto IF_TRUE10
+goto IF_FALSE10
+label IF_TRUE10
+push constant 10
+return
+label IF_FALSE10
+push this 1
+push this 5
+call CardValue.getKing 1
+eq
+if-goto IF_TRUE11
+goto IF_FALSE11
+label IF_TRUE11
+push constant 10
+return
+label IF_FALSE11
+push this 1
+push this 5
+call CardValue.getAce 1
+eq
+if-goto IF_TRUE12
+goto IF_FALSE12
+label IF_TRUE12
+push constant 1
+return
+label IF_FALSE12
+push constant 0
+return
 function Card.renderValue 1
 push argument 0
 pop pointer 0

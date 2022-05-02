@@ -51,6 +51,49 @@ class Card {
     method String getSuit(){
         return suit;
     }
+    
+    method int getValue(){
+        if(value = cardValueObj.getDeuce()){
+            return 2;
+        }
+        if(value = cardValueObj.getThree()){
+            return 3;
+        }
+        if(value = cardValueObj.getFour()){
+            return 4;
+        }
+        if(value = cardValueObj.getFive()){
+            return 5;
+        }
+        if(value = cardValueObj.getSix()){
+            return 6;
+        }
+        if(value = cardValueObj.getSeven()){
+            return 7;
+        }
+        if(value = cardValueObj.getEight()){
+            return 8;
+        }
+        if(value = cardValueObj.getNine()){
+            return 9;
+        }
+        if(value = cardValueObj.getTen()){
+            return 10;
+        }
+        if(value = cardValueObj.getJack()){
+            return 10;
+        }
+        if(value = cardValueObj.getQueen()){
+            return 10;
+        }
+        if(value = cardValueObj.getKing()){
+            return 10;
+        }
+        if(value = cardValueObj.getAce()){
+            return 1;
+        }
+        return 0;
+    }
 
     method void renderValue(int x, int y){
         var int base;

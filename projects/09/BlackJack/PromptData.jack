@@ -1,0 +1,24 @@
+class PromptData {
+    field int timeElapsed;
+    field int keyCode;
+
+    constructor PromptData new(int timeCount, int keyCodeIn){
+        let timeElapsed = timeCount;
+        let keyCode = keyCodeIn;
+
+        return this;
+    }
+
+    method void dispose() {
+       do Memory.deAlloc(this);
+       return;
+    }
+
+    method int getElapsedTime(){
+        return timeElapsed;
+    }
+
+    method int getKeyCode(){
+        return keyCode;
+    }
+}

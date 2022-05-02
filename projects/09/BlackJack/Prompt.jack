@@ -13,16 +13,19 @@ promptUser() - prints the message to screen
 */
 
 class Prompt {
-    field Char keyPressed;
+    field Char keyCode;
     field int offsetX;
     field int offsetY;
     field String message;
+    field PromptData promptData;
+    field int promptWidth;
 
     constructor Prompt new(){
         let message = "empty message";
         let offsetY = 5;
         let offsetX = 8;
-        let keyPressed = 0;
+        let keyCode = 0;
+        let promptWidth = 48;
         return this;
     }
 
@@ -52,19 +55,93 @@ class Prompt {
         return;
     }
 
-    method int promptUser(){
-        var int count;
-        let count = 0;
-        let keyPressed = 0;
-        do Output.moveCursor(offsetY, offsetX);
+    method Array parseMessageToArray(){
+        var Array parsedMessage;
+        var String line;
+        var int lineCount;
+        // charCount is 0 to size of promptWidth
+        var int charCount;
+        var char currentChar;
+
+        var int totalIndex;
+        let lineCount = 0;
+        let charCount = 0;
+
+        let parsedMessage = Array.new(4);
+        let line = String.new(promptWidth);
+
+        do Output.moveCursor(0,0);
+        do Output.printInt(message.length());
+
+        // if the message is one line
+        if(message.length() < promptWidth){
+            let parsedMessage[0] = message;
+            return parsedMessage;
+        }
+
+        let totalIndex = charCount + (promptWidth * lineCount);
+
+        while(totalIndex < message.length()){
+            let currentChar = message[totalIndex];
+            let line[charCount] = currentChar;
+
+            if(charCount = promptWidth){
+                // do Output.moveCursor(offsetY + lineCount + 1, offsetX);
+                // do Output.printString(line);
+                let lineCount = lineCount + 1;
+                let charCount = 0;
+            } 
+            else {
+                let charCount = charCount + 1;
+            }
+            let totalIndex = totalIndex + 1;
+        }
+
+
+        return parsedMessage;
+    }
+
+    method PromptData promptUser(){
+        var Boolean hasKeyBeenPressed;
+        var int timeElapsed;
+        var Array parsedMessage;
+        var int messageLineCount;
+
+        let hasKeyBeenPressed = false;
+        let timeElapsed = 0;
+        
+        let keyCode = 0;
+        
+        // let parsedMessage = parseMessageToArray();
+        // let messageLineCount = 0;
+
+        do Output.moveCursor(offsetY + 6, offsetX);
         do Output.printString(message);
-        while(count = 0){
-            let keyPressed = Keyboard.keyPressed();
-            if(~(keyPressed = 0)){
-                let count = count + 1;
+        
+        // while(~(parsedMessage[messageLineCount] = null)){
+        //     do Output.moveCursor(offsetY + messageLineCount, offsetX);
+        //     do Output.printString(parsedMessage[0]);
+        //     let messageLineCount = messageLineCount + 1;
+        // }
+
+        while(hasKeyBeenPressed = false){
+            let keyCode = Keyboard.keyPressed();
+            let timeElapsed = timeElapsed + 1;
+            if(timeElapsed > 52){
+                let timeElapsed = 0;
+            }
+            if(~(keyCode = 0)){
+                let hasKeyBeenPressed = true;
             }
         }
 
-        return keyPressed;
+        let promptData = PromptData.new(timeElapsed, keyCode);
+        return promptData;
+    }
+    
+    method void dispose() {
+       do promptData.dispose();
+       do Memory.deAlloc(this);
+       return;
     }
 }

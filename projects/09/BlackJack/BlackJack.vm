@@ -1,18 +1,20 @@
 function BlackJack.new 0
-push constant 8
+push constant 7
 call Memory.alloc 1
 pop pointer 0
 call Prompt.new 0
 pop this 0
 push constant 0
 pop this 2
-push constant 0
+push constant 9
+call Array.new 1
+pop this 5
+push constant 9
+call Array.new 1
 pop this 6
-push constant 0
-pop this 7
 push pointer 0
 return
-function BlackJack.promptPlayerTitle 1
+function BlackJack.promptPlayerTitle 5
 push argument 0
 pop pointer 0
 push constant 46
@@ -129,15 +131,21 @@ call Prompt.eraseLine 1
 pop temp 0
 push constant 1
 pop this 2
+push constant 500
+call Sys.wait 1
+pop temp 0
 push pointer 0
 call BlackJack.gameLoop 1
 pop temp 0
 label IF_FALSE0
 push constant 0
 return
-function BlackJack.promptPlayerForAnotherCard 1
+function BlackJack.promptPlayerForAnotherCard 2
 push argument 0
 pop pointer 0
+push constant 0
+pop local 1
+push this 0
 push constant 71
 call String.new 1
 push constant 87
@@ -282,15 +290,15 @@ push constant 46
 call String.appendChar 2
 push constant 41
 call String.appendChar 2
-pop this 1
-push this 0
-push this 1
 call Prompt.setMessage 2
 pop temp 0
 push this 0
 call Prompt.promptUser 1
 pop local 0
 push local 0
+call PromptData.getKeyCode 1
+pop local 1
+push local 1
 push constant 78
 eq
 if-goto IF_TRUE0
@@ -299,16 +307,25 @@ label IF_TRUE0
 push constant 0
 pop this 2
 label IF_FALSE0
-push local 0
+push local 1
 push constant 89
 eq
 if-goto IF_TRUE1
 goto IF_FALSE1
 label IF_TRUE1
-push this 3
-call Deck.printRandomCard 1
+push constant 250
+call Sys.wait 1
+pop temp 0
+push pointer 0
+push this 5
+push local 0
+call PromptData.getElapsedTime 1
+call BlackJack.dealCard 3
 pop temp 0
 label IF_FALSE1
+push local 0
+call PromptData.dispose 1
+pop temp 0
 push constant 0
 return
 function BlackJack.loadDeck 0
@@ -318,18 +335,135 @@ call Deck.new 0
 pop this 3
 push constant 0
 return
-function BlackJack.gameLoop 0
+function BlackJack.dealCard 2
+push argument 0
+pop pointer 0
+push this 3
+push argument 2
+call Deck.getRandomCard 2
+pop local 0
+push constant 0
+pop local 1
+label WHILE_EXP0
+push local 1
+push argument 1
+add
+pop pointer 1
+push that 0
+push constant 0
+eq
+not
+not
+if-goto WHILE_END0
+push local 1
+push constant 1
+add
+pop local 1
+goto WHILE_EXP0
+label WHILE_END0
+push local 1
+push argument 1
+add
+push local 0
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 0
+return
+function BlackJack.dealFirst 0
+push argument 0
+pop pointer 0
+push pointer 0
+push this 6
+push constant 5
+call BlackJack.dealCard 3
+pop temp 0
+push pointer 0
+push this 6
+push constant 13
+call BlackJack.dealCard 3
+pop temp 0
+push constant 0
+return
+function BlackJack.printHand 2
+push argument 0
+pop pointer 0
+push constant 0
+pop local 1
+label WHILE_EXP0
+push local 1
+push argument 1
+add
+pop pointer 1
+push that 0
+push constant 0
+eq
+not
+not
+if-goto WHILE_END0
+push local 1
+push argument 1
+add
+pop pointer 1
+push that 0
+pop local 0
+push local 0
+push argument 2
+call Card.setLocationY 2
+pop temp 0
+push local 0
+push local 1
+push constant 2
+call Math.multiply 2
+push constant 3
+add
+call Card.setLocationX 2
+pop temp 0
+push local 0
+call Card.render 1
+pop temp 0
+push local 1
+push constant 1
+add
+pop local 1
+goto WHILE_EXP0
+label WHILE_END0
+push constant 0
+return
+function BlackJack.gameLoop 1
 push argument 0
 pop pointer 0
 push pointer 0
 call BlackJack.loadDeck 1
 pop temp 0
+push constant 0
+push constant 0
+call Score.new 2
+pop this 4
 label WHILE_EXP0
 push this 2
 push constant 1
 eq
 not
 if-goto WHILE_END0
+push pointer 0
+push this 5
+push constant 200
+call BlackJack.printHand 3
+pop temp 0
+push pointer 0
+push this 6
+push constant 80
+call BlackJack.printHand 3
+pop temp 0
+push this 4
+push this 5
+call Score.setPlayer 2
+pop temp 0
+push this 4
+call Score.print 1
+pop temp 0
 push pointer 0
 call BlackJack.promptPlayerForAnotherCard 1
 pop temp 0

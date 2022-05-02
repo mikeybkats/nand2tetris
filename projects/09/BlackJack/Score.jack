@@ -8,7 +8,7 @@ class Score {
         return this;
     }
 
-    method void printScores(){
+    method void print(){
         do Output.moveCursor(1,1);
         do Output.printString("Dealer Score: ");
         do Output.printInt(dealerScore);
@@ -19,8 +19,24 @@ class Score {
         return;
     }
 
-    method void setPlayerScore(int newScore){
-        let playerScore = newScore;
+    method int tallyScore(Array cards){
+        var int i;
+        var int scoreTally;
+        var Card card;
+
+        let i = 0;
+        let scoreTally = 0;
+
+        while(~(cards[i] = null)){
+            let card = cards[i];
+            let scoreTally = scoreTally + card.getValue();
+            let i = i + 1;
+        }
+        return scoreTally;
+    }
+
+    method void setPlayer(Array cards){
+        let playerScore = tallyScore(cards);
         return;
     }
 
@@ -28,8 +44,8 @@ class Score {
         return playerScore;
     }
 
-    method void setDealerScore(int newScore){
-        let dealerScore = newScore;
+    method void setDealer(Array cards){
+        let dealerScore = tallyScore(cards);
         return;
     }
 

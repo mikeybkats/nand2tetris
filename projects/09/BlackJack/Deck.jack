@@ -8,7 +8,7 @@ reload() - reloads all cards back into deck
 */
 class Deck {
     field Array deck;
-    field int seedCount;
+    field int count;
 
     constructor Deck new() {
         var int deckCount;
@@ -21,7 +21,7 @@ class Deck {
         var Suit suitObj;
         var CardValue cardValue;
 
-        let seedCount = 11;
+        let count = 0;
         let suits = Array.new(4);
         let suitObj = Suit.new();
         let suits[0] = suitObj.getClubs();
@@ -90,17 +90,32 @@ class Deck {
     //     return results;
     // }
 
-    method Card getRandomCard(){
-        var int randomNumber;
-        do Random.setSeed(Random.rand() + seedCount);
-        let seedCount = seedCount + 1;
-        let randomNumber = Random.randRange(52);
-        return deck[randomNumber];
+    method Card popCard(int index){
+        var Card card;
+        let card = deck[index];
+        let deck[index] = null;
+        return card;
     }
 
-    method void printRandomCard(){
+
+    method Card getRandomCard(int randomizer){
+        var int randomNumber;
+        var Card card;
+
+        do Random.setSeed(randomizer);
+        let randomNumber = Random.randRange(52);
+        let card = null;
+
+        while(card = null){
+            let card = popCard(randomNumber);
+        }
+
+        return card;
+    }
+
+    method void printRandomCard(int randomizer){
         var Card randomCard;
-        let randomCard = getRandomCard();
+        let randomCard = getRandomCard(randomizer);
         do randomCard.setLocationX(5);
         do randomCard.setLocationY(5);
         do randomCard.render();
