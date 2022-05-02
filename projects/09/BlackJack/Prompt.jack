@@ -22,25 +22,57 @@ class Prompt {
 
     constructor Prompt new(){
         let message = "empty message";
-        let offsetY = 5;
+        let offsetY = 6;
         let offsetX = 8;
         let keyCode = 0;
         let promptWidth = 48;
         return this;
     }
 
-    method void eraseLine() {
+    method void eraseScreen() {
         var int count;
-        var int characterLen;
+        var int posY;
+        var int loopScreen;
+        let loopScreen = 0;
+        let posY = 0;
         let count = 0;
-        let characterLen = message.length();
 
-        do Output.moveCursor(20, 40);
-        do Output.printInt(characterLen);
-
-        while (count < characterLen){
-            do Output.moveCursor(offsetY, offsetX + count);
+        while(loopScreen = 0){
+            do Output.moveCursor(posY, count);
             let count = count + 1;
+
+            if(count = 64){
+                let posY = posY + 1;
+                let count = 0;
+            }
+            if(posY = 23){
+                let loopScreen = 1;
+            }
+        }
+
+        do Output.moveCursor(offsetY, offsetX);
+
+        return;
+    }
+
+    method void eraseLine() {
+        var int lineCount;
+        var int tempOffsetY;
+        var int tempOffsetX;
+        let tempOffsetX = 0;
+        let tempOffsetY = offsetY;
+        let lineCount = 0;
+
+        // loopScreen max of 3 lines
+        while (lineCount < 3){
+            do Output.moveCursor(tempOffsetY, tempOffsetX);
+            let tempOffsetX = tempOffsetX + 1;
+
+            if(tempOffsetX = 64){
+                let tempOffsetX = 0;
+                let tempOffsetY = tempOffsetY + 1;
+                let lineCount = lineCount + 1;
+            }
         }
         do Output.moveCursor(offsetY, offsetX);
 

@@ -31,7 +31,7 @@ call String.appendChar 2
 push constant 101
 call String.appendChar 2
 pop this 3
-push constant 5
+push constant 6
 pop this 2
 push constant 8
 pop this 1
@@ -41,37 +41,99 @@ push constant 48
 pop this 5
 push pointer 0
 return
-function Prompt.eraseLine 2
+function Prompt.eraseScreen 3
 push argument 0
 pop pointer 0
 push constant 0
-pop local 0
-push this 3
-call String.length 1
+pop local 2
+push constant 0
 pop local 1
-push constant 20
-push constant 40
-call Output.moveCursor 2
-pop temp 0
-push local 1
-call Output.printInt 1
-pop temp 0
+push constant 0
+pop local 0
 label WHILE_EXP0
-push local 0
-push local 1
-lt
+push local 2
+push constant 0
+eq
 not
 if-goto WHILE_END0
-push this 2
-push this 1
+push local 1
 push local 0
-add
 call Output.moveCursor 2
 pop temp 0
 push local 0
 push constant 1
 add
 pop local 0
+push local 0
+push constant 64
+eq
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push local 1
+push constant 1
+add
+pop local 1
+push constant 0
+pop local 0
+label IF_FALSE0
+push local 1
+push constant 23
+eq
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push constant 1
+pop local 2
+label IF_FALSE1
+goto WHILE_EXP0
+label WHILE_END0
+push this 2
+push this 1
+call Output.moveCursor 2
+pop temp 0
+push constant 0
+return
+function Prompt.eraseLine 3
+push argument 0
+pop pointer 0
+push constant 0
+pop local 2
+push this 2
+pop local 1
+push constant 0
+pop local 0
+label WHILE_EXP0
+push local 0
+push constant 3
+lt
+not
+if-goto WHILE_END0
+push local 1
+push local 2
+call Output.moveCursor 2
+pop temp 0
+push local 2
+push constant 1
+add
+pop local 2
+push local 2
+push constant 64
+eq
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push constant 0
+pop local 2
+push local 1
+push constant 1
+add
+pop local 1
+push local 0
+push constant 1
+add
+pop local 0
+label IF_FALSE0
 goto WHILE_EXP0
 label WHILE_END0
 push this 2
