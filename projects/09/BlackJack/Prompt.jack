@@ -29,7 +29,26 @@ class Prompt {
         return this;
     }
 
+    method void eraseLine() {
+        var int count;
+        var int characterLen;
+        let count = 0;
+        let characterLen = message.length();
+
+        do Output.moveCursor(20, 40);
+        do Output.printInt(characterLen);
+
+        while (count < characterLen){
+            do Output.moveCursor(offsetY, offsetX + count);
+            let count = count + 1;
+        }
+        do Output.moveCursor(offsetY, offsetX);
+
+        return;
+    }
+
     method void setMessage(String newMessage){
+        do eraseLine();
         let message = newMessage;
         return;
     }
@@ -40,65 +59,9 @@ class Prompt {
         return;
     }
 
-    method void eraseLine() {
-        var int count;
-        var int characterLen;
-        let count = 0;
-        let characterLen = 64;
-
-        while (count < characterLen){
-            do Output.moveCursor(offsetY, count);
-            let count = count + 1;
-        }
-        do Output.moveCursor(offsetY, offsetX);
-
+    method void printMessage(){
+        do Output.printString(message);
         return;
-    }
-
-    method Array parseMessageToArray(){
-        var Array parsedMessage;
-        var String line;
-        var int lineCount;
-        // charCount is 0 to size of promptWidth
-        var int charCount;
-        var char currentChar;
-
-        var int totalIndex;
-        let lineCount = 0;
-        let charCount = 0;
-
-        let parsedMessage = Array.new(4);
-        let line = String.new(promptWidth);
-
-        do Output.moveCursor(0,0);
-        do Output.printInt(message.length());
-
-        // if the message is one line
-        if(message.length() < promptWidth){
-            let parsedMessage[0] = message;
-            return parsedMessage;
-        }
-
-        let totalIndex = charCount + (promptWidth * lineCount);
-
-        while(totalIndex < message.length()){
-            let currentChar = message[totalIndex];
-            let line[charCount] = currentChar;
-
-            if(charCount = promptWidth){
-                // do Output.moveCursor(offsetY + lineCount + 1, offsetX);
-                // do Output.printString(line);
-                let lineCount = lineCount + 1;
-                let charCount = 0;
-            } 
-            else {
-                let charCount = charCount + 1;
-            }
-            let totalIndex = totalIndex + 1;
-        }
-
-
-        return parsedMessage;
     }
 
     method PromptData promptUser(){
@@ -112,17 +75,8 @@ class Prompt {
         
         let keyCode = 0;
         
-        // let parsedMessage = parseMessageToArray();
-        // let messageLineCount = 0;
-
-        do Output.moveCursor(offsetY + 6, offsetX);
+        do Output.moveCursor(offsetY, offsetX);
         do Output.printString(message);
-        
-        // while(~(parsedMessage[messageLineCount] = null)){
-        //     do Output.moveCursor(offsetY + messageLineCount, offsetX);
-        //     do Output.printString(parsedMessage[0]);
-        //     let messageLineCount = messageLineCount + 1;
-        // }
 
         while(hasKeyBeenPressed = false){
             let keyCode = Keyboard.keyPressed();

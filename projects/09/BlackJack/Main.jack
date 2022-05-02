@@ -2,7 +2,7 @@ class Main {
     function void main() {
         var BlackJack game;
         let game = BlackJack.new();
-        do game.promptPlayerTitle();
+        do game.start();
 
         return;
     }
