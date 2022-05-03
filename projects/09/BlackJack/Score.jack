@@ -23,16 +23,42 @@ class Score {
         var int i;
         var int scoreTally;
         var Card card;
+        var int aces;
+        var int acesTally;
 
         let i = 0;
         let scoreTally = 0;
 
+        let aces = 0;
+        let acesTally = 0;
+
         while(~(cards[i] = null)){
             let card = cards[i];
-            let scoreTally = scoreTally + card.getValue();
+            if(card.getName() = "ace"){
+                let aces = aces + 1;
+            }
+            else {
+                let scoreTally = scoreTally + card.getValue();
+            }
             let i = i + 1;
         }
-        return scoreTally;
+        let i = 0;
+
+        while(i < aces){
+            // if there is one ace. and score is 10 or below let first ace = 11
+            if(scoreTally < 11){
+                let acesTally = 11;
+            } 
+            else {
+                if(scoreTally > 10) {
+                    let acesTally = acesTally + 1;
+                }
+            }
+
+            let i = i + 1;
+        }
+
+        return scoreTally + acesTally;
     }
 
     method void setPlayer(Array cards){
