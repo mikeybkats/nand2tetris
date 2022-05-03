@@ -22,11 +22,21 @@ class Prompt {
 
     constructor Prompt new(){
         let message = "empty message";
-        let offsetY = 6;
-        let offsetX = 8;
+        let offsetY = 10;
+        let offsetX = 10;
         let keyCode = 0;
         let promptWidth = 48;
         return this;
+    }
+
+    method void setOffsetX(int newX){
+        let offsetX = newX;
+        return;
+    }
+
+    method void setOffsetY(int newY){
+        let offsetY = newY;
+        return;
     }
 
     method void eraseScreen() {
@@ -63,8 +73,8 @@ class Prompt {
         let tempOffsetY = offsetY;
         let lineCount = 0;
 
-        // loopScreen max of 3 lines
-        while (lineCount < 3){
+        // loopScreen max of 6 lines
+        while (lineCount < 6){
             do Output.moveCursor(tempOffsetY, tempOffsetX);
             let tempOffsetX = tempOffsetX + 1;
 
@@ -85,9 +95,17 @@ class Prompt {
         return;
     }
 
-    method void setOffset(int offsetX, int offsetY){
-        let offsetX = offsetX;
-        let offsetY = offsetY;
+    method int getOffsetX(){
+        return offsetX;
+    }
+
+    method int getOffsetY(){
+        return offsetY;
+    }
+
+    method void shiftOffset(int xMod, int yMod){
+        let offsetX = offsetX + xMod;
+        let offsetY = offsetY + yMod;
         return;
     }
 

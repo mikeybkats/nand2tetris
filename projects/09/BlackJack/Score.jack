@@ -9,11 +9,11 @@ class Score {
     }
 
     method void print(){
-        do Output.moveCursor(1,1);
+        do Output.moveCursor(2,1);
         do Output.printString("Dealer Score: ");
         do Output.printInt(dealerScore);
 
-        do Output.moveCursor(3,1);
+        do Output.moveCursor(20,1);
         do Output.printString("Player Score: ");
         do Output.printInt(playerScore);
         return;
@@ -51,5 +51,10 @@ class Score {
 
     method int getDealerScore(){
         return dealerScore;
+    }
+
+    method void dispose(){
+        do Memory.deAlloc(this);
+        return;
     }
 }
