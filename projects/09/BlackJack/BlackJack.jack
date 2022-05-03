@@ -205,6 +205,18 @@ class BlackJack {
                 let hitPlayer = promptPlayerForAnotherCard();
             }
             else {
+                // if black jack player wins
+                if(score.getPlayerScore() = 21 & gameActive = 1){
+                    do prompt.setMessage("Black Jack. Good job.");
+                    do prompt.printMessage();
+                    do prompt.shiftOffset(0, 2);
+                    do prompt.setMessage("You win.");
+                    do prompt.printMessage();
+                    let gameActive = 0;
+
+                    do Sys.wait(4000);
+                    return;
+                }
                 // if no dealer draws cards
                 while(score.getDealerScore() < 18){
                     do dealCard(dealerCards, 3 + dealerCount);
@@ -222,22 +234,10 @@ class BlackJack {
                 if(score.getDealerScore() > 21){
                     do prompt.setMessage("Dealer busts! You win!");
                     do prompt.printMessage();
-                    do Sys.wait(3000);
+                    do Sys.wait(4000);
                     return;
                 } 
-                // if black jack player wins
-                if(score.getPlayerScore() = 21 & gameActive = 1){
-                    do prompt.setMessage("Black Jack. Good job.");
-                    do prompt.printMessage();
-                    do prompt.shiftOffset(0, 2);
-                    do prompt.setMessage("You win.");
-                    do prompt.printMessage();
-                    let gameActive = 0;
-
-                    do Sys.wait(2000);
-                    return;
-                }
-                if((score.getPlayerScore() > score.getDealerScore()) & (score.getPlayerScore() < 21)){
+                if((score.getPlayerScore() > score.getDealerScore()) & ~(score.getPlayerScore() > 21)){
                     do prompt.setMessage("You have beat the dealer.");
                     do prompt.printMessage();
                     do prompt.shiftOffset(0, 2);
@@ -245,7 +245,7 @@ class BlackJack {
                     do prompt.printMessage();
                     let gameActive = 0;
 
-                    do Sys.wait(2000);
+                    do Sys.wait(4000);
                     return;
                 }
                 if(score.getPlayerScore() = score.getDealerScore()){
@@ -253,7 +253,7 @@ class BlackJack {
                     do prompt.printMessage();
                     let gameActive = 0;
 
-                    do Sys.wait(2000);
+                    do Sys.wait(4000);
                     return;
                 }
                 else {
@@ -264,7 +264,7 @@ class BlackJack {
                     do prompt.printMessage();
                     let gameActive = 0;
 
-                    do Sys.wait(2000);
+                    do Sys.wait(4000);
                     return;
                 }
             }
