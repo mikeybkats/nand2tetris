@@ -34,7 +34,7 @@ class Score {
 
         while(~(cards[i] = null)){
             let card = cards[i];
-            if(card.getName() = "ace"){
+            if(card.getValue() = 1){
                 let aces = aces + 1;
             }
             else {
@@ -50,9 +50,7 @@ class Score {
                 let acesTally = 11;
             } 
             else {
-                if(scoreTally > 10) {
-                    let acesTally = acesTally + 1;
-                }
+                let acesTally = acesTally + 1;
             }
 
             let i = i + 1;

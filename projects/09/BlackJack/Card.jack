@@ -10,7 +10,7 @@ class Card
 
 class Card {
     field String suit;
-    field String value;
+    field String valueName;
     field int locationX;
     field int locationY;
     field Suit suitObj;
@@ -18,9 +18,9 @@ class Card {
     field DrawSuit suitDrawing;
     field Boolean hidden;
 
-    constructor Card new(String suitName, String valueName, Suit suitObjArg, CardValue cardValueArg){
+    constructor Card new(String suitName, String value, Suit suitObjArg, CardValue cardValueArg){
         let suit = suitName;
-        let value = valueName;
+        let valueName = value;
         let suitObj = suitObjArg;
         let cardValueObj = cardValueArg;
         let locationX = 0;
@@ -28,6 +28,10 @@ class Card {
         let hidden = false;
         return this;
     }
+
+    method CardValue getCardValueObj(){
+        return cardValueObj;
+    } 
 
     method void setHidden(boolean newHidden){
         let hidden = newHidden;
@@ -45,7 +49,7 @@ class Card {
     }
 
     method String getName(){
-        return value;
+        return valueName;
     }
     
     method String getSuit(){
@@ -53,43 +57,43 @@ class Card {
     }
     
     method int getValue(){
-        if(value = cardValueObj.getDeuce()){
+        if(valueName = cardValueObj.getDeuce()){
             return 2;
         }
-        if(value = cardValueObj.getThree()){
+        if(valueName = cardValueObj.getThree()){
             return 3;
         }
-        if(value = cardValueObj.getFour()){
+        if(valueName = cardValueObj.getFour()){
             return 4;
         }
-        if(value = cardValueObj.getFive()){
+        if(valueName = cardValueObj.getFive()){
             return 5;
         }
-        if(value = cardValueObj.getSix()){
+        if(valueName = cardValueObj.getSix()){
             return 6;
         }
-        if(value = cardValueObj.getSeven()){
+        if(valueName = cardValueObj.getSeven()){
             return 7;
         }
-        if(value = cardValueObj.getEight()){
+        if(valueName = cardValueObj.getEight()){
             return 8;
         }
-        if(value = cardValueObj.getNine()){
+        if(valueName = cardValueObj.getNine()){
             return 9;
         }
-        if(value = cardValueObj.getTen()){
+        if(valueName = cardValueObj.getTen()){
             return 10;
         }
-        if(value = cardValueObj.getJack()){
+        if(valueName = cardValueObj.getJack()){
             return 10;
         }
-        if(value = cardValueObj.getQueen()){
+        if(valueName = cardValueObj.getQueen()){
             return 10;
         }
-        if(value = cardValueObj.getKing()){
+        if(valueName = cardValueObj.getKing()){
             return 10;
         }
-        if(value = cardValueObj.getAce()){
+        if(valueName = cardValueObj.getAce()){
             return 1;
         }
         return 0;
@@ -98,43 +102,43 @@ class Card {
     method void renderValue(int x, int y){
         var int base;
         let base = x + y + 705;
-        if(value = cardValueObj.getDeuce()){
+        if(valueName = cardValueObj.getDeuce()){
             do suitDrawing.deuce(base);
         }
-        if(value = cardValueObj.getThree()){
+        if(valueName = cardValueObj.getThree()){
             do suitDrawing.three(base);
         }
-        if(value = cardValueObj.getFour()){
+        if(valueName = cardValueObj.getFour()){
             do suitDrawing.four(base);
         }
-        if(value = cardValueObj.getFive()){
+        if(valueName = cardValueObj.getFive()){
             do suitDrawing.five(base);
         }
-        if(value = cardValueObj.getSix()){
+        if(valueName = cardValueObj.getSix()){
             do suitDrawing.six(base);
         }
-        if(value = cardValueObj.getSeven()){
+        if(valueName = cardValueObj.getSeven()){
             do suitDrawing.seven(base);
         }
-        if(value = cardValueObj.getEight()){
+        if(valueName = cardValueObj.getEight()){
             do suitDrawing.eight(base);
         }
-        if(value = cardValueObj.getNine()){
+        if(valueName = cardValueObj.getNine()){
             do suitDrawing.nine(base);
         }
-        if(value = cardValueObj.getTen()){
+        if(valueName = cardValueObj.getTen()){
             do suitDrawing.ten(base);
         }
-        if(value = cardValueObj.getJack()){
+        if(valueName = cardValueObj.getJack()){
             do suitDrawing.jack(base);
         }
-        if(value = cardValueObj.getQueen()){
+        if(valueName = cardValueObj.getQueen()){
             do suitDrawing.queen(base);
         }
-        if(value = cardValueObj.getKing()){
+        if(valueName = cardValueObj.getKing()){
             do suitDrawing.king(base);
         }
-        if(value = cardValueObj.getAce()){
+        if(valueName = cardValueObj.getAce()){
             do suitDrawing.ace(base);
         }
         return;

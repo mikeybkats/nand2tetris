@@ -18,6 +18,11 @@ push constant 0
 pop this 7
 push pointer 0
 return
+function Card.getCardValueObj 0
+push argument 0
+pop pointer 0
+push this 5
+return
 function Card.setHidden 0
 push argument 0
 pop pointer 0
