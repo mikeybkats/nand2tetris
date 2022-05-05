@@ -64,32 +64,6 @@ class Deck {
         return this;
     }
 
-	// const linearRandomGenerator = (x0, a, b, m, n) => {
-    // x0=seed; a=multiplier; b=increment; m=modulus; n=desired array length; 
-    // method Array generateRandom(int seed, int multiplier, int increment, int modulus, int length){
-    //     // const results = []
-    //     var Array results;
-    //     var int i;
-    //     var int seedResult;
-    //     var int preSeedResult;
-
-    //     // for (let i = 0; i < n; i++) {
-    //     while(i < length){
-    //         // x0 = (a * x0 + b) % m
-    //         let preSeedResult = (multiplier * seed) + increment;
-    //         let seedResult = preSeedResult / modulus;
-
-    //         // if it's not an even fraction
-    //         if(~(preSeedResult * modulus = seedResult)){
-    //             // set seedResult equal to the remainder
-    //             let seedResult = preSeedResult - (modulus * seedResult);
-    //         }
-    //         let results[i] = seedResult;
-    //         let i = i + 1;
-    //     }
-    //     return results;
-    // }
-
     method Card popCard(int index){
         var Card card;
         let card = deck[index];
@@ -101,13 +75,16 @@ class Deck {
     method Card getRandomCard(int randomizer){
         var int randomNumber;
         var Card card;
+        var int count;
 
-        do Random.setSeed(randomizer);
-        let randomNumber = Random.randRange(52);
         let card = null;
+        let count = 0;
+        do Random.setSeed(randomizer + count + Random.rand());
 
         while(card = null){
-            let card = popCard(randomNumber);
+            let randomNumber = Random.randRange(52);
+            let card = popCard(randomNumber + count);
+            let count = count + 1;
         }
 
         return card;

@@ -77,7 +77,7 @@ class BlackJack {
     }
 
     method void start(){
-        do promptPlayerStart("Welcome to Black Jack. Press spacebar to start.", 32, 0);
+        do promptPlayerStart("Welcome to Black Jack. Press spacebar to start.", 32, 0, 0);
         return;
     }
 
@@ -90,14 +90,17 @@ class BlackJack {
         let cardSuit = cardSuitObj.getSpades();
         let cardVal = CardValue.new();
         let playerCards[0] = Card.new(cardSuit, cardVal.getAce(), cardSuitObj, cardVal);
-        let playerCards[1] = Card.new(cardSuit, cardVal.getKing(), cardSuitObj, cardVal);
+        let playerCards[1] = Card.new(cardSuit, cardVal.getNine(), cardSuitObj, cardVal);
+        let playerCards[2] = Card.new(cardSuit, cardVal.getAce(), cardSuitObj, cardVal);
         return;
     }
 
-    method PromptData promptPlayerStart(String message, int keyCode, int escKeyCode) {
+    method PromptData promptPlayerStart(String message, int keyCode, int escKeyCode, int shiftX) {
 
         var PromptData userInput;
         do prompt.setMessage(message);
+        do prompt.setOffsetY(10);
+        do prompt.shiftOffset(shiftX, 0);
 
         let userInput = prompt.promptUser();
         let randomizer = userInput.getElapsedTime();
@@ -107,15 +110,18 @@ class BlackJack {
             let userInput = prompt.promptUser();
         }
 
+        do prompt.setOffsetX(10);
+
         if (userInput.getKeyCode() = keyCode) {
             do prompt.eraseScreen();
             let gameActive = 1;
 
             // first deal cards to player
-            do dealCard(playerCards, randomizer);
-            do dealCard(playerCards, randomizer + 3);
+            // do testBlackJack();
+            do dealCard(playerCards, randomizer + 1);
+            do dealCard(playerCards, randomizer + 2);
+            do dealCard(dealerCards, randomizer + 3);
             do dealCard(dealerCards, randomizer + 4);
-            do dealCard(dealerCards, randomizer + 2);
 
             do gameLoop();
 
@@ -131,18 +137,15 @@ class BlackJack {
         var int userInputKeyCode;
         let userInputKeyCode = 0;
 
-        do prompt.setMessage("Would you like to draw another card?");
-        do prompt.printMessage();
-
-        do prompt.shiftOffset(0, 1);
-        do prompt.setMessage("press y for yes. press n for no.");
+        do prompt.shiftOffset(2, 0);
+        do prompt.setMessage("Would you like to draw another card? (y/n)");
         let userInput = prompt.promptUser();
-        do prompt.shiftOffset(0, -1);
         
         let userInputKeyCode = userInput.getKeyCode();
         do Sys.wait(300);
 
         if (userInputKeyCode = 89){
+            do prompt.shiftOffset(-2, 0);
             do dealCard(playerCards, userInput.getElapsedTime());
 
             return true;
@@ -150,6 +153,7 @@ class BlackJack {
             do Sys.wait(250);
         }
 
+        do prompt.shiftOffset(-2, 0);
         return false;
     }
 
@@ -194,8 +198,10 @@ class BlackJack {
     }
 
     method void dealFirstHand(){
+        do prompt.shiftOffset(14, 0);
         do prompt.setMessage("Dealing cards...");
         do prompt.printMessage();
+        do prompt.shiftOffset(-14, 0);
 
         do Sys.wait(1000);
         do printCard(playerCards[0], 200, 5, 0);
@@ -230,7 +236,7 @@ class BlackJack {
 
     method void endGame(){
         do prompt.eraseScreen();
-        do prompt.shiftOffset(6, -2);
+        do prompt.shiftOffset(10, -2);
         do prompt.setMessage("Thank you for playing!");
         do prompt.printMessage();
 
@@ -245,8 +251,7 @@ class BlackJack {
         
         do resetGame();
 
-        do prompt.shiftOffset(6, 3);
-        let startGame = promptPlayerStart("Would you like to play again? (y/n)", 89, 78);
+        let startGame = promptPlayerStart("Would you like to play again? (y/n)", 89, 78, 6);
 
         if(startGame.getKeyCode() = 78){
             do endGame();
@@ -301,9 +306,9 @@ class BlackJack {
 
     method void dealerDealsTheirHand(int dealerCount){
         do dealCard(dealerCards, 3 + dealerCount);
-        do printHand(dealerCards, 10, 5);
         do score.setDealer(dealerCards);
         do score.print();
+        do printHand(dealerCards, 10, 5);
         do Sys.wait(2000);
         return;
     }
@@ -326,8 +331,10 @@ class BlackJack {
 
             // if over 21 player bust
             if(score.getPlayerScore() > 21){
+                do prompt.shiftOffset(9,0);
                 do prompt.setMessage("Busted. You have lost.");
                 do prompt.printMessage();
+                do prompt.shiftOffset(-9, 0);
                 let gameActive = 0;
                 let hitPlayer = false;
 
@@ -347,35 +354,46 @@ class BlackJack {
                 if(score.getPlayerScore() = 21){
                     // if black jack player always wins
                     if(isBlackJack(playerCards) = true){
+                        let gameActive = 0;
                         do Sys.wait(2000);
                         return;
                     }
 
+                    do prompt.shiftOffset(12, 0);
                     do prompt.setMessage("21, Good job.");
                     do prompt.printMessage();
+                    do prompt.shiftOffset(-12, 0);
                     do Sys.wait(2000);
                 }
 
                 // dealer draws cards if their score is under 18
                 while((score.getDealerScore() < 18) | ( (score.getPlayerScore() = 21) & (score.getDealerScore() < 22) ) ){
+                    do prompt.shiftOffset(12, 0);
                     do prompt.setMessage("Dealer draws...");
                     do prompt.printMessage();
                     do dealerDealsTheirHand(dealerCount);
+                    do prompt.shiftOffset(-8, 0);
                     let dealerCount = dealerCount + 1;
                 }
 
                 if(score.getDealerScore() > 21){
+                    do prompt.shiftOffset(8, 0);
                     do prompt.setMessage("Dealer busts! You win!");
                     do prompt.printMessage();
+                    do prompt.shiftOffset(-8,0);
+                    let gameActive = 0;
+
                     do Sys.wait(2000);
                     return;
                 } 
                 if((score.getPlayerScore() > score.getDealerScore()) & ~(score.getPlayerScore() > 21)){
+                    do prompt.shiftOffset(8, 0);
                     do prompt.setMessage("You have beat the dealer.");
                     do prompt.printMessage();
-                    do prompt.shiftOffset(0, 2);
+                    do prompt.shiftOffset(8, 2);
                     do prompt.setMessage("You win.");
                     do prompt.printMessage();
+                    do prompt.shiftOffset(-8, 2);
                     let gameActive = 0;
 
                     do Sys.wait(4000);
@@ -383,18 +401,22 @@ class BlackJack {
                 }
 
                 if(score.getPlayerScore() = score.getDealerScore()){
+                    do prompt.shiftOffset(8, 0);
                     do prompt.setMessage("It's a tie.");
                     do prompt.printMessage();
+                    do prompt.shiftOffset(-8, 0);
                     let gameActive = 0;
 
                     do Sys.wait(2000);
                     return;
                 }
                 else {
+                    do prompt.shiftOffset(8, 0);
                     do prompt.setMessage("The Dealer wins.");
                     do prompt.printMessage();
-                    do prompt.shiftOffset(0, 2);
+                    do prompt.shiftOffset(6, 2);
                     do prompt.setMessage("You lose.");
+                    do prompt.shiftOffset(-8, 0);
                     do prompt.printMessage();
                     let gameActive = 0;
 

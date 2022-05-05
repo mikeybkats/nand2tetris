@@ -155,6 +155,10 @@ if-goto WHILE_END1
 push local 1
 push constant 11
 lt
+push local 0
+push constant 0
+eq
+and
 if-goto IF_TRUE1
 goto IF_FALSE1
 label IF_TRUE1

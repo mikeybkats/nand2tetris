@@ -125,7 +125,8 @@ push constant 46
 call String.appendChar 2
 push constant 32
 push constant 0
-call BlackJack.promptPlayerStart 4
+push constant 0
+call BlackJack.promptPlayerStart 5
 pop temp 0
 push constant 0
 return
@@ -157,7 +158,20 @@ push this 5
 add
 push local 1
 push local 2
-call CardValue.getKing 1
+call CardValue.getNine 1
+push local 0
+push local 2
+call Card.new 4
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 2
+push this 5
+add
+push local 1
+push local 2
+call CardValue.getAce 1
 push local 0
 push local 2
 call Card.new 4
@@ -173,6 +187,15 @@ pop pointer 0
 push this 0
 push argument 1
 call Prompt.setMessage 2
+pop temp 0
+push this 0
+push constant 10
+call Prompt.setOffsetY 2
+pop temp 0
+push this 0
+push argument 4
+push constant 0
+call Prompt.shiftOffset 3
 pop temp 0
 push this 0
 call Prompt.promptUser 1
@@ -202,6 +225,10 @@ call Prompt.promptUser 1
 pop local 0
 goto WHILE_EXP0
 label WHILE_END0
+push this 0
+push constant 10
+call Prompt.setOffsetX 2
+pop temp 0
 push local 0
 call PromptData.getKeyCode 1
 push argument 2
@@ -217,10 +244,19 @@ pop this 2
 push pointer 0
 push this 5
 push this 7
+push constant 1
+add
 call BlackJack.dealCard 3
 pop temp 0
 push pointer 0
 push this 5
+push this 7
+push constant 2
+add
+call BlackJack.dealCard 3
+pop temp 0
+push pointer 0
+push this 6
 push this 7
 push constant 3
 add
@@ -230,13 +266,6 @@ push pointer 0
 push this 6
 push this 7
 push constant 4
-add
-call BlackJack.dealCard 3
-pop temp 0
-push pointer 0
-push this 6
-push this 7
-push constant 2
 add
 call BlackJack.dealCard 3
 pop temp 0
@@ -255,7 +284,12 @@ pop pointer 0
 push constant 0
 pop local 1
 push this 0
-push constant 36
+push constant 2
+push constant 0
+call Prompt.shiftOffset 3
+pop temp 0
+push this 0
+push constant 42
 call String.new 1
 push constant 87
 call String.appendChar 2
@@ -329,94 +363,23 @@ push constant 100
 call String.appendChar 2
 push constant 63
 call String.appendChar 2
-call Prompt.setMessage 2
-pop temp 0
-push this 0
-call Prompt.printMessage 1
-pop temp 0
-push this 0
-push constant 0
-push constant 1
-call Prompt.shiftOffset 3
-pop temp 0
-push this 0
 push constant 32
-call String.new 1
-push constant 112
 call String.appendChar 2
-push constant 114
-call String.appendChar 2
-push constant 101
-call String.appendChar 2
-push constant 115
-call String.appendChar 2
-push constant 115
-call String.appendChar 2
-push constant 32
+push constant 40
 call String.appendChar 2
 push constant 121
 call String.appendChar 2
-push constant 32
-call String.appendChar 2
-push constant 102
-call String.appendChar 2
-push constant 111
-call String.appendChar 2
-push constant 114
-call String.appendChar 2
-push constant 32
-call String.appendChar 2
-push constant 121
-call String.appendChar 2
-push constant 101
-call String.appendChar 2
-push constant 115
-call String.appendChar 2
-push constant 46
-call String.appendChar 2
-push constant 32
-call String.appendChar 2
-push constant 112
-call String.appendChar 2
-push constant 114
-call String.appendChar 2
-push constant 101
-call String.appendChar 2
-push constant 115
-call String.appendChar 2
-push constant 115
-call String.appendChar 2
-push constant 32
+push constant 47
 call String.appendChar 2
 push constant 110
 call String.appendChar 2
-push constant 32
-call String.appendChar 2
-push constant 102
-call String.appendChar 2
-push constant 111
-call String.appendChar 2
-push constant 114
-call String.appendChar 2
-push constant 32
-call String.appendChar 2
-push constant 110
-call String.appendChar 2
-push constant 111
-call String.appendChar 2
-push constant 46
+push constant 41
 call String.appendChar 2
 call Prompt.setMessage 2
 pop temp 0
 push this 0
 call Prompt.promptUser 1
 pop local 0
-push this 0
-push constant 0
-push constant 1
-neg
-call Prompt.shiftOffset 3
-pop temp 0
 push local 0
 call PromptData.getKeyCode 1
 pop local 1
@@ -429,6 +392,12 @@ eq
 if-goto IF_TRUE0
 goto IF_FALSE0
 label IF_TRUE0
+push this 0
+push constant 2
+neg
+push constant 0
+call Prompt.shiftOffset 3
+pop temp 0
 push pointer 0
 push this 5
 push local 0
@@ -444,6 +413,12 @@ push constant 250
 call Sys.wait 1
 pop temp 0
 label IF_END0
+push this 0
+push constant 2
+neg
+push constant 0
+call Prompt.shiftOffset 3
+pop temp 0
 push constant 0
 return
 function BlackJack.loadNewDeck 0
@@ -550,6 +525,11 @@ function BlackJack.dealFirstHand 0
 push argument 0
 pop pointer 0
 push this 0
+push constant 14
+push constant 0
+call Prompt.shiftOffset 3
+pop temp 0
+push this 0
 push constant 16
 call String.new 1
 push constant 68
@@ -588,6 +568,12 @@ call Prompt.setMessage 2
 pop temp 0
 push this 0
 call Prompt.printMessage 1
+pop temp 0
+push this 0
+push constant 14
+neg
+push constant 0
+call Prompt.shiftOffset 3
 pop temp 0
 push constant 1000
 call Sys.wait 1
@@ -697,7 +683,7 @@ push this 0
 call Prompt.eraseScreen 1
 pop temp 0
 push this 0
-push constant 6
+push constant 10
 push constant 2
 neg
 call Prompt.shiftOffset 3
@@ -840,11 +826,6 @@ pop pointer 0
 push pointer 0
 call BlackJack.resetGame 1
 pop temp 0
-push this 0
-push constant 6
-push constant 3
-call Prompt.shiftOffset 3
-pop temp 0
 push pointer 0
 push constant 35
 call String.new 1
@@ -920,7 +901,8 @@ push constant 41
 call String.appendChar 2
 push constant 89
 push constant 78
-call BlackJack.promptPlayerStart 4
+push constant 6
+call BlackJack.promptPlayerStart 5
 pop local 0
 push local 0
 call PromptData.getKeyCode 1
@@ -1133,18 +1115,18 @@ push argument 1
 add
 call BlackJack.dealCard 3
 pop temp 0
-push pointer 0
-push this 6
-push constant 10
-push constant 5
-call BlackJack.printHand 4
-pop temp 0
 push this 4
 push this 6
 call Score.setDealer 2
 pop temp 0
 push this 4
 call Score.print 1
+pop temp 0
+push pointer 0
+push this 6
+push constant 10
+push constant 5
+call BlackJack.printHand 4
 pop temp 0
 push constant 2000
 call Sys.wait 1
@@ -1193,6 +1175,11 @@ gt
 if-goto IF_TRUE0
 goto IF_FALSE0
 label IF_TRUE0
+push this 0
+push constant 9
+push constant 0
+call Prompt.shiftOffset 3
+pop temp 0
 push this 0
 push constant 22
 call String.new 1
@@ -1245,6 +1232,12 @@ pop temp 0
 push this 0
 call Prompt.printMessage 1
 pop temp 0
+push this 0
+push constant 9
+neg
+push constant 0
+call Prompt.shiftOffset 3
+pop temp 0
 push constant 0
 pop this 2
 push constant 0
@@ -1290,12 +1283,19 @@ eq
 if-goto IF_TRUE3
 goto IF_FALSE3
 label IF_TRUE3
+push constant 0
+pop this 2
 push constant 2000
 call Sys.wait 1
 pop temp 0
 push constant 0
 return
 label IF_FALSE3
+push this 0
+push constant 12
+push constant 0
+call Prompt.shiftOffset 3
+pop temp 0
 push this 0
 push constant 13
 call String.new 1
@@ -1330,6 +1330,12 @@ pop temp 0
 push this 0
 call Prompt.printMessage 1
 pop temp 0
+push this 0
+push constant 12
+neg
+push constant 0
+call Prompt.shiftOffset 3
+pop temp 0
 push constant 2000
 call Sys.wait 1
 pop temp 0
@@ -1351,6 +1357,11 @@ and
 or
 not
 if-goto WHILE_END1
+push this 0
+push constant 12
+push constant 0
+call Prompt.shiftOffset 3
+pop temp 0
 push this 0
 push constant 15
 call String.new 1
@@ -1393,6 +1404,12 @@ push pointer 0
 push local 1
 call BlackJack.dealerDealsTheirHand 2
 pop temp 0
+push this 0
+push constant 8
+neg
+push constant 0
+call Prompt.shiftOffset 3
+pop temp 0
 push local 1
 push constant 1
 add
@@ -1406,6 +1423,11 @@ gt
 if-goto IF_TRUE4
 goto IF_FALSE4
 label IF_TRUE4
+push this 0
+push constant 8
+push constant 0
+call Prompt.shiftOffset 3
+pop temp 0
 push this 0
 push constant 22
 call String.new 1
@@ -1458,6 +1480,14 @@ pop temp 0
 push this 0
 call Prompt.printMessage 1
 pop temp 0
+push this 0
+push constant 8
+neg
+push constant 0
+call Prompt.shiftOffset 3
+pop temp 0
+push constant 0
+pop this 2
 push constant 2000
 call Sys.wait 1
 pop temp 0
@@ -1478,6 +1508,11 @@ and
 if-goto IF_TRUE5
 goto IF_FALSE5
 label IF_TRUE5
+push this 0
+push constant 8
+push constant 0
+call Prompt.shiftOffset 3
+pop temp 0
 push this 0
 push constant 25
 call String.new 1
@@ -1537,7 +1572,7 @@ push this 0
 call Prompt.printMessage 1
 pop temp 0
 push this 0
-push constant 0
+push constant 8
 push constant 2
 call Prompt.shiftOffset 3
 pop temp 0
@@ -1565,6 +1600,12 @@ pop temp 0
 push this 0
 call Prompt.printMessage 1
 pop temp 0
+push this 0
+push constant 8
+neg
+push constant 2
+call Prompt.shiftOffset 3
+pop temp 0
 push constant 0
 pop this 2
 push constant 4000
@@ -1581,6 +1622,11 @@ eq
 if-goto IF_TRUE6
 goto IF_FALSE6
 label IF_TRUE6
+push this 0
+push constant 8
+push constant 0
+call Prompt.shiftOffset 3
+pop temp 0
 push this 0
 push constant 11
 call String.new 1
@@ -1611,6 +1657,12 @@ pop temp 0
 push this 0
 call Prompt.printMessage 1
 pop temp 0
+push this 0
+push constant 8
+neg
+push constant 0
+call Prompt.shiftOffset 3
+pop temp 0
 push constant 0
 pop this 2
 push constant 2000
@@ -1620,6 +1672,11 @@ push constant 0
 return
 goto IF_END6
 label IF_FALSE6
+push this 0
+push constant 8
+push constant 0
+call Prompt.shiftOffset 3
+pop temp 0
 push this 0
 push constant 16
 call String.new 1
@@ -1661,7 +1718,7 @@ push this 0
 call Prompt.printMessage 1
 pop temp 0
 push this 0
-push constant 0
+push constant 6
 push constant 2
 call Prompt.shiftOffset 3
 pop temp 0
@@ -1687,6 +1744,12 @@ call String.appendChar 2
 push constant 46
 call String.appendChar 2
 call Prompt.setMessage 2
+pop temp 0
+push this 0
+push constant 8
+neg
+push constant 0
+call Prompt.shiftOffset 3
 pop temp 0
 push this 0
 call Prompt.printMessage 1

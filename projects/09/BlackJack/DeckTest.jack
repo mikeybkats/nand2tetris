@@ -1,0 +1,48 @@
+class DeckTest {
+    field Deck deck;
+
+    constructor DeckTest new(){
+        let deck = Deck.new();
+        return this;
+    }
+
+    method void testGetRandomCard(){
+        var Card card1;
+        var Card card2;
+        var Card card3;
+        var Card card4;
+
+        do Output.moveCursor(8, 20);
+        do Output.printString("deck test");
+
+        let card1 = deck.getRandomCard(11);
+
+        let card2 = deck.getRandomCard(11);
+        do Output.moveCursor(4, 50);
+
+        let card3 = deck.getRandomCard(11);
+        let card4 = deck.getRandomCard(11);
+
+        do Output.moveCursor(10, 20);
+        do Output.printString(card1.getName());
+        do Output.moveCursor(11, 20);
+        do Output.printString(card1.getSuit());
+
+        do Output.moveCursor(13, 20);
+        do Output.printString(card2.getName());
+        do Output.moveCursor(14, 20);
+        do Output.printString(card2.getSuit());
+
+        do Output.moveCursor(16, 20);
+        do Output.printString(card3.getName());
+        do Output.moveCursor(17, 20);
+        do Output.printString(card3.getSuit());
+
+        do Output.moveCursor(19, 20);
+        do Output.printString(card4.getName());
+        do Output.moveCursor(20, 20);
+        do Output.printString(card4.getSuit());
+
+        return;
+    }
+}

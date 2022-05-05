@@ -1,9 +1,13 @@
 class Main {
     function void main() {
+        // var DeckTest deckTest;
+        // let deckTest = DeckTest.new();
+        // do deckTest.testGetRandomCard();
+
         var BlackJack game;
         let game = BlackJack.new();
         do game.start();
-
         return;
     }
+
 }

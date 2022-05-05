@@ -29,6 +29,11 @@ class Card {
         return this;
     }
 
+    method void dispose(){
+        do Memory.deAlloc(this);
+        return;
+    }
+
     method CardValue getCardValueObj(){
         return cardValueObj;
     } 
