@@ -159,6 +159,10 @@ push local 0
 push constant 0
 eq
 and
+push local 3
+push constant 1
+eq
+and
 if-goto IF_TRUE1
 goto IF_FALSE1
 label IF_TRUE1

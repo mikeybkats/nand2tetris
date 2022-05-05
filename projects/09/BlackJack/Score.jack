@@ -46,7 +46,7 @@ class Score {
 
         while(i < aces){
             // if there is one ace. and score is 10 or below let first ace = 11
-            if((scoreTally < 11) & (i = 0)){
+            if((scoreTally < 11) & (i = 0) & (aces = 1)){
                 let acesTally = 11;
             } 
             else {

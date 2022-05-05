@@ -189,10 +189,6 @@ push argument 1
 call Prompt.setMessage 2
 pop temp 0
 push this 0
-push constant 10
-call Prompt.setOffsetY 2
-pop temp 0
-push this 0
 push argument 4
 push constant 0
 call Prompt.shiftOffset 3
@@ -656,7 +652,7 @@ push constant 8
 call Prompt.setOffsetX 2
 pop temp 0
 push this 0
-push constant 6
+push constant 10
 call Prompt.setOffsetY 2
 pop temp 0
 call Deck.new 0
@@ -1019,7 +1015,13 @@ if-goto IF_TRUE0
 goto IF_FALSE0
 label IF_TRUE0
 push this 0
-push constant 21
+push constant 11
+push constant 2
+neg
+call Prompt.shiftOffset 3
+pop temp 0
+push this 0
+push constant 20
 call String.new 1
 push constant 66
 call String.appendChar 2
@@ -1041,41 +1043,10 @@ push constant 99
 call String.appendChar 2
 push constant 107
 call String.appendChar 2
-push constant 44
+push constant 33
 call String.appendChar 2
 push constant 32
 call String.appendChar 2
-push constant 71
-call String.appendChar 2
-push constant 111
-call String.appendChar 2
-push constant 111
-call String.appendChar 2
-push constant 100
-call String.appendChar 2
-push constant 32
-call String.appendChar 2
-push constant 106
-call String.appendChar 2
-push constant 111
-call String.appendChar 2
-push constant 98
-call String.appendChar 2
-push constant 46
-call String.appendChar 2
-call Prompt.setMessage 2
-pop temp 0
-push this 0
-call Prompt.printMessage 1
-pop temp 0
-push this 0
-push constant 0
-push constant 2
-call Prompt.shiftOffset 3
-pop temp 0
-push this 0
-push constant 8
-call String.new 1
 push constant 89
 call String.appendChar 2
 push constant 111
@@ -1096,6 +1067,12 @@ call Prompt.setMessage 2
 pop temp 0
 push this 0
 call Prompt.printMessage 1
+pop temp 0
+push this 0
+push constant 11
+neg
+push constant 2
+call Prompt.shiftOffset 3
 pop temp 0
 push constant 0
 pop this 2
@@ -1176,8 +1153,9 @@ if-goto IF_TRUE0
 goto IF_FALSE0
 label IF_TRUE0
 push this 0
-push constant 9
-push constant 0
+push constant 10
+push constant 2
+neg
 call Prompt.shiftOffset 3
 pop temp 0
 push this 0
@@ -1233,9 +1211,9 @@ push this 0
 call Prompt.printMessage 1
 pop temp 0
 push this 0
-push constant 9
+push constant 10
 neg
-push constant 0
+push constant 2
 call Prompt.shiftOffset 3
 pop temp 0
 push constant 0
@@ -1405,7 +1383,7 @@ push local 1
 call BlackJack.dealerDealsTheirHand 2
 pop temp 0
 push this 0
-push constant 8
+push constant 12
 neg
 push constant 0
 call Prompt.shiftOffset 3
@@ -1424,8 +1402,9 @@ if-goto IF_TRUE4
 goto IF_FALSE4
 label IF_TRUE4
 push this 0
-push constant 8
-push constant 0
+push constant 10
+push constant 2
+neg
 call Prompt.shiftOffset 3
 pop temp 0
 push this 0
@@ -1481,9 +1460,9 @@ push this 0
 call Prompt.printMessage 1
 pop temp 0
 push this 0
-push constant 8
+push constant 10
 neg
-push constant 0
+push constant 2
 call Prompt.shiftOffset 3
 pop temp 0
 push constant 0
@@ -1509,71 +1488,9 @@ if-goto IF_TRUE5
 goto IF_FALSE5
 label IF_TRUE5
 push this 0
-push constant 8
-push constant 0
-call Prompt.shiftOffset 3
-pop temp 0
-push this 0
-push constant 25
-call String.new 1
-push constant 89
-call String.appendChar 2
-push constant 111
-call String.appendChar 2
-push constant 117
-call String.appendChar 2
-push constant 32
-call String.appendChar 2
-push constant 104
-call String.appendChar 2
-push constant 97
-call String.appendChar 2
-push constant 118
-call String.appendChar 2
-push constant 101
-call String.appendChar 2
-push constant 32
-call String.appendChar 2
-push constant 98
-call String.appendChar 2
-push constant 101
-call String.appendChar 2
-push constant 97
-call String.appendChar 2
-push constant 116
-call String.appendChar 2
-push constant 32
-call String.appendChar 2
-push constant 116
-call String.appendChar 2
-push constant 104
-call String.appendChar 2
-push constant 101
-call String.appendChar 2
-push constant 32
-call String.appendChar 2
-push constant 100
-call String.appendChar 2
-push constant 101
-call String.appendChar 2
-push constant 97
-call String.appendChar 2
-push constant 108
-call String.appendChar 2
-push constant 101
-call String.appendChar 2
-push constant 114
-call String.appendChar 2
-push constant 46
-call String.appendChar 2
-call Prompt.setMessage 2
-pop temp 0
-push this 0
-call Prompt.printMessage 1
-pop temp 0
-push this 0
-push constant 8
+push constant 16
 push constant 2
+neg
 call Prompt.shiftOffset 3
 pop temp 0
 push this 0
@@ -1601,9 +1518,10 @@ push this 0
 call Prompt.printMessage 1
 pop temp 0
 push this 0
-push constant 8
+push constant 16
 neg
-push constant 2
+push constant 0
+neg
 call Prompt.shiftOffset 3
 pop temp 0
 push constant 0
@@ -1623,8 +1541,9 @@ if-goto IF_TRUE6
 goto IF_FALSE6
 label IF_TRUE6
 push this 0
-push constant 8
-push constant 0
+push constant 12
+push constant 2
+neg
 call Prompt.shiftOffset 3
 pop temp 0
 push this 0
@@ -1658,9 +1577,9 @@ push this 0
 call Prompt.printMessage 1
 pop temp 0
 push this 0
-push constant 8
+push constant 12
 neg
-push constant 0
+push constant 2
 call Prompt.shiftOffset 3
 pop temp 0
 push constant 0
@@ -1673,8 +1592,9 @@ return
 goto IF_END6
 label IF_FALSE6
 push this 0
-push constant 8
-push constant 0
+push constant 12
+push constant 2
+neg
 call Prompt.shiftOffset 3
 pop temp 0
 push this 0
@@ -1718,41 +1638,10 @@ push this 0
 call Prompt.printMessage 1
 pop temp 0
 push this 0
-push constant 6
+push constant 12
+neg
 push constant 2
 call Prompt.shiftOffset 3
-pop temp 0
-push this 0
-push constant 9
-call String.new 1
-push constant 89
-call String.appendChar 2
-push constant 111
-call String.appendChar 2
-push constant 117
-call String.appendChar 2
-push constant 32
-call String.appendChar 2
-push constant 108
-call String.appendChar 2
-push constant 111
-call String.appendChar 2
-push constant 115
-call String.appendChar 2
-push constant 101
-call String.appendChar 2
-push constant 46
-call String.appendChar 2
-call Prompt.setMessage 2
-pop temp 0
-push this 0
-push constant 8
-neg
-push constant 0
-call Prompt.shiftOffset 3
-pop temp 0
-push this 0
-call Prompt.printMessage 1
 pop temp 0
 push constant 0
 pop this 2

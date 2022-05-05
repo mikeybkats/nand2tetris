@@ -99,7 +99,6 @@ class BlackJack {
 
         var PromptData userInput;
         do prompt.setMessage(message);
-        do prompt.setOffsetY(10);
         do prompt.shiftOffset(shiftX, 0);
 
         let userInput = prompt.promptUser();
@@ -223,7 +222,7 @@ class BlackJack {
         do dealerCards.dispose();
         do score.dispose();
         do prompt.setOffsetX(8);
-        do prompt.setOffsetY(6);
+        do prompt.setOffsetY(10);
 
         let deck = Deck.new();
         let playerCards = Array.new(9);
@@ -292,11 +291,10 @@ class BlackJack {
 
     method Boolean isBlackJack(Array hand){
         if( (isAce(hand[0]) & isRoyalCard(hand[1])) | (isAce(hand[1]) & isRoyalCard(hand[0])) ){
-            do prompt.setMessage("Black Jack, Good job.");
+            do prompt.shiftOffset(11, -2);
+            do prompt.setMessage("Black Jack! You win.");
             do prompt.printMessage();
-            do prompt.shiftOffset(0, 2);
-            do prompt.setMessage("You win.");
-            do prompt.printMessage();
+            do prompt.shiftOffset(-11, 2);
             let gameActive = 0;
 
             return true;
@@ -331,10 +329,10 @@ class BlackJack {
 
             // if over 21 player bust
             if(score.getPlayerScore() > 21){
-                do prompt.shiftOffset(9,0);
+                do prompt.shiftOffset(10,-2);
                 do prompt.setMessage("Busted. You have lost.");
                 do prompt.printMessage();
-                do prompt.shiftOffset(-9, 0);
+                do prompt.shiftOffset(-10,2);
                 let gameActive = 0;
                 let hitPlayer = false;
 
@@ -372,28 +370,25 @@ class BlackJack {
                     do prompt.setMessage("Dealer draws...");
                     do prompt.printMessage();
                     do dealerDealsTheirHand(dealerCount);
-                    do prompt.shiftOffset(-8, 0);
+                    do prompt.shiftOffset(-12, 0);
                     let dealerCount = dealerCount + 1;
                 }
 
                 if(score.getDealerScore() > 21){
-                    do prompt.shiftOffset(8, 0);
+                    do prompt.shiftOffset(10,-2);
                     do prompt.setMessage("Dealer busts! You win!");
                     do prompt.printMessage();
-                    do prompt.shiftOffset(-8,0);
+                    do prompt.shiftOffset(-10,2);
                     let gameActive = 0;
 
                     do Sys.wait(2000);
                     return;
                 } 
                 if((score.getPlayerScore() > score.getDealerScore()) & ~(score.getPlayerScore() > 21)){
-                    do prompt.shiftOffset(8, 0);
-                    do prompt.setMessage("You have beat the dealer.");
-                    do prompt.printMessage();
-                    do prompt.shiftOffset(8, 2);
+                    do prompt.shiftOffset(16, -2);
                     do prompt.setMessage("You win.");
                     do prompt.printMessage();
-                    do prompt.shiftOffset(-8, 2);
+                    do prompt.shiftOffset(-16, -0);
                     let gameActive = 0;
 
                     do Sys.wait(4000);
@@ -401,23 +396,20 @@ class BlackJack {
                 }
 
                 if(score.getPlayerScore() = score.getDealerScore()){
-                    do prompt.shiftOffset(8, 0);
+                    do prompt.shiftOffset(12, -2);
                     do prompt.setMessage("It's a tie.");
                     do prompt.printMessage();
-                    do prompt.shiftOffset(-8, 0);
+                    do prompt.shiftOffset(-12, 2);
                     let gameActive = 0;
 
                     do Sys.wait(2000);
                     return;
                 }
                 else {
-                    do prompt.shiftOffset(8, 0);
+                    do prompt.shiftOffset(12, -2);
                     do prompt.setMessage("The Dealer wins.");
                     do prompt.printMessage();
-                    do prompt.shiftOffset(6, 2);
-                    do prompt.setMessage("You lose.");
-                    do prompt.shiftOffset(-8, 0);
-                    do prompt.printMessage();
+                    do prompt.shiftOffset(-12, 2);
                     let gameActive = 0;
 
                     do Sys.wait(2000);
