@@ -1,15 +1,14 @@
 /** 
 class Prompt
+
 Prompts the play with a message and asks for input 
 
-field keyPressed: Char - sets a value to which key has been pressed
 field offsetX: int - sets offset for text print max value of 23
 field offsetY: int - sets offset for text print max value of 64
-static message: String - message to print on screen
 
-setMessage(string newMessage) - setter for message
-eraseLine() - erases the line according to the offset value 
-promptUser() - prints the message to screen
+field message: String - message to print on screen
+
+promptUser() - prints the message to screen and asks for user input.
 */
 
 class Prompt {

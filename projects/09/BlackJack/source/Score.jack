@@ -1,3 +1,11 @@
+/**
+class Score
+
+Manages the game score based on the input from player and dealer card arrays. 
+
+method print - Prints the score to screen
+method tallyScore - tallys the score of the input card array
+*/
 class Score {
     field int playerScore;
     field int dealerScore;

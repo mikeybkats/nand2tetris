@@ -1,11 +1,16 @@
 /** 
+card class provides structured data for all the cards required for the game
+
 class Card
     field suit: "clubs" | "diamonds" | "hearts" | "spades"
     field value: "2.. 10" | "jack" | "queen" | "king" | "ace"
     field locationX: int
     field locationY: int
+    field Suit suitObj: the suit object is required for checking strings for the card suit
+    field CardValueObj: the card value object is required for checking strings for the card value deuce to ace
+    field Boolean hidden: hides the card from the game (TODO: implement into game play)
 
-    method renderCard: void
+    method renderCard: void - renders the card to screen
 */
 
 class Card {
