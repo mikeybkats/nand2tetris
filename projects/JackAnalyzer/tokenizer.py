@@ -1,9 +1,15 @@
+import io
+
+
 class JackTokenizer:
     def __init__(self, inputStreamOrFile):
         """
         Opens the input file/stream and gets ready to tokenize it.
         """
-        self._infile = open(inputStreamOrFile, mode='rt', encoding='utf-8')
+        if isinstance(inputStreamOrFile, io.TextIOBase):
+            self._infile = inputStreamOrFile
+        else:
+            self._infile = open(inputStreamOrFile, mode='rt', encoding='utf-8')
         self._currentToken = None
 
     @property
@@ -36,13 +42,19 @@ class JackTokenizer:
 
         token = ""
         tokenFoundOrEnd = False
-        while not tokenFound:
+        while not tokenFoundOrEnd:
             char = file.read(1)
+            if char == "\n":
+                tokenFoundOrEnd = True
+                break
             if char == " ":
                 tokenFoundOrEnd = True
+                break
             if not char:
                 tokenFoundOrEnd = True
-            token = token + char
+                break
+            else:
+                token = token + char
 
         return token
 
@@ -54,14 +66,9 @@ class JackTokenizer:
             None
         """
 
-        # while hasMoreTokens
-        with self._infile as file:
-            while True:
-                token = self.getNextToken(file)
-                self.currentToken = self.getNextToken(line)
-
-            # self._infile.readline()
-            # advance to the next token
+        # if has more tokens
+        if self.hasMoreTokens():
+            self._currentToken = self.getNextToken(self._infile)
         return None
 
     def tokenType(self):

@@ -14,6 +14,30 @@ class TokenizerTest(unittest.TestCase):
     def test_hasMoreTokens(self):
         self.assertEqual(tokenizer.hasMoreTokens(), True)
 
+        testFile = StringIO("""a test
+        file
+        """)
+
+        tokenizer2 = JackTokenizer(inputStreamOrFile=testFile)
+        self.assertEqual(tokenizer2.hasMoreTokens(), True)
+
+        tokenizer2.advance()
+        self.assertEqual("a", tokenizer2.currentToken)
+
+        tokenizer2.advance()
+        self.assertEqual("test", tokenizer2.currentToken)
+
+        tokenizer2.advance()
+        tokenizer2.advance()
+        tokenizer2.advance()
+        tokenizer2.advance()
+        tokenizer2.advance()
+        tokenizer2.advance()
+        tokenizer2.advance()
+        tokenizer2.advance()
+        tokenizer2.advance()
+        self.assertEqual("file", tokenizer2.currentToken)
+
     def test_getNextToken(self):
         testString = "here are some tokens"
         testFile = StringIO(testString)
