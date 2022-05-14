@@ -6,6 +6,10 @@ class JackTokenizer:
         self._infile = open(inputStreamOrFile, mode='rt', encoding='utf-8')
         self._currentToken = None
 
+    @property
+    def currentToken(self):
+        return self._currentToken
+
     def hasMoreTokens(self):
         """
         checks to see if the input contains more tokens
@@ -13,7 +17,34 @@ class JackTokenizer:
         Returns:
             boolean
         """
-        return False
+        currentLocation = self._infile.tell()
+        fileContents = self._infile.read()
+        hasMoreTokens = True if fileContents else False
+        self._infile.seek(currentLocation)
+        return hasMoreTokens
+
+    def getNextToken(self, file):
+        """
+        Reads one char at a time from the file to build the next token. Stops when it sees whitespace. 
+
+        Arg1:
+            FileStream
+
+        Returns:
+            string
+        """
+
+        token = ""
+        tokenFoundOrEnd = False
+        while not tokenFound:
+            char = file.read(1)
+            if char == " ":
+                tokenFoundOrEnd = True
+            if not char:
+                tokenFoundOrEnd = True
+            token = token + char
+
+        return token
 
     def advance(self):
         """
@@ -25,7 +56,10 @@ class JackTokenizer:
 
         # while hasMoreTokens
         with self._infile as file:
-            line = file.readline()
+            while True:
+                token = self.getNextToken(file)
+                self.currentToken = self.getNextToken(line)
+
             # self._infile.readline()
             # advance to the next token
         return None

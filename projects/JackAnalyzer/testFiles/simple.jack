@@ -1,0 +1,13 @@
+class Main {
+    function void main() {
+        var int x;
+        var int y;
+        var int result;
+
+        let x = 10;
+        let y = 10;
+        let result = x + y;
+
+        return;
+    }
+}
