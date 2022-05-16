@@ -1,4 +1,5 @@
 import io
+from tokenTypes import TokenTypeTable, Token_Type
 
 
 class JackTokenizer:
@@ -10,7 +11,8 @@ class JackTokenizer:
             self._infile = inputStreamOrFile
         else:
             self._infile = open(inputStreamOrFile, mode='rt', encoding='utf-8')
-        self._currentToken = None
+        self._currentToken = ""
+        self._tokenTypeTable = TokenTypeTable()
 
     @property
     def currentToken(self):
@@ -42,12 +44,27 @@ class JackTokenizer:
 
         token = ""
         tokenFoundOrEnd = False
+        firstChar = file.read(1)
+
+        # check if the first character is line break or empty space
+        # keep reading until a character is reached
+        while firstChar == " " or firstChar == "\n":
+            firstChar = file.read(1)
+        char = firstChar
+
+        # if the char is a symbol then return the token
+        if self._tokenTypeTable.getTokenType(char) == Token_Type.SYMBOL:
+            return char
+
+        # if the char is not a symbol then build the token word
         while not tokenFoundOrEnd:
-            char = file.read(1)
-            if char == "\n":
+            # if a symbol is reached end the loop
+            if (self._tokenTypeTable.getTokenType(char) == Token_Type.SYMBOL):
+                # decrement the file reader back one space and break so the token can be read the next time the function is called
+                self._infile.seek(prevReadLoc)
                 tokenFoundOrEnd = True
                 break
-            if char == " ":
+            if char == " " or char == "\n":
                 tokenFoundOrEnd = True
                 break
             if not char:
@@ -55,6 +72,8 @@ class JackTokenizer:
                 break
             else:
                 token = token + char
+                prevReadLoc = self._infile.tell()
+                char = file.read(1)
 
         return token
 
@@ -68,8 +87,8 @@ class JackTokenizer:
 
         # if has more tokens
         if self.hasMoreTokens():
+            # get the next token and assign it to current
             self._currentToken = self.getNextToken(self._infile)
-        return None
 
     def tokenType(self):
         """
@@ -78,6 +97,7 @@ class JackTokenizer:
         Returns:
             TOKEN_TYPE enum
         """
+        return self._tokenTypeTable.getTokenType(self._currentToken)
 
     def keyWord(self):
         """
@@ -86,6 +106,8 @@ class JackTokenizer:
         Returns:
             KEYWORD enum
         """
+        if self.tokenType() == Token_Type.KEYWORD:
+            return self._currentToken
 
     def symbol(self):
         """
@@ -94,6 +116,8 @@ class JackTokenizer:
         Returns:
             Char
         """
+        if self.tokenType() == Token_Type.SYMBOL:
+            return self._currentToken
 
     def identifier(self):
         """ 
@@ -102,6 +126,8 @@ class JackTokenizer:
         Returns:
             String
         """
+        if self.tokenType() == Token_Type.IDENTIFIER:
+            return self._currentToken
 
     def intVal(self):
         """ 
@@ -110,6 +136,8 @@ class JackTokenizer:
         Returns:
             Int
         """
+        if self.tokenType() == Token_Type.INT_CONST:
+            return self._currentToken
 
     def stringVal(self):
         """
@@ -118,3 +146,5 @@ class JackTokenizer:
         Returns:
             String
         """
+        if self.tokenType() == Token_Type.STRING_CONST:
+            return self._currentToken.replace("\"", "").replace("'", "")
