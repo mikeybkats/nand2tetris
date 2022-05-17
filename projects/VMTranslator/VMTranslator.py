@@ -75,9 +75,11 @@ if __name__ == '__main__':
     infile_path = sys.argv[1]
     outfile_path = "Sys.asm"
 
+    # if an outfile name is designated
     if len(sys.argv) == 3:
         outfile_path = os.path.realpath(infile_path) + "/" + sys.argv[2]
     else:
+        # if the path is a directory
         if os.path.isdir(infile_path):
             outfile_path = infile_path + "/" + \
                 os.path.basename(os.path.normpath(infile_path)) + ".asm"

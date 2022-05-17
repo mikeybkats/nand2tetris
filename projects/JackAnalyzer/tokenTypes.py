@@ -11,9 +11,9 @@ class Token_Type(Enum):
 
 class TokenTypeTable:
     def __init__(self):
-        self._table = self.buildTokenTable()
+        self._table = self.build_token_table()
 
-    def getTokenType(self, token):
+    def get_token_type(self, token):
         if token.isnumeric():
             token = "int_const"
             return self._table.get(token)
@@ -29,7 +29,7 @@ class TokenTypeTable:
 
         return self._table.get(token)
 
-    def buildTokenTable(self):
+    def build_token_table(self):
         return dict([
             ("class", Token_Type.KEYWORD),
             ("constructor", Token_Type.KEYWORD),

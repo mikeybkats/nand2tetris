@@ -1,12 +1,12 @@
 import unittest
 import os
-from tokenizer import JackTokenizer
+from JackTokenizer import JackTokenizer
 from io import StringIO
-from tokenTypes import TokenTypeTable, Token_Type
+from TokenTypes import TokenTypeTable, Token_Type
 
 
 class TokenizerTest(unittest.TestCase):
-    def test_hasMoreTokens(self):
+    def test_has_more_tokens(self):
         testFile = StringIO("""a test 
 
 
@@ -18,7 +18,7 @@ class TokenizerTest(unittest.TestCase):
 
         """)
         tokenizer = JackTokenizer(inputStreamOrFile=testFile)
-        self.assertEqual(tokenizer.hasMoreTokens(), True)
+        self.assertEqual(tokenizer.has_more_tokens(), True)
 
         tokenizer.advance()
         self.assertEqual("a", tokenizer.currentToken)
@@ -26,7 +26,7 @@ class TokenizerTest(unittest.TestCase):
         tokenizer.advance()
         self.assertEqual("test", tokenizer.currentToken)
 
-        self.assertEqual(True, tokenizer.hasMoreTokens())
+        self.assertEqual(True, tokenizer.has_more_tokens())
 
         tokenizer.advance()
         self.assertEqual("file", tokenizer.currentToken)
@@ -43,7 +43,7 @@ class TokenizerTest(unittest.TestCase):
         tokenizer.advance()
         self.assertEqual("lines", tokenizer.currentToken)
 
-    def test_getNextToken(self):
+    def test_get_next_token(self):
         testString = """ 
         class Main {
             var String io;
@@ -54,13 +54,13 @@ class TokenizerTest(unittest.TestCase):
         testFile = StringIO(testString)
         tokenizer = JackTokenizer(inputStreamOrFile=testFile)
 
-        firstWord = tokenizer.getNextToken(testFile)
+        firstWord = tokenizer.get_next_token(testFile)
         self.assertEqual(firstWord, "class")
-        secondWord = tokenizer.getNextToken(testFile)
+        secondWord = tokenizer.get_next_token(testFile)
         self.assertEqual(secondWord, "Main")
-        thirdWord = tokenizer.getNextToken(testFile)
+        thirdWord = tokenizer.get_next_token(testFile)
         self.assertEqual(thirdWord, "{")
-        fourthWord = tokenizer.getNextToken(testFile)
+        fourthWord = tokenizer.get_next_token(testFile)
         self.assertEqual(fourthWord, "var")
 
         testString2 = """ 
@@ -71,14 +71,14 @@ class TokenizerTest(unittest.TestCase):
         tokenizer = JackTokenizer(inputStreamOrFile=testFile)
         tokenizer.advance()
         tokenizer.advance()
-        token = tokenizer.getNextToken(testFile)
+        token = tokenizer.get_next_token(testFile)
         self.assertEqual("io", token)
-        token = tokenizer.getNextToken(testFile)
+        token = tokenizer.get_next_token(testFile)
         self.assertEqual(";", token)
 
         tokenizer.advance()
         tokenizer.advance()
-        token = tokenizer.getNextToken(testFile)
+        token = tokenizer.get_next_token(testFile)
         self.assertEqual("three", token)
 
         # test symbols
@@ -140,16 +140,16 @@ class TokenizerTest(unittest.TestCase):
 
     def test_tokenTable(self):
         tokenTable = TokenTypeTable()
-        tokenType = tokenTable.getTokenType("55555")
+        tokenType = tokenTable.get_token_type("55555")
         self.assertEqual(tokenType, Token_Type.INT_CONST)
 
-        tokenType = tokenTable.getTokenType("\"my_string\"")
+        tokenType = tokenTable.get_token_type("\"my_string\"")
         self.assertEqual(tokenType, Token_Type.STRING_CONST)
 
-        tokenType = tokenTable.getTokenType("'my_string'")
+        tokenType = tokenTable.get_token_type("'my_string'")
         self.assertEqual(tokenType, Token_Type.STRING_CONST)
 
-        tokenType = tokenTable.getTokenType("let")
+        tokenType = tokenTable.get_token_type("let")
         self.assertEqual(tokenType, Token_Type.KEYWORD)
 
     def test_tokenType(self):
@@ -169,40 +169,40 @@ class TokenizerTest(unittest.TestCase):
 
         # class token keyward
         tokenizer.advance()
-        self.assertEqual(Token_Type.KEYWORD, tokenizer.tokenType())
+        self.assertEqual(Token_Type.KEYWORD, tokenizer.token_type())
 
         # Main identifier
         tokenizer.advance()
-        self.assertEqual(Token_Type.IDENTIFIER, tokenizer.tokenType())
+        self.assertEqual(Token_Type.IDENTIFIER, tokenizer.token_type())
 
         # {} token symbol
         tokenizer.advance()
-        self.assertEqual(Token_Type.SYMBOL, tokenizer.tokenType())
+        self.assertEqual(Token_Type.SYMBOL, tokenizer.token_type())
 
         # ; semi colon
         token = tokenizer.currentToken
         while token != ";":
             tokenizer.advance()
             token = tokenizer.currentToken
-        self.assertEqual(Token_Type.SYMBOL, tokenizer.tokenType())
+        self.assertEqual(Token_Type.SYMBOL, tokenizer.token_type())
 
         # identifier
         token = tokenizer.currentToken
         while token != "hello":
             tokenizer.advance()
             token = tokenizer.currentToken
-        self.assertEqual(Token_Type.IDENTIFIER, tokenizer.tokenType())
+        self.assertEqual(Token_Type.IDENTIFIER, tokenizer.token_type())
 
         # string const
         token = tokenizer.currentToken
         while token != "\"foo\"":
             tokenizer.advance()
             token = tokenizer.currentToken
-        self.assertEqual(Token_Type.STRING_CONST, tokenizer.tokenType())
+        self.assertEqual(Token_Type.STRING_CONST, tokenizer.token_type())
 
         # int constant
         token = tokenizer.currentToken
         while token != "55412":
             tokenizer.advance()
             token = tokenizer.currentToken
-        self.assertEqual(Token_Type.INT_CONST, tokenizer.tokenType())
+        self.assertEqual(Token_Type.INT_CONST, tokenizer.token_type())

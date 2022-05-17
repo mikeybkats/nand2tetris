@@ -1,5 +1,5 @@
 import io
-from tokenTypes import TokenTypeTable, Token_Type
+from TokenTypes import TokenTypeTable, Token_Type
 
 
 class JackTokenizer:
@@ -18,7 +18,7 @@ class JackTokenizer:
     def currentToken(self):
         return self._currentToken
 
-    def hasMoreTokens(self):
+    def has_more_tokens(self):
         """
         checks to see if the input contains more tokens
 
@@ -31,7 +31,7 @@ class JackTokenizer:
         self._infile.seek(currentLocation)
         return hasMoreTokens
 
-    def getNextToken(self, file):
+    def get_next_token(self, file):
         """
         Reads one char at a time from the file to build the next token. Stops when it sees whitespace. 
 
@@ -53,13 +53,13 @@ class JackTokenizer:
         char = firstChar
 
         # if the char is a symbol then return the token
-        if self._tokenTypeTable.getTokenType(char) == Token_Type.SYMBOL:
+        if self._tokenTypeTable.get_token_type(char) == Token_Type.SYMBOL:
             return char
 
         # if the char is not a symbol then build the token word
         while not tokenFoundOrEnd:
             # if a symbol is reached end the loop
-            if (self._tokenTypeTable.getTokenType(char) == Token_Type.SYMBOL):
+            if (self._tokenTypeTable.get_token_type(char) == Token_Type.SYMBOL):
                 # decrement the file reader back one space and break so the token can be read the next time the function is called
                 self._infile.seek(prevReadLoc)
                 tokenFoundOrEnd = True
@@ -86,27 +86,27 @@ class JackTokenizer:
         """
 
         # if has more tokens
-        if self.hasMoreTokens():
+        if self.has_more_tokens():
             # get the next token and assign it to current
-            self._currentToken = self.getNextToken(self._infile)
+            self._currentToken = self.get_next_token(self._infile)
 
-    def tokenType(self):
+    def token_type(self):
         """
         Returns the type of the current token.
 
         Returns:
             TOKEN_TYPE enum
         """
-        return self._tokenTypeTable.getTokenType(self._currentToken)
+        return self._tokenTypeTable.get_token_type(self._currentToken)
 
-    def keyWord(self):
+    def key_word(self):
         """
         Returns the keyword which is the current token. Should be called only when the tokenType() is KEYWORD
 
         Returns:
             KEYWORD enum
         """
-        if self.tokenType() == Token_Type.KEYWORD:
+        if self.token_type() == Token_Type.KEYWORD:
             return self._currentToken
 
     def symbol(self):
@@ -116,7 +116,7 @@ class JackTokenizer:
         Returns:
             Char
         """
-        if self.tokenType() == Token_Type.SYMBOL:
+        if self.token_type() == Token_Type.SYMBOL:
             return self._currentToken
 
     def identifier(self):
@@ -126,25 +126,25 @@ class JackTokenizer:
         Returns:
             String
         """
-        if self.tokenType() == Token_Type.IDENTIFIER:
+        if self.token_type() == Token_Type.IDENTIFIER:
             return self._currentToken
 
-    def intVal(self):
+    def int_val(self):
         """ 
         Return integer value of the current token. Should be called only when tokenType() is INT_CONST
 
         Returns:
             Int
         """
-        if self.tokenType() == Token_Type.INT_CONST:
+        if self.token_type() == Token_Type.INT_CONST:
             return self._currentToken
 
-    def stringVal(self):
+    def string_val(self):
         """
         Return the string value of the current token, without the double quotes. Should only be called when tokenType() is STRING_CONST
 
         Returns:
             String
         """
-        if self.tokenType() == Token_Type.STRING_CONST:
+        if self.token_type() == Token_Type.STRING_CONST:
             return self._currentToken.replace("\"", "").replace("'", "")
