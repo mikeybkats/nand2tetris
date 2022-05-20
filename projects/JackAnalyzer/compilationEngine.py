@@ -2,9 +2,10 @@ from JackTokenizer import JackTokenizer
 from TagTypes import Tag_Types
 from TokenTypes import Token_Type, Keyword
 import os
+from io import TextIOBase
 
 
-class CompilationEngine(self):
+class CompilationEngine:
     def __init__(self, inputFileStream, outputFileStream):
         """ 
         Creates a new compilation engin with the givin input and output. The next routine called must be compileClass()
@@ -13,15 +14,24 @@ class CompilationEngine(self):
         # make a jack tokenizer
         self._tokenizer = JackTokenizer(inputStreamOrFile=inputFileStream)
         # make the outfile
-        self._outfile = open(inputFileStream, mode="w+", encoding='utf-8')
+        if isinstance(outputFileStream, TextIOBase):
+            self._outfile = outputFileStream
+        else:
+            self._outfile = open(inputFileStream, mode="w+", encoding='utf-8')
 
-        pass
+    @property
+    def tokenizer(self):
+        return self._tokenizer
+
+    @property
+    def outfile(self):
+        return self._outfile
 
     def write_xml_tag(self, tagType):
-        self._outfile.write("<" + tagType + ">")
+        self._outfile.write("<" + tagType.value + ">")
 
     def write_xml_closing_tag(self, tagType):
-        self._outfile.write("</" + tagType + ">\n")
+        self._outfile.write("</" + tagType.value + ">\n")
 
     def compile_class(self):
         """Compiles a complete class"""
