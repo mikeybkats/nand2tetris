@@ -7,7 +7,8 @@ from TokenTypes import TokenTypeTable, Token_Type
 
 class TokenizerTest(unittest.TestCase):
     def test_has_more_tokens(self):
-        testFile = StringIO("""a test 
+        testFile = StringIO("""
+        a test 
 
 
         file 
@@ -43,54 +44,58 @@ class TokenizerTest(unittest.TestCase):
         tokenizer.advance()
         self.assertEqual("lines", tokenizer.currentToken)
 
+        while tokenizer.has_more_tokens():
+            tokenizer.advance()
+        self.assertEqual(False, tokenizer.has_more_tokens())
+
     def test_get_next_token(self):
-        testString = """ 
+        test_string = """ 
         class Main {
             var String io;
 
             let io = "foo"
         }
         """
-        testFile = StringIO(testString)
-        tokenizer = JackTokenizer(inputStreamOrFile=testFile)
+        test_file = StringIO(test_string)
+        tokenizer = JackTokenizer(inputStreamOrFile=test_file)
 
-        firstWord = tokenizer.get_next_token(testFile)
-        self.assertEqual(firstWord, "class")
-        secondWord = tokenizer.get_next_token(testFile)
-        self.assertEqual(secondWord, "Main")
-        thirdWord = tokenizer.get_next_token(testFile)
-        self.assertEqual(thirdWord, "{")
-        fourthWord = tokenizer.get_next_token(testFile)
-        self.assertEqual(fourthWord, "var")
+        first_word = tokenizer.get_next_token(test_file)
+        self.assertEqual(first_word, "class")
+        second_word = tokenizer.get_next_token(test_file)
+        self.assertEqual(second_word, "Main")
+        third_word = tokenizer.get_next_token(test_file)
+        self.assertEqual(third_word, "{")
+        fourth_word = tokenizer.get_next_token(test_file)
+        self.assertEqual(fourth_word, "var")
 
-        testString2 = """ 
+        test_string2 = """ 
         var String io;
         var int three;
         """
-        testFile = StringIO(testString2)
-        tokenizer = JackTokenizer(inputStreamOrFile=testFile)
+        test_file = StringIO(test_string2)
+        tokenizer = JackTokenizer(inputStreamOrFile=test_file)
         tokenizer.advance()
         tokenizer.advance()
-        token = tokenizer.get_next_token(testFile)
+        token = tokenizer.get_next_token(test_file)
         self.assertEqual("io", token)
-        token = tokenizer.get_next_token(testFile)
+        token = tokenizer.get_next_token(test_file)
         self.assertEqual(";", token)
 
         tokenizer.advance()
         tokenizer.advance()
-        token = tokenizer.get_next_token(testFile)
+        token = tokenizer.get_next_token(test_file)
         self.assertEqual("three", token)
 
         # test symbols
-        testString = """ 
+        test_string = """ 
             var int x, y, z;
             var Boolean xgt;
             let xgt = x>z;
             let y = "\<foo";
         }
         """
-        testFile = StringIO(testString)
-        tokenizer = JackTokenizer(inputStreamOrFile=testFile)
+        test_file = StringIO(test_string)
+        tokenizer = JackTokenizer(inputStreamOrFile=test_file)
 
         # test if it can get commas
         tokenizer.advance()
@@ -137,6 +142,28 @@ class TokenizerTest(unittest.TestCase):
         tokenizer.advance()
         token = tokenizer.currentToken
         self.assertEqual("String", token)
+
+        test_string2 = """ 
+        baz.bar
+        foo[1]
+        """
+        test_file2 = StringIO(test_string2)
+        tokenizer = JackTokenizer(inputStreamOrFile=test_file2)
+
+        tokenizer.advance()
+        tokenizer.advance()
+        token = tokenizer.currentToken
+        self.assertEqual(".", token)
+
+        tokenizer.advance()
+        tokenizer.advance()
+        tokenizer.advance()
+        token = tokenizer.currentToken
+        self.assertEqual("[", token)
+
+        tokenizer.advance()
+        token = tokenizer.currentToken
+        self.assertEqual("1", token)
 
     def test_tokenTable(self):
         tokenTable = TokenTypeTable()
@@ -206,3 +233,17 @@ class TokenizerTest(unittest.TestCase):
             tokenizer.advance()
             token = tokenizer.currentToken
         self.assertEqual(Token_Type.INT_CONST, tokenizer.token_type())
+
+    def test_token_type(self):
+        test_string = """
+        boop 100
+        """
+        test_file = StringIO(test_string)
+        tokenizer = JackTokenizer(inputStreamOrFile=test_file)
+        tokenizer.advance()
+        token_type = tokenizer.token_type()
+        self.assertEqual(token_type, Token_Type.IDENTIFIER)
+
+        tokenizer.advance()
+        token_type = tokenizer.token_type()
+        self.assertEqual(token_type, Token_Type.INT_CONST)

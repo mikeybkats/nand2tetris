@@ -80,25 +80,87 @@ class TokenTypeTable:
         ])
 
 
-class Keyword(Enum):
-    CLASS = "class"
-    METHOD = "method"
-    FUNCTION = "function"
-    CONSTRUCTOR = "constructor"
-    INT = "int"
+class GrammarLanguage(Enum):
     BOOLEAN = "boolean"
     CHAR = "char"
+    CLASS = "class"
+    INT_CONSTANT = "intConstant"
+    CONSTRUCTOR = "constructor"
+    DO = "do"
+    DO_STATEMENT = "doStatement"
+    EXPRESSION = "expression"
+    EXPRESSION_LIST = "expressionList"
+    ELSE = "else"
+    FALSE = "false"
+    FIELD = "field"
+    FUNCTION = "function"
+    IDENTIFIER = "identifier"
+    IF_STATEMENT = "ifStatement"
+    IF = "if"
+    INT = "int"
+    KEYWORD = "keyword"
+    LET = "let"
+    LET_STATEMENT = "letStatement"
+    METHOD = "method"
+    NULL = "null"
+    RETURN = "return"
+    RETURN_STATEMENT = "returnStatement"
+    SYMBOL = "symbol"
+    STATEMENTS = "statements"
+    STATIC = "static"
+    STRING_CONST = "stringConstant"
+    SUB_ROUTINE_DEC = "subroutineDec"
+    SUB_ROUTINE_BOD = "subroutineBody"
+    TERM = "term"
+    THIS = "this"
+    TRUE = "true"
     VOID = "void"
     VAR = "var"
-    STATIC = "static"
-    FIELD = "field"
-    LET = "let"
-    DO = "fo"
-    IF = "if"
-    ELSE = "else"
+    VAR_DEC = "varDeclaration"
+    WHILE_STATEMENT = "whileStatement"
     WHILE = "while"
-    RETURN = "return"
-    TRUE = "true"
-    FALSE = "false"
-    NULL = "null"
-    THIS = "this"
+    CLASS_VAR_DEC = "classVarDec"
+    PARAMETER_LIST = "parameterList"
+
+
+class TerminalType(Enum):
+    TERMINAL = "terminal"
+    NON_TERMINAL = "non_terminal"
+
+
+class TerminalTypeTable:
+    def __init__(self):
+        self._table = self.build_terminal_tag_table()
+
+    def build_terminal_tag_table(self):
+        return dict([
+            (GrammarLanguage.SYMBOL.value, TerminalType.TERMINAL),
+            (GrammarLanguage.KEYWORD.value, TerminalType.TERMINAL),
+            (GrammarLanguage.INT_CONSTANT.value, TerminalType.TERMINAL),
+            (GrammarLanguage.STRING_CONST.value, TerminalType.TERMINAL),
+            (GrammarLanguage.IDENTIFIER.value, TerminalType.TERMINAL),
+
+            (GrammarLanguage.CLASS.value, TerminalType.NON_TERMINAL),
+            (GrammarLanguage.CLASS_VAR_DEC.value, TerminalType.NON_TERMINAL),
+            (GrammarLanguage.SUB_ROUTINE_DEC.value, TerminalType.NON_TERMINAL),
+            (GrammarLanguage.PARAMETER_LIST.value, TerminalType.NON_TERMINAL),
+            (GrammarLanguage.SUB_ROUTINE_BOD.value, TerminalType.NON_TERMINAL),
+            (GrammarLanguage.VAR_DEC.value, TerminalType.NON_TERMINAL),
+
+            (GrammarLanguage.STATEMENTS.value, TerminalType.NON_TERMINAL),
+            (GrammarLanguage.WHILE_STATEMENT.value, TerminalType.NON_TERMINAL),
+            (GrammarLanguage.IF_STATEMENT.value, TerminalType.NON_TERMINAL),
+            (GrammarLanguage.RETURN_STATEMENT.value, TerminalType.NON_TERMINAL),
+            (GrammarLanguage.LET_STATEMENT.value, TerminalType.NON_TERMINAL),
+            (GrammarLanguage.DO_STATEMENT.value, TerminalType.NON_TERMINAL),
+
+            (GrammarLanguage.EXPRESSION.value, TerminalType.NON_TERMINAL),
+            (GrammarLanguage.TERM.value, TerminalType.NON_TERMINAL),
+            (GrammarLanguage.EXPRESSION_LIST.value, TerminalType.NON_TERMINAL)
+        ])
+
+    def is_terminal(self, tag_name):
+        if self._table.get(tag_name) == TerminalType.TERMINAL:
+            return True
+        else:
+            return False

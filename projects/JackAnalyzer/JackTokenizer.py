@@ -25,11 +25,15 @@ class JackTokenizer:
         Returns:
             boolean
         """
-        currentLocation = self._infile.tell()
-        fileContents = self._infile.read()
-        hasMoreTokens = True if fileContents else False
-        self._infile.seek(currentLocation)
-        return hasMoreTokens
+        current_location = self._infile.tell()
+
+        file_contents = self._infile.read()
+        has_more_tokens = False if not file_contents else True
+        if file_contents.isspace():
+            has_more_tokens = False
+
+        self._infile.seek(current_location)
+        return has_more_tokens
 
     def get_next_token(self, file):
         """
@@ -43,36 +47,37 @@ class JackTokenizer:
         """
 
         token = ""
-        tokenFoundOrEnd = False
-        firstChar = file.read(1)
+        token_found_or_end = False
+        first_char = file.read(1)
 
         # check if the first character is line break or empty space
         # keep reading until a character is reached
-        while firstChar == " " or firstChar == "\n":
-            firstChar = file.read(1)
-        char = firstChar
+        while first_char == " " or first_char == "\n":
+            first_char = file.read(1)
+        char = first_char
 
         # if the char is a symbol then return the token
         if self._tokenTypeTable.get_token_type(char) == Token_Type.SYMBOL:
             return char
 
         # if the char is not a symbol then build the token word
-        while not tokenFoundOrEnd:
+        while not token_found_or_end:
             # if a symbol is reached end the loop
-            if (self._tokenTypeTable.get_token_type(char) == Token_Type.SYMBOL):
-                # decrement the file reader back one space and break so the token can be read the next time the function is called
-                self._infile.seek(prevReadLoc)
-                tokenFoundOrEnd = True
+            if self._tokenTypeTable.get_token_type(char) == Token_Type.SYMBOL:
+                # decrement the file reader back one space and break so the token
+                # can be read the next time the function is called
+                self._infile.seek(prev_read_loc)
+                token_found_or_end = True
                 break
             if char == " " or char == "\n":
-                tokenFoundOrEnd = True
+                token_found_or_end = True
                 break
             if not char:
-                tokenFoundOrEnd = True
+                token_found_or_end = True
                 break
             else:
                 token = token + char
-                prevReadLoc = self._infile.tell()
+                prev_read_loc = self._infile.tell()
                 char = file.read(1)
 
         return token
