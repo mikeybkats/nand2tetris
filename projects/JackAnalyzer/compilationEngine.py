@@ -1,6 +1,6 @@
 from JackTokenizer import JackTokenizer
 from TagTypes import Tag_Types
-from TokenTypes import Token_Type, GrammarLanguage, TerminalTypeTable
+from TokenTypes import Token_Type, GrammarLanguage, TerminalTypeTable, is_op
 from io import TextIOBase
 
 
@@ -204,7 +204,17 @@ class CompilationEngine:
 
     def compile_do(self):
         """Compiles a do statement"""
-        pass
+        self.write_xml_tag_2(GrammarLanguage.DO_STATEMENT.value, False)
+        self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+
+        while self._tokenizer.currentToken != ";":
+            self._tokenizer.advance()
+
+            if self._tokenizer.currentToken == "(":
+                self.write_terminal_tag(GrammarLanguage.SYMBOL.value.lower())
+                self.compile_expression_list()
+
+            self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
     def compile_while(self):
         """Compiles a while statement"""
@@ -218,21 +228,24 @@ class CompilationEngine:
         pass
 
     def compile_expression(self):
-        """Compiles an expressions - expression grammar: term (op term) """
+        """Compiles an expression - expression grammar: term (op term) """
         self.write_non_terminal_tag(GrammarLanguage.EXPRESSION.value, False)
+
         expression = True
         while expression:
-            self._tokenizer.advance()
-
-            if self._tokenizer.token_type() == Token_Type.SYMBOL and self._tokenizer.currentToken != ";":
+            if is_op(self._tokenizer.currentToken):
                 self.write_terminal_tag(GrammarLanguage.SYMBOL.value)
             elif self._tokenizer.token_type() != Token_Type.SYMBOL:
                 self.compile_term()
 
-            if self._tokenizer.currentToken == ";" or self._tokenizer.currentToken == ")":
-                self.write_non_terminal_tag(GrammarLanguage.EXPRESSION.value, True)
+            self._tokenizer.advance()
+
+            if (self._tokenizer.currentToken == ";" or
+                    self._tokenizer.currentToken == ")" or
+                    self._tokenizer.currentToken == ","):
                 expression = False
 
+        self.write_non_terminal_tag(GrammarLanguage.EXPRESSION.value, True)
 
     def compile_term(self):
         """
@@ -245,12 +258,13 @@ class CompilationEngine:
         self.outfile.write("\n")
 
         if self._tokenizer.token_type() == Token_Type.INT_CONST:
-            # self.write_xml_tag(GrammarLanguage.INT_CONSTANT.value)
             self.write_terminal_tag(GrammarLanguage.INT_CONSTANT.value)
 
         if self._tokenizer.token_type() == Token_Type.IDENTIFIER:
-            # self.write_xml_tag(GrammarLanguage.IDENTIFIER.value)
             self.write_terminal_tag(GrammarLanguage.IDENTIFIER.value)
+
+        if self._tokenizer.token_type() == Token_Type.KEYWORD:
+            self.write_terminal_tag(GrammarLanguage.KEYWORD.value)
 
         # TODO: update outfile.write here so it can distinguish between the different kinds of term tokens
         # but for now it just writes the current token
@@ -259,4 +273,13 @@ class CompilationEngine:
 
     def compile_expression_list(self):
         """Compiles a possibly empty comma-separated list of expressions"""
-        pass
+        self.write_xml_tag_2(GrammarLanguage.EXPRESSION_LIST.value, False)
+
+        while self._tokenizer.currentToken != ";" and self._tokenizer.currentToken != ")":
+            self._tokenizer.advance()
+            self.compile_expression()
+
+            if self._tokenizer.currentToken == ",":
+                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+
+        self.write_xml_tag_2(GrammarLanguage.EXPRESSION_LIST.value, True)

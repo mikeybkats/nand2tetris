@@ -201,6 +201,58 @@ class CompilationEngineTest(unittest.TestCase):
         #            <symbol> ; </symbol>
         #          </letStatement>
 
+    def test_compile_do(self):
+        jack_mock_class = """
+        do game.dispose(this, that);
+        """
+
+        jack_mock_in_file = StringIO(jack_mock_class)
+        mock_output_file = StringIO()
+        comp_eng = CompilationEngine(
+            input_stream=jack_mock_in_file, output_stream=mock_output_file)
+
+        comp_eng.tokenizer.advance()
+        comp_eng.compile_do()
+
+        comp_eng.outfile.seek(0)
+        file_lines = comp_eng.outfile.readlines()
+        self.assertEqual("<doStatement>\n", file_lines[0])
+        self.assertEqual("<keyword> do </keyword>\n", file_lines[1])
+        self.assertEqual("<identifier> game </identifier>\n", file_lines[2])
+        self.assertEqual("<symbol> . </symbol>\n", file_lines[3])
+        self.assertEqual("<identifier> dispose </identifier>\n", file_lines[4])
+        self.assertEqual("<symbol> ( </symbol>\n", file_lines[5])
+        self.assertEqual("<expressionList>\n", file_lines[6])
+        self.assertEqual("<expression>\n", file_lines[7])
+        self.assertEqual("<term>\n", file_lines[8])
+        self.assertEqual("<keyword> this </keyword>\n", file_lines[9])
+        self.assertEqual("</term>\n", file_lines[10])
+        self.assertEqual("</expression>\n", file_lines[11])
+        self.assertEqual("<symbol> , </symbol>\n", file_lines[12])
+        self.assertEqual("<expression>\n", file_lines[13])
+        self.assertEqual("<term>\n", file_lines[14])
+        self.assertEqual("<identifier> that </identifier>\n", file_lines[15])
+        self.assertEqual("</term>\n", file_lines[16])
+        self.assertEqual("</expression>\n", file_lines[17])
+        self.assertEqual("</expressionList>\n", file_lines[18])
+
+        # <doStatement>
+        #   <keyword> do </keyword>
+        #   <identifier> game </identifier>
+        #   <symbol> . </symbol>
+        #   <identifier> dispose </identifier>
+        #   <symbol> ( </symbol>
+        #   <expressionList>
+        #   <expression>
+        #   <term>
+        #   <keyword> this </keyword>
+        #   </term>
+        #   </expression>
+        #   </expressionList>
+        #   <symbol> ) </symbol>
+        #   <symbol> ; </symbol>
+        # </doStatement>
+
     def test_compile_subroutine(self):
         jack_mock_class = """
         function void main(x, y) {
@@ -327,10 +379,6 @@ def test_compile_statements():
     assert False
 
 
-def test_compile_do():
-    assert False
-
-
 def test_compile_while():
     assert False
 
@@ -345,6 +393,7 @@ def test_compile_if():
 
 def test_compile_expression():
     assert False
+
 
 def test_compile_expression_list():
     assert False

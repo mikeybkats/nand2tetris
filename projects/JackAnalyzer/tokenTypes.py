@@ -9,6 +9,21 @@ class Token_Type(Enum):
     STRING_CONST = "STRING_CONST"
 
 
+def is_op(token):
+    if (token == "+" or
+            token == "-" or
+            token == "*" or
+            token == "/" or
+            token == "|" or
+            token == "<" or
+            token == ">" or
+            token == "~" or
+            token == "="):
+        return True
+    else:
+        return False
+
+
 class TokenTypeTable:
     def __init__(self):
         self._table = self.build_token_table()
@@ -62,6 +77,7 @@ class TokenTypeTable:
             (".", Token_Type.SYMBOL),
             (",", Token_Type.SYMBOL),
             (";", Token_Type.SYMBOL),
+
             ("+", Token_Type.SYMBOL),
             ("-", Token_Type.SYMBOL),
             ("*", Token_Type.SYMBOL),
