@@ -92,40 +92,30 @@ class CompilationEngineTest(unittest.TestCase):
                 self.assertEqual(line, "</class>\n")
             count = count + 1
 
-    def test_compile_term(self):
+    def test_compile_expression(self):
         jack_mock_class = """
-        count < 100
+        count < 100;
         """
         jack_mock_in_file = StringIO(jack_mock_class)
         mock_output_file = StringIO()
         comp_eng = CompilationEngine(
             input_stream=jack_mock_in_file, output_stream=mock_output_file)
 
-        while comp_eng.tokenizer.has_more_tokens():
-            comp_eng.tokenizer.advance()
-            comp_eng.compile_term()
-
+        # while comp_eng.tokenizer.has_more_tokens():
+        # comp_eng.tokenizer.advance()
+        comp_eng.compile_expression()
         comp_eng.outfile.seek(0)
-        count = 0
-        for line in comp_eng.outfile:
-            if count == 0:
-                self.assertEqual(line, "<term>\n")
-            if count == 1:
-                self.assertEqual(line, "<identifier> count </identifier>\n")
-            if count == 2:
-                self.assertEqual(line, "</term>\n")
-            if count == 3:
-                self.assertEqual(line, "<symbol> < </symbol>\n")
-            if count == 4:
-                self.assertEqual("<term>\n", line)
-            if count == 5:
-                self.assertEqual(comp_eng.tokenizer.currentToken, '100')
-                self.assertEqual(comp_eng.tokenizer.token_type(), Token_Type.INT_CONST)
-                self.assertEqual(comp_eng.tokenizer.token_type() == Token_Type.INT_CONST, True)
-                self.assertEqual("<intConstant> 100 </intConstant>\n", line)
-            if count == 6:
-                self.assertEqual("</term>\n", line)
-            count = count + 1
+        file_lines = comp_eng.outfile.readlines()
+        self.assertEqual("<expression>\n", file_lines[0])
+        self.assertEqual("<term>\n", file_lines[1])
+        self.assertEqual("<identifier> count </identifier>\n", file_lines[2])
+        self.assertEqual("</term>\n", file_lines[3])
+        self.assertEqual("<symbol> < </symbol>\n", file_lines[4])
+        self.assertEqual("<term>\n", file_lines[5])
+        self.assertEqual("<intConstant> 100 </intConstant>\n", file_lines[6])
+        self.assertEqual("</term>\n", file_lines[7])
+        self.assertEqual("</expression>\n", file_lines[8])
+        # self.assertEqual("<symbol> ; </symbol>\n", file_lines[8])
 
     def test_compile_class_var_declaration(self):
         jack_mock_class = """
@@ -171,6 +161,46 @@ class CompilationEngineTest(unittest.TestCase):
 
             count = count + 1
 
+    def test_compile_let(self):
+        jack_mock_class = """
+        let game = game;
+        """
+
+        jack_mock_in_file = StringIO(jack_mock_class)
+        mock_output_file = StringIO()
+        comp_eng = CompilationEngine(
+            input_stream=jack_mock_in_file, output_stream=mock_output_file)
+
+        comp_eng.tokenizer.advance()
+        comp_eng.compile_let()
+
+        comp_eng.outfile.seek(0)
+        count = 0
+        file_lines = comp_eng.outfile.readlines()
+        self.assertEqual("<letStatement>\n", file_lines[0])
+        self.assertEqual("<keyword> let </keyword>\n", file_lines[1])
+        self.assertEqual("<identifier> game </identifier>\n", file_lines[2])
+        self.assertEqual("<symbol> = </symbol>\n", file_lines[3])
+        self.assertEqual("<expression>\n", file_lines[4])
+        self.assertEqual("<term>\n", file_lines[5])
+        self.assertEqual("<identifier> game </identifier>\n", file_lines[6])
+        self.assertEqual("</term>\n", file_lines[7])
+        self.assertEqual("</expression>\n", file_lines[8])
+        self.assertEqual("<symbol> ; </symbol>\n", file_lines[9])
+        self.assertEqual("</letStatement>\n", file_lines[10])
+
+        #          <letStatement>
+        #            <keyword> let </keyword>
+        #            <identifier> game </identifier>
+        #            <symbol> = </symbol>
+        #            <expression>
+        #              <term>
+        #                <identifier> game </identifier>
+        #              </term>
+        #            </expression>
+        #            <symbol> ; </symbol>
+        #          </letStatement>
+
     def test_compile_subroutine(self):
         jack_mock_class = """
         function void main(x, y) {
@@ -211,8 +241,20 @@ class CompilationEngineTest(unittest.TestCase):
         self.assertEqual("<symbol> ) </symbol>\n", file_lines[14])
         self.assertEqual("<subroutineBody>\n", file_lines[15])
         self.assertEqual("<symbol> { </symbol>\n", file_lines[16])
-        # self.assertEqual("<varDec>\n", file_lines[17])
-    #  <subroutineDec>
+        self.assertEqual("<varDeclaration>\n", file_lines[17])
+        self.assertEqual("<keyword> var </keyword>\n", file_lines[18])
+        self.assertEqual("<identifier> SquareGame </identifier>\n", file_lines[19])
+        self.assertEqual("<identifier> game </identifier>\n", file_lines[20])
+        self.assertEqual("<symbol> ; </symbol>\n", file_lines[21])
+        self.assertEqual("</varDeclaration>\n", file_lines[22])
+        self.assertEqual("<statements>\n", file_lines[23])
+        self.assertEqual("<letStatement>\n", file_lines[24])
+        self.assertEqual("<keyword> let </keyword>\n", file_lines[25])
+        self.assertEqual("<identifier> game </identifier>\n", file_lines[26])
+        self.assertEqual("<symbol> = </symbol>\n", file_lines[27])
+        self.assertEqual("<expression>\n", file_lines[28])
+
+      #  <subroutineDec>
       #      <keyword> function </keyword>
       #      <keyword> void </keyword>
       #      <identifier> main </identifier>
@@ -286,10 +328,6 @@ def test_compile_statements():
 
 
 def test_compile_do():
-    assert False
-
-
-def test_compile_let():
     assert False
 
 

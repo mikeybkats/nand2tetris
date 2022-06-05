@@ -115,45 +115,95 @@ class CompilationEngine:
                 if self._tokenizer.currentToken == "{":
                     self.write_xml_tag_2(GrammarLanguage.SUB_ROUTINE_BOD.value, False)
 
+                # compile declarations
+                if self._tokenizer.currentToken == GrammarLanguage.VAR.value:
+                    self.compile_var_declaration()
+                    self._tokenizer.advance()
+
+                # compile statements
+                if (self._tokenizer.currentToken == GrammarLanguage.LET.value or
+                    self._tokenizer.currentToken == GrammarLanguage.DO.value or
+                        self._tokenizer.currentToken == GrammarLanguage.IF.value):
+                    self.compile_statements()
+                    self._tokenizer.advance()
+
+                # TODO: resolve how to write this properly so it does not repeat writing
+                #  tags that have already been written.
                 self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
+                # compile parameter list
                 if self._tokenizer.currentToken == "(":
-                    self.write_xml_tag_2(GrammarLanguage.PARAMETER_LIST.value, False)
-
-                    # ((type varName)(',' type varName)*)?
-                    while self._tokenizer.currentToken != ")":
-                        self._tokenizer.advance()
-
-                        if self._tokenizer.currentToken == ",":
-                            self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-
-                        if self._tokenizer.currentToken == ")":
-                            self.write_xml_closing_tag(GrammarLanguage.PARAMETER_LIST.value)
-
-                        if self._tokenizer.currentToken != ",":
-                            self.compile_term()
-
-
+                    self.compile_parameter_list()
+                    # write the closing ')' symbol
+                    self.write_terminal_tag(GrammarLanguage.SYMBOL.value)
 
     def compile_parameter_list(self):
         """Compiles a (possibly empty) parameter list, not including the enclosing "()"."""
-        pass
+        self.write_xml_tag_2(GrammarLanguage.PARAMETER_LIST.value, False)
+
+        # ((type varName)(',' type varName)*)?
+        while self._tokenizer.currentToken != ")":
+            self._tokenizer.advance()
+
+            if self._tokenizer.currentToken == ")":
+                self.write_xml_closing_tag(GrammarLanguage.PARAMETER_LIST.value)
+                break
+
+            if self._tokenizer.currentToken == ",":
+                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+
+            if self._tokenizer.currentToken != ",":
+                self.compile_term()
 
     def compile_var_declaration(self):
         """Compiles var declaration"""
-        pass
+        self.write_xml_tag_2(GrammarLanguage.VAR_DEC.value, False)
+        self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+
+        while self._tokenizer.currentToken != ";":
+            self._tokenizer.advance()
+            self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+
+        self.write_xml_closing_tag(GrammarLanguage.VAR_DEC.value)
 
     def compile_statements(self):
         """Compiles a sequence of statements, not including the
         enclosing curly braces "{}". Compiles if, let and while statements"""
-        pass
+        self.write_xml_tag_2(GrammarLanguage.STATEMENTS.value, False)
 
-    def compile_do(self):
-        """Compiles a do statement"""
-        pass
+        while (self._tokenizer.currentToken == GrammarLanguage.DO.value or
+                self._tokenizer.currentToken == GrammarLanguage.LET.value or
+                self._tokenizer.currentToken == GrammarLanguage.IF.value):
+
+            if self._tokenizer.currentToken == GrammarLanguage.LET.value:
+                self.compile_let()
+            if self._tokenizer.currentToken == GrammarLanguage.DO.value:
+                self.compile_do()
+            if self._tokenizer.currentToken == GrammarLanguage.IF.value:
+                self.compile_if()
+
+            self._tokenizer.advance()
 
     def compile_let(self):
         """Compiles a let statement"""
+        self.write_xml_tag_2(GrammarLanguage.LET_STATEMENT.value, False)
+        self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+
+        while self._tokenizer.currentToken != ";":
+            self._tokenizer.advance()
+
+            if self.tokenizer.currentToken == "=":
+                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+                self.compile_expression()
+                break
+
+            self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+
+        self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+        self.write_xml_closing_tag(GrammarLanguage.LET_STATEMENT.value)
+
+    def compile_do(self):
+        """Compiles a do statement"""
         pass
 
     def compile_while(self):
@@ -168,7 +218,21 @@ class CompilationEngine:
         pass
 
     def compile_expression(self):
-        """Compiles an expressions"""
+        """Compiles an expressions - expression grammar: term (op term) """
+        self.write_non_terminal_tag(GrammarLanguage.EXPRESSION.value, False)
+        expression = True
+        while expression:
+            self._tokenizer.advance()
+
+            if self._tokenizer.token_type() == Token_Type.SYMBOL and self._tokenizer.currentToken != ";":
+                self.write_terminal_tag(GrammarLanguage.SYMBOL.value)
+            elif self._tokenizer.token_type() != Token_Type.SYMBOL:
+                self.compile_term()
+
+            if self._tokenizer.currentToken == ";" or self._tokenizer.currentToken == ")":
+                self.write_non_terminal_tag(GrammarLanguage.EXPRESSION.value, True)
+                expression = False
+
 
     def compile_term(self):
         """
@@ -177,31 +241,19 @@ class CompilationEngine:
         This routine will require a look ahead token which will be one of
         '[', or '(', or '.'. Any other token is not part of the term
         """
-
-        if self._tokenizer.token_type() == Token_Type.SYMBOL:
-            self.write_xml_tag(GrammarLanguage.SYMBOL.value)
-            self.write_token()
-            self.write_xml_closing_tag(GrammarLanguage.SYMBOL.value)
-            return
-
         self.write_xml_tag(GrammarLanguage.TERM.value)
         self.outfile.write("\n")
 
         if self._tokenizer.token_type() == Token_Type.INT_CONST:
-            self.write_xml_tag(GrammarLanguage.INT_CONSTANT.value)
+            # self.write_xml_tag(GrammarLanguage.INT_CONSTANT.value)
+            self.write_terminal_tag(GrammarLanguage.INT_CONSTANT.value)
 
         if self._tokenizer.token_type() == Token_Type.IDENTIFIER:
-            self.write_xml_tag(GrammarLanguage.IDENTIFIER.value)
+            # self.write_xml_tag(GrammarLanguage.IDENTIFIER.value)
+            self.write_terminal_tag(GrammarLanguage.IDENTIFIER.value)
 
         # TODO: update outfile.write here so it can distinguish between the different kinds of term tokens
         # but for now it just writes the current token
-        self.write_token()
-
-        if self._tokenizer.token_type() == Token_Type.IDENTIFIER:
-            self.write_xml_closing_tag(GrammarLanguage.IDENTIFIER.value)
-
-        if self._tokenizer.token_type() == Token_Type.INT_CONST:
-            self.write_xml_closing_tag(GrammarLanguage.INT_CONSTANT.value)
 
         self.write_xml_closing_tag(GrammarLanguage.TERM.value)
 
