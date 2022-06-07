@@ -100,7 +100,7 @@ class GrammarLanguage(Enum):
     BOOLEAN = "boolean"
     CHAR = "char"
     CLASS = "class"
-    INT_CONSTANT = "intConstant"
+    INT_CONSTANT = "integerConstant"
     CONSTRUCTOR = "constructor"
     DO = "do"
     DO_STATEMENT = "doStatement"
@@ -119,6 +119,7 @@ class GrammarLanguage(Enum):
     LET_STATEMENT = "letStatement"
     METHOD = "method"
     NULL = "null"
+    PARAMETER_LIST = "parameterList"
     RETURN = "return"
     RETURN_STATEMENT = "returnStatement"
     SYMBOL = "symbol"
@@ -136,7 +137,6 @@ class GrammarLanguage(Enum):
     WHILE_STATEMENT = "whileStatement"
     WHILE = "while"
     CLASS_VAR_DEC = "classVarDec"
-    PARAMETER_LIST = "parameterList"
 
 
 class TerminalType(Enum):

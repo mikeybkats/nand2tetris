@@ -38,6 +38,25 @@ class CompilationEngineTest(unittest.TestCase):
 
         self.assertIsInstance(comp_eng.outfile, io.StringIO)
 
+    def test_end_while(self):
+        jack_mock_class = """ 
+        class Main {
+            var String io;
+            let io = "foo";
+        }
+        """
+        jack_mock_in_file = StringIO(jack_mock_class)
+        mock_output_file = StringIO()
+        comp_eng = CompilationEngine(
+            input_stream=jack_mock_in_file, output_stream=mock_output_file)
+
+        while comp_eng.tokenizer.currentToken != ";":
+            comp_eng.tokenizer.advance()
+
+        comp_eng.outfile.seek(0)
+        file_lines = comp_eng.outfile.readlines()
+        self.assertEqual(";", comp_eng.tokenizer.currentToken)
+
     def test_write_xml_tag(self):
         jack_mock_in_file = StringIO()
         mock_output_file = StringIO()
@@ -62,7 +81,7 @@ class CompilationEngineTest(unittest.TestCase):
         jack_mock_class = """ 
         class Main {
             var String io;
-            let io = "foo"
+            let io = "foo";
         }
         """
         jack_mock_in_file = StringIO(jack_mock_class)
@@ -112,7 +131,7 @@ class CompilationEngineTest(unittest.TestCase):
         self.assertEqual("</term>\n", file_lines[3])
         self.assertEqual("<symbol> < </symbol>\n", file_lines[4])
         self.assertEqual("<term>\n", file_lines[5])
-        self.assertEqual("<intConstant> 100 </intConstant>\n", file_lines[6])
+        self.assertEqual("<integerConstant> 100 </integerConstant>\n", file_lines[6])
         self.assertEqual("</term>\n", file_lines[7])
         self.assertEqual("</expression>\n", file_lines[8])
         # self.assertEqual("<symbol> ; </symbol>\n", file_lines[8])
@@ -253,6 +272,72 @@ class CompilationEngineTest(unittest.TestCase):
         #   <symbol> ; </symbol>
         # </doStatement>
 
+    def test_compile_term(self):
+        jack_mock_term = """
+        (key = 0)
+        """
+
+    def test_compile_while(self):
+        jack_mock_class = """
+         while (key = 0) {
+            let key = Keyboard.keyPressed();
+            do moveSquare();
+         }
+        """
+
+        jack_mock_in_file = StringIO(jack_mock_class)
+        mock_output_file = StringIO()
+        comp_eng = CompilationEngine(
+            input_stream=jack_mock_in_file, output_stream=mock_output_file)
+
+        comp_eng.tokenizer.advance()
+        comp_eng.compile_while()
+
+        comp_eng.outfile.seek(0)
+        file_lines = comp_eng.outfile.readlines()
+        self.assertEqual("<whileStatement>\n", file_lines[0])
+        self.assertEqual("<keyword> while </keyword>\n", file_lines[1])
+        self.assertEqual("<symbol> ( </symbol>\n", file_lines[2])
+        self.assertEqual("<expression>\n", file_lines[3])
+        self.assertEqual("<term>\n", file_lines[4])
+        self.assertEqual("<identifier> key </identifier>\n", file_lines[5])
+        self.assertEqual("</term>\n", file_lines[6])
+        self.assertEqual("<symbol> = </symbol>\n", file_lines[7])
+        self.assertEqual("<term>\n", file_lines[8])
+        self.assertEqual("<integerConstant> 0 </integerConstant>\n", file_lines[9])
+        self.assertEqual("</term>\n", file_lines[10])
+        self.assertEqual("</expression>\n", file_lines[11])
+        self.assertEqual("<symbol> ) </symbol>\n", file_lines[12])
+        self.assertEqual("<symbol> { </symbol>\n", file_lines[13])
+        self.assertEqual("<statements>\n", file_lines[14])
+        self.assertEqual("<letStatement>\n", file_lines[15])
+        self.assertEqual("<keyword> let </keyword>\n", file_lines[16])
+        self.assertEqual("<identifier> key </identifier>\n", file_lines[17])
+        self.assertEqual("<symbol> = </symbol>\n", file_lines[18])
+        self.assertEqual("<expression>\n", file_lines[19])
+        self.assertEqual("<term>\n", file_lines[20])
+        self.assertEqual("<identifier> Keyboard </identifier>\n", file_lines[21])
+        self.assertEqual("<symbol> . </symbol>\n", file_lines[22])
+        self.assertEqual("<identifier> keyPressed </identifier>\n", file_lines[23])
+        self.assertEqual("<symbol> ( </symbol>\n", file_lines[24])
+        self.assertEqual("<symbol> ) </symbol>\n", file_lines[25])
+        self.assertEqual("</term>\n", file_lines[26])
+        self.assertEqual("</expression>\n", file_lines[27])
+        self.assertEqual("<symbol> ; </symbol>\n", file_lines[28])
+        self.assertEqual("</letStatement>\n", file_lines[29])
+        self.assertEqual("<doStatement>\n", file_lines[30])
+        self.assertEqual("<keyword> do </keyword>\n", file_lines[31])
+        self.assertEqual("<identifier> moveSquare </identifier>\n", file_lines[32])
+        self.assertEqual("<symbol> ( </symbol>\n", file_lines[33])
+        self.assertEqual("<expressionList>\n", file_lines[34])
+        self.assertEqual("</expressionList>\n", file_lines[35])
+        self.assertEqual("<symbol> ) </symbol>\n", file_lines[36])
+        self.assertEqual("<symbol> ; </symbol>\n", file_lines[37])
+        self.assertEqual("</doStatement>\n", file_lines[38])
+        self.assertEqual("</statements>\n", file_lines[39])
+        self.assertEqual("<symbol> } </symbol>\n", file_lines[40])
+        self.assertEqual("</whileStatement>\n", file_lines[41])
+
     def test_compile_subroutine(self):
         jack_mock_class = """
         function void main(x, y) {
@@ -376,10 +461,6 @@ def test_compile_var_declaration():
 
 
 def test_compile_statements():
-    assert False
-
-
-def test_compile_while():
     assert False
 
 

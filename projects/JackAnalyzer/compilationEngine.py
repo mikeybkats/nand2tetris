@@ -42,7 +42,6 @@ class CompilationEngine:
     def write_token(self):
         self._outfile.write(" " + self._tokenizer.currentToken + " ")
 
-    # TODO: implement this write_non_terminal_tag so that write_xml_tag does not need more qualifying lines of code
     def write_non_terminal_tag(self, tag_type, closed):
         """Writes an open token tag: <tokenType>\n or </tokenType>\n"""
         if closed:
@@ -181,8 +180,12 @@ class CompilationEngine:
                 self.compile_do()
             if self._tokenizer.currentToken == GrammarLanguage.IF.value:
                 self.compile_if()
+            if self._tokenizer.currentToken == GrammarLanguage.WHILE.value:
+                self.compile_while()
 
             self._tokenizer.advance()
+
+        self.write_xml_closing_tag(GrammarLanguage.STATEMENTS.value)
 
     def compile_let(self):
         """Compiles a let statement"""
@@ -216,20 +219,51 @@ class CompilationEngine:
 
             self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
+        # self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+        self.write_xml_closing_tag(GrammarLanguage.DO_STATEMENT.value)
+
     def compile_while(self):
         """Compiles a while statement"""
+        self.write_non_terminal_tag(GrammarLanguage.WHILE_STATEMENT.value, False)
+        self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+
+        while self._tokenizer.currentToken != "}":
+            if self._tokenizer.currentToken == "(":
+                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+                self.compile_expression()
+                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+
+            if self._tokenizer.currentToken == "{":
+                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+                self._tokenizer.advance()
+                self.compile_statements()
+
+            self._tokenizer.advance()
+
+        self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+        self.write_xml_closing_tag(GrammarLanguage.WHILE_STATEMENT.value)
+
+    def compile_if(self):
+        """Compiles if statement"""
+        self.write_non_terminal_tag(GrammarLanguage.IF_STATEMENT.value, False)
+        self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+
+        while self._tokenizer.currentToken != "}":
+            pass
+
+        self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
     def compile_return(self):
         """Compiles a return statement"""
         pass
 
-    def compile_if(self):
-        """Compiles if statement"""
-        pass
-
     def compile_expression(self):
         """Compiles an expression - expression grammar: term (op term) """
         self.write_non_terminal_tag(GrammarLanguage.EXPRESSION.value, False)
+
+        # TODO: remove this hacky fix
+        if self._tokenizer.currentToken == "=":
+            self._tokenizer.advance()
 
         expression = True
         while expression:
@@ -260,14 +294,21 @@ class CompilationEngine:
         if self._tokenizer.token_type() == Token_Type.INT_CONST:
             self.write_terminal_tag(GrammarLanguage.INT_CONSTANT.value)
 
-        if self._tokenizer.token_type() == Token_Type.IDENTIFIER:
-            self.write_terminal_tag(GrammarLanguage.IDENTIFIER.value)
-
         if self._tokenizer.token_type() == Token_Type.KEYWORD:
             self.write_terminal_tag(GrammarLanguage.KEYWORD.value)
 
-        # TODO: update outfile.write here so it can distinguish between the different kinds of term tokens
-        # but for now it just writes the current token
+        if self._tokenizer.token_type() == Token_Type.IDENTIFIER:
+            self.write_terminal_tag(GrammarLanguage.IDENTIFIER.value)
+
+            if (self._tokenizer.look_ahead() == "." or
+                self._tokenizer.look_ahead() == "[" or
+                    self._tokenizer.look_ahead() == "("):
+                while (self._tokenizer.currentToken != ";" and
+                        self._tokenizer.currentToken != "{" and
+                        self._tokenizer.currentToken != ")" and
+                        self._tokenizer.currentToken != "="):
+                    self._tokenizer.advance()
+                    self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
         self.write_xml_closing_tag(GrammarLanguage.TERM.value)
 
@@ -277,9 +318,10 @@ class CompilationEngine:
 
         while self._tokenizer.currentToken != ";" and self._tokenizer.currentToken != ")":
             self._tokenizer.advance()
-            self.compile_expression()
+            if self._tokenizer.currentToken != ")":
+                self.compile_expression()
 
             if self._tokenizer.currentToken == ",":
                 self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
-        self.write_xml_tag_2(GrammarLanguage.EXPRESSION_LIST.value, True)
+        self.write_non_terminal_tag(GrammarLanguage.EXPRESSION_LIST.value, True)

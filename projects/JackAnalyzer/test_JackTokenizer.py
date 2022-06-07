@@ -6,6 +6,27 @@ from TokenTypes import TokenTypeTable, Token_Type
 
 
 class TokenizerTest(unittest.TestCase):
+    def test_look_ahead(self):
+        jack_mock_class = """
+        let side = box.x
+        """
+
+        jack_mock_in_file = StringIO(jack_mock_class)
+        tokenizer = JackTokenizer(
+            inputStreamOrFile=jack_mock_in_file)
+
+        self.assertEqual("let", tokenizer.look_ahead())
+
+        tokenizer.advance()
+        self.assertEqual("let", tokenizer.currentToken)
+        tokenizer.advance()
+        self.assertEqual("side", tokenizer.currentToken)
+        tokenizer.advance()
+        self.assertEqual("=", tokenizer.currentToken)
+        tokenizer.advance()
+        self.assertEqual("box", tokenizer.currentToken)
+        self.assertEqual(".", tokenizer.look_ahead())
+
     def test_has_more_tokens(self):
         testFile = StringIO("""
         a test 

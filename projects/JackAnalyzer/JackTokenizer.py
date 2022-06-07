@@ -13,10 +13,15 @@ class JackTokenizer:
             self._infile = open(inputStreamOrFile, mode='rt', encoding='utf-8')
         self._currentToken = ""
         self._tokenTypeTable = TokenTypeTable()
+        self._prevTokenLoc = 0
 
     @property
     def currentToken(self):
         return self._currentToken
+
+    @property
+    def prev_token_loc(self):
+        return self._prevTokenLoc
 
     def has_more_tokens(self):
         """
@@ -82,6 +87,20 @@ class JackTokenizer:
 
         return token
 
+    def tell(self):
+        return self._infile.tell()
+
+    def look_ahead(self):
+        """returns the next token"""
+        prev_token = self._currentToken
+        self.advance()
+
+        next_token = self._currentToken
+        self._infile.seek(self.prev_token_loc)
+        self._currentToken = prev_token
+
+        return next_token
+
     def advance(self):
         """
         Gets the next token from the input and makes it the current token. This method should only be called if hasMoreTokens() is true. Initially there is no current token.
@@ -92,6 +111,7 @@ class JackTokenizer:
 
         # if has more tokens
         if self.has_more_tokens():
+            self._prevTokenLoc = self._infile.tell()
             # get the next token and assign it to current
             self._currentToken = self.get_next_token(self._infile)
 
