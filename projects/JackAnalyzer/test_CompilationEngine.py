@@ -120,9 +120,9 @@ class CompilationEngineTest(unittest.TestCase):
         comp_eng = CompilationEngine(
             input_stream=jack_mock_in_file, output_stream=mock_output_file)
 
-        # while comp_eng.tokenizer.has_more_tokens():
-        # comp_eng.tokenizer.advance()
+        comp_eng.tokenizer.advance()
         comp_eng.compile_expression()
+
         comp_eng.outfile.seek(0)
         file_lines = comp_eng.outfile.readlines()
         self.assertEqual("<expression>\n", file_lines[0])
@@ -255,23 +255,6 @@ class CompilationEngineTest(unittest.TestCase):
         self.assertEqual("</expression>\n", file_lines[17])
         self.assertEqual("</expressionList>\n", file_lines[18])
 
-        # <doStatement>
-        #   <keyword> do </keyword>
-        #   <identifier> game </identifier>
-        #   <symbol> . </symbol>
-        #   <identifier> dispose </identifier>
-        #   <symbol> ( </symbol>
-        #   <expressionList>
-        #   <expression>
-        #   <term>
-        #   <keyword> this </keyword>
-        #   </term>
-        #   </expression>
-        #   </expressionList>
-        #   <symbol> ) </symbol>
-        #   <symbol> ; </symbol>
-        # </doStatement>
-
     def test_compile_term(self):
         jack_mock_term = """
         (key = 0)
@@ -340,7 +323,7 @@ class CompilationEngineTest(unittest.TestCase):
 
     def test_compile_subroutine(self):
         jack_mock_class = """
-        function void main(x, y) {
+        function void main(int x, int y) {
             var SquareGame game;
             let game = game;
             do game.run();
@@ -367,93 +350,121 @@ class CompilationEngineTest(unittest.TestCase):
         self.assertEqual("<identifier> main </identifier>\n", file_lines[3])
         self.assertEqual("<symbol> ( </symbol>\n", file_lines[4])
         self.assertEqual("<parameterList>\n", file_lines[5])
-        self.assertEqual("<term>\n", file_lines[6])
+        self.assertEqual("<keyword> int </keyword>\n", file_lines[6])
         self.assertEqual("<identifier> x </identifier>\n", file_lines[7])
-        self.assertEqual("</term>\n", file_lines[8])
-        self.assertEqual("<symbol> , </symbol>\n", file_lines[9])
-        self.assertEqual("<term>\n", file_lines[10])
-        self.assertEqual("<identifier> y </identifier>\n", file_lines[11])
-        self.assertEqual("</term>\n", file_lines[12])
-        self.assertEqual("</parameterList>\n", file_lines[13])
-        self.assertEqual("<symbol> ) </symbol>\n", file_lines[14])
-        self.assertEqual("<subroutineBody>\n", file_lines[15])
-        self.assertEqual("<symbol> { </symbol>\n", file_lines[16])
-        self.assertEqual("<varDeclaration>\n", file_lines[17])
-        self.assertEqual("<keyword> var </keyword>\n", file_lines[18])
-        self.assertEqual("<identifier> SquareGame </identifier>\n", file_lines[19])
-        self.assertEqual("<identifier> game </identifier>\n", file_lines[20])
-        self.assertEqual("<symbol> ; </symbol>\n", file_lines[21])
-        self.assertEqual("</varDeclaration>\n", file_lines[22])
-        self.assertEqual("<statements>\n", file_lines[23])
-        self.assertEqual("<letStatement>\n", file_lines[24])
-        self.assertEqual("<keyword> let </keyword>\n", file_lines[25])
-        self.assertEqual("<identifier> game </identifier>\n", file_lines[26])
-        self.assertEqual("<symbol> = </symbol>\n", file_lines[27])
-        self.assertEqual("<expression>\n", file_lines[28])
+        self.assertEqual("<symbol> , </symbol>\n", file_lines[8])
+        self.assertEqual("<keyword> int </keyword>\n", file_lines[9])
+        self.assertEqual("<identifier> y </identifier>\n", file_lines[10])
+        self.assertEqual("</parameterList>\n", file_lines[11])
+        self.assertEqual("<symbol> ) </symbol>\n", file_lines[12])
+        self.assertEqual("<subroutineBody>\n", file_lines[13])
+        self.assertEqual("<symbol> { </symbol>\n", file_lines[14])
+        self.assertEqual("<varDeclaration>\n", file_lines[15])
+        self.assertEqual("<keyword> var </keyword>\n", file_lines[16])
+        self.assertEqual("<identifier> SquareGame </identifier>\n", file_lines[17])
+        self.assertEqual("<identifier> game </identifier>\n", file_lines[18])
+        self.assertEqual("<symbol> ; </symbol>\n", file_lines[19])
+        self.assertEqual("</varDeclaration>\n", file_lines[20])
+        self.assertEqual("<statements>\n", file_lines[21])
+        self.assertEqual("<letStatement>\n", file_lines[22])
+        self.assertEqual("<keyword> let </keyword>\n", file_lines[23])
+        self.assertEqual("<identifier> game </identifier>\n", file_lines[24])
+        self.assertEqual("<symbol> = </symbol>\n", file_lines[25])
+        self.assertEqual("<expression>\n", file_lines[26])
 
-      #  <subroutineDec>
-      #      <keyword> function </keyword>
-      #      <keyword> void </keyword>
-      #      <identifier> main </identifier>
-      #      <symbol> ( </symbol>
-      #      <parameterList>
-      #      </parameterList>
-      #      <symbol> ) </symbol>
-      #      <subroutineBody>
-      #        <symbol> { </symbol>
-      #        <varDec>
-      #          <keyword> var </keyword>
-      #          <identifier> SquareGame </identifier>
-      #          <identifier> game </identifier>
-      #          <symbol> ; </symbol>
-      #        </varDec>
-      #        <statements>
-      #          <letStatement>
-      #            <keyword> let </keyword>
-      #            <identifier> game </identifier>
-      #            <symbol> = </symbol>
-      #            <expression>
-      #              <term>
-      #                <identifier> game </identifier>
-      #              </term>
-      #            </expression>
-      #            <symbol> ; </symbol>
-      #          </letStatement>
-      #          <doStatement>
-      #            <keyword> do </keyword>
-      #            <identifier> game </identifier>
-      #            <symbol> . </symbol>
-      #            <identifier> run </identifier>
-      #            <symbol> ( </symbol>
-      #            <expressionList>
-      #            </expressionList>
-      #            <symbol> ) </symbol>
-      #            <symbol> ; </symbol>
-      #          </doStatement>
-      #          <doStatement>
-      #            <keyword> do </keyword>
-      #            <identifier> game </identifier>
-      #            <symbol> . </symbol>
-      #            <identifier> dispose </identifier>
-      #            <symbol> ( </symbol>
-      #            <expressionList>
-      #            </expressionList>
-      #            <symbol> ) </symbol>
-      #            <symbol> ; </symbol>
-      #          </doStatement>
-      #          <returnStatement>
-      #            <keyword> return </keyword>
-      #            <symbol> ; </symbol>
-      #          </returnStatement>
-      #        </statements>
-      #        <symbol> } </symbol>
-      #      </subroutineBody>
-      # </subroutineDec>
+    def test_compile_parameter_list(self):
+        jack_mock_class = """
+        constructor Square new(int Ax, int Ay, int Asize) {
+        """
 
+        jack_mock_in_file = StringIO(jack_mock_class)
+        mock_output_file = StringIO()
+        comp_eng = CompilationEngine(
+            input_stream=jack_mock_in_file, output_stream=mock_output_file)
 
+        while comp_eng.tokenizer.currentToken != ")":
+            comp_eng.tokenizer.advance()
+            if comp_eng.tokenizer.currentToken == "(":
+                comp_eng.compile_parameter_list()
 
-def test_compile_parameter_list():
-    assert False
+        comp_eng.outfile.seek(0)
+        file_lines = comp_eng.outfile.readlines()
+        self.assertEqual("<parameterList>\n", file_lines[0])
+        self.assertEqual("<keyword> int </keyword>\n", file_lines[1])
+        self.assertEqual("<identifier> Ax </identifier>\n", file_lines[2])
+        self.assertEqual("<symbol> , </symbol>\n", file_lines[3])
+        self.assertEqual("<keyword> int </keyword>\n", file_lines[4])
+        self.assertEqual("<identifier> Ay </identifier>\n", file_lines[5])
+        self.assertEqual("<symbol> , </symbol>\n", file_lines[6])
+        self.assertEqual("<keyword> int </keyword>\n", file_lines[7])
+        self.assertEqual("<identifier> Asize </identifier>\n", file_lines[8])
+        self.assertEqual("<parameterList>\n", file_lines[0])
+
+        result = """
+        <parameterList>
+              <keyword> int </keyword>
+              <identifier> Ax </identifier>
+              <symbol> , </symbol>
+              <keyword> int </keyword>
+              <identifier> Ay </identifier>
+              <symbol> , </symbol>
+              <keyword> int </keyword>
+              <identifier> Asize </identifier>
+        </parameterList>
+        """
+
+    def test_compile_if(self):
+        jack_mock_class = """
+        if (direction = 1) {}
+        """
+
+        jack_mock_in_file = StringIO(jack_mock_class)
+        mock_output_file = StringIO()
+        comp_eng = CompilationEngine(
+            input_stream=jack_mock_in_file, output_stream=mock_output_file)
+
+        comp_eng.tokenizer.advance()
+        comp_eng.compile_if()
+
+        comp_eng.outfile.seek(0)
+        file_lines = comp_eng.outfile.readlines()
+
+        self.assertEqual("<ifStatement>\n", file_lines[0])
+        self.assertEqual("<keyword> if </keyword>\n", file_lines[1])
+        self.assertEqual("<symbol> ( </symbol>\n", file_lines[2])
+        self.assertEqual("<expression>\n", file_lines[3])
+        self.assertEqual("<term>\n", file_lines[4])
+        self.assertEqual("<identifier> direction </identifier>\n", file_lines[5])
+        self.assertEqual("</term>\n", file_lines[6])
+        self.assertEqual("<symbol> = </symbol>\n", file_lines[7])
+        self.assertEqual("<term>\n", file_lines[8])
+        self.assertEqual("<integerConstant> 1 </integerConstant>\n", file_lines[9])
+        self.assertEqual("</term>\n", file_lines[10])
+        self.assertEqual("</expression>\n", file_lines[11])
+        self.assertEqual("<symbol> ) </symbol>\n", file_lines[12])
+        self.assertEqual("<symbol> { </symbol>\n", file_lines[13])
+        self.assertEqual("<statements>\n", file_lines[14])
+
+        result = """
+        <ifStatement>
+          <keyword> if </keyword>
+          <symbol> ( </symbol>
+          <expression>
+            <term>
+              <identifier> direction </identifier>
+            </term>
+            <symbol> = </symbol>
+            <term>
+              <integerConstant> 1 </integerConstant>
+            </term>
+          </expression>
+          <symbol> ) </symbol>
+          <symbol> { </symbol>
+              <statements>
+              </statements>
+          <symbol> } </symbol>
+        </ifStatement>
+        """
 
 
 def test_compile_var_declaration():
@@ -465,10 +476,6 @@ def test_compile_statements():
 
 
 def test_compile_return():
-    assert False
-
-
-def test_compile_if():
     assert False
 
 

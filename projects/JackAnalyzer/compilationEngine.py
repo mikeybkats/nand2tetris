@@ -140,19 +140,15 @@ class CompilationEngine:
         """Compiles a (possibly empty) parameter list, not including the enclosing "()"."""
         self.write_xml_tag_2(GrammarLanguage.PARAMETER_LIST.value, False)
 
-        # ((type varName)(',' type varName)*)?
-        while self._tokenizer.currentToken != ")":
+        if self._tokenizer.currentToken == "(":
             self._tokenizer.advance()
 
-            if self._tokenizer.currentToken == ")":
-                self.write_xml_closing_tag(GrammarLanguage.PARAMETER_LIST.value)
-                break
+        # ((type varName)(',' type varName)*)?
+        while self._tokenizer.currentToken != ")":
+            self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+            self._tokenizer.advance()
 
-            if self._tokenizer.currentToken == ",":
-                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-
-            if self._tokenizer.currentToken != ",":
-                self.compile_term()
+        self.write_xml_closing_tag(GrammarLanguage.PARAMETER_LIST.value)
 
     def compile_var_declaration(self):
         """Compiles var declaration"""
@@ -249,9 +245,18 @@ class CompilationEngine:
         self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
         while self._tokenizer.currentToken != "}":
-            pass
+            if self._tokenizer.currentToken == "(":
+                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+                self.compile_expression()
+                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
-        self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+            if self._tokenizer.currentToken == "{":
+                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+                self.compile_statements()
+
+            self._tokenizer.advance()
+
+        self.write_terminal_tag(GrammarLanguage.IF_STATEMENT.value)
 
     def compile_return(self):
         """Compiles a return statement"""
@@ -261,12 +266,12 @@ class CompilationEngine:
         """Compiles an expression - expression grammar: term (op term) """
         self.write_non_terminal_tag(GrammarLanguage.EXPRESSION.value, False)
 
-        # TODO: remove this hacky fix
         if self._tokenizer.currentToken == "=":
             self._tokenizer.advance()
 
         expression = True
         while expression:
+
             if is_op(self._tokenizer.currentToken):
                 self.write_terminal_tag(GrammarLanguage.SYMBOL.value)
             elif self._tokenizer.token_type() != Token_Type.SYMBOL:
