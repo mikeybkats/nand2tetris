@@ -133,7 +133,7 @@ class GrammarLanguage(Enum):
     TRUE = "true"
     VOID = "void"
     VAR = "var"
-    VAR_DEC = "varDeclaration"
+    VAR_DEC = "varDec"
     WHILE_STATEMENT = "whileStatement"
     WHILE = "while"
     CLASS_VAR_DEC = "classVarDec"

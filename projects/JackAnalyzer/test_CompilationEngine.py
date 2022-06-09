@@ -3,7 +3,6 @@ import io
 from io import StringIO
 from CompilationEngine import CompilationEngine
 from JackTokenizer import JackTokenizer
-from TokenTypes import Token_Type
 
 
 class CompilationEngineTest(unittest.TestCase):
@@ -37,25 +36,6 @@ class CompilationEngineTest(unittest.TestCase):
             input_stream=jack_mock_in_file, output_stream=mock_output_file)
 
         self.assertIsInstance(comp_eng.outfile, io.StringIO)
-
-    def test_end_while(self):
-        jack_mock_class = """ 
-        class Main {
-            var String io;
-            let io = "foo";
-        }
-        """
-        jack_mock_in_file = StringIO(jack_mock_class)
-        mock_output_file = StringIO()
-        comp_eng = CompilationEngine(
-            input_stream=jack_mock_in_file, output_stream=mock_output_file)
-
-        while comp_eng.tokenizer.currentToken != ";":
-            comp_eng.tokenizer.advance()
-
-        comp_eng.outfile.seek(0)
-        file_lines = comp_eng.outfile.readlines()
-        self.assertEqual(";", comp_eng.tokenizer.currentToken)
 
     def test_write_xml_tag(self):
         jack_mock_in_file = StringIO()
@@ -359,12 +339,12 @@ class CompilationEngineTest(unittest.TestCase):
         self.assertEqual("<symbol> ) </symbol>\n", file_lines[12])
         self.assertEqual("<subroutineBody>\n", file_lines[13])
         self.assertEqual("<symbol> { </symbol>\n", file_lines[14])
-        self.assertEqual("<varDeclaration>\n", file_lines[15])
+        self.assertEqual("<varDec>\n", file_lines[15])
         self.assertEqual("<keyword> var </keyword>\n", file_lines[16])
         self.assertEqual("<identifier> SquareGame </identifier>\n", file_lines[17])
         self.assertEqual("<identifier> game </identifier>\n", file_lines[18])
         self.assertEqual("<symbol> ; </symbol>\n", file_lines[19])
-        self.assertEqual("</varDeclaration>\n", file_lines[20])
+        self.assertEqual("</varDec>\n", file_lines[20])
         self.assertEqual("<statements>\n", file_lines[21])
         self.assertEqual("<letStatement>\n", file_lines[22])
         self.assertEqual("<keyword> let </keyword>\n", file_lines[23])
@@ -466,16 +446,88 @@ class CompilationEngineTest(unittest.TestCase):
         </ifStatement>
         """
 
+    def test_compile_var_declaration(self):
+        jack_mock_class = """
+        var int i, j;
+        """
 
-def test_compile_var_declaration():
-    assert False
+        jack_mock_in_file = StringIO(jack_mock_class)
+        mock_output_file = StringIO()
+        comp_eng = CompilationEngine(
+            input_stream=jack_mock_in_file, output_stream=mock_output_file)
+
+        comp_eng.tokenizer.advance()
+        comp_eng.compile_var_declaration()
+
+        comp_eng.outfile.seek(0)
+        file_lines = comp_eng.outfile.readlines()
+
+        self.assertEqual("<varDec>\n", file_lines[0])
+        self.assertEqual("<keyword> var </keyword>\n", file_lines[1])
+        self.assertEqual("<keyword> int </keyword>\n", file_lines[2])
+        self.assertEqual("<identifier> i </identifier>\n", file_lines[3])
+        self.assertEqual("<symbol> , </symbol>\n", file_lines[4])
+        self.assertEqual("<identifier> j </identifier>\n", file_lines[5])
+        self.assertEqual("<symbol> ; </symbol>\n", file_lines[6])
+        self.assertEqual("</varDec>\n", file_lines[7])
+
+        result = """
+        <varDec>
+          <keyword> var </keyword>
+          <keyword> int </keyword>
+          <identifier> i </identifier>
+          <symbol> , </symbol>
+          <identifier> j </identifier>
+          <symbol> ; </symbol>
+        </varDec>
+        """
+
+    def test_compile_return(self):
+        jack_mock_class = """
+        return this;
+        """
+
+        jack_mock_class2 = """
+        return;
+        """
+
+        jack_mock_in_file = StringIO(jack_mock_class)
+        mock_output_file = StringIO()
+        comp_eng = CompilationEngine(
+            input_stream=jack_mock_in_file, output_stream=mock_output_file)
+
+        comp_eng.tokenizer.advance()
+        comp_eng.compile_return()
+
+        comp_eng.outfile.seek(0)
+        file_lines = comp_eng.outfile.readlines()
+
+        self.assertEqual("<returnStatement>\n", file_lines[0])
+        self.assertEqual("<keyword> return </keyword>\n", file_lines[1])
+        self.assertEqual("<expression>\n", file_lines[2])
+        self.assertEqual("<term>\n", file_lines[3])
+        self.assertEqual("<keyword> this </keyword>\n", file_lines[4])
+        self.assertEqual("</term>\n", file_lines[5])
+        self.assertEqual("</expression>\n", file_lines[6])
+        self.assertEqual("<symbol> ; </symbol>\n", file_lines[7])
+        self.assertEqual("</returnStatement>\n", file_lines[8])
+
+        jack_mock_in_file2 = StringIO(jack_mock_class2)
+        mock_output_file2 = StringIO()
+        comp_eng2 = CompilationEngine(
+            input_stream=jack_mock_in_file2, output_stream=mock_output_file2)
+        comp_eng2.tokenizer.advance()
+        comp_eng2.compile_return()
+        comp_eng2.outfile.seek(0)
+        file_lines = comp_eng2.outfile.readlines()
+
+        self.assertEqual("<returnStatement>\n", file_lines[0])
+        self.assertEqual("<keyword> return </keyword>\n", file_lines[1])
+        self.assertEqual("<symbol> ; </symbol>\n", file_lines[2])
+        self.assertEqual("</returnStatement>\n", file_lines[3])
 
 
 def test_compile_statements():
-    assert False
-
-
-def test_compile_return():
     assert False
 
 

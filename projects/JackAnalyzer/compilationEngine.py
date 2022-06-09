@@ -151,7 +151,11 @@ class CompilationEngine:
         self.write_xml_closing_tag(GrammarLanguage.PARAMETER_LIST.value)
 
     def compile_var_declaration(self):
-        """Compiles var declaration"""
+        """
+        Compiles var declaration
+
+        var type varName (, varName)*;
+        """
         self.write_xml_tag_2(GrammarLanguage.VAR_DEC.value, False)
         self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
@@ -260,7 +264,15 @@ class CompilationEngine:
 
     def compile_return(self):
         """Compiles a return statement"""
-        pass
+        self.write_non_terminal_tag(GrammarLanguage.RETURN_STATEMENT.value, False)
+        self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+
+        self._tokenizer.advance()
+        if self._tokenizer.currentToken != ";":
+            self.compile_expression()
+
+        self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+        self.write_xml_closing_tag(GrammarLanguage.RETURN_STATEMENT.value)
 
     def compile_expression(self):
         """Compiles an expression - expression grammar: term (op term) """
