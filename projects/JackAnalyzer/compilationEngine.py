@@ -7,7 +7,7 @@ from io import TextIOBase
 class CompilationEngine:
     def __init__(self, input_stream, output_stream):
         """ 
-        Creates a new compilation engin with the givin input and output. The next routine called must be compileClass()
+        Creates a new compilation engin with the given input and output. The next routine called must be compileClass()
         """
 
         # make a jack tokenizer
@@ -16,7 +16,7 @@ class CompilationEngine:
         if isinstance(output_stream, TextIOBase):
             self._outfile = output_stream
         else:
-            self._outfile = open(input_stream, mode="w+", encoding='utf-8')
+            self._outfile = open(output_stream, mode="w+", encoding='utf-8')
 
     @property
     def tokenizer(self):
@@ -25,6 +25,9 @@ class CompilationEngine:
     @property
     def outfile(self):
         return self._outfile
+
+    def close_outfile(self):
+        self._outfile.close()
 
     def write_xml_tag(self, tag_type):
         self._outfile.write("<" + tag_type + ">")
@@ -58,33 +61,28 @@ class CompilationEngine:
 
     def compile_class(self):
         """Compiles a complete class"""
+
         while self._tokenizer.has_more_tokens():
-            # get the token
             self._tokenizer.advance()
 
-            # if keyword and word == class
-            if (self._tokenizer.token_type() == GrammarLanguage.KEYWORD.value and
-                    self._tokenizer.currentToken == "class"):
-                self.write_xml_tag_2(GrammarLanguage.CLASS.value, True)
+            if self._tokenizer.currentToken == GrammarLanguage.CLASS.value:
+                self.write_non_terminal_tag(GrammarLanguage.CLASS.value, False)
+                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+                self._tokenizer.advance()
+                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+                self._tokenizer.advance()
+                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
-            # if identifier
-            if self._tokenizer.token_type() == GrammarLanguage.IDENTIFIER.value:
-                self.write_terminal_tag(GrammarLanguage.IDENTIFIER.value)
-                break
+            if (self._tokenizer.currentToken == GrammarLanguage.VAR.value or
+                    self._tokenizer.currentToken == GrammarLanguage.FIELD.value):
+                self.compile_class_var_declaration()
 
-            if (self._tokenizer.token_type() == GrammarLanguage.SYMBOL.value and
-                    self._tokenizer.currentToken == "{"):
-                self.write_terminal_tag(GrammarLanguage.SYMBOL.value)
-                break
+            if (self._tokenizer.currentToken == GrammarLanguage.METHOD.value or
+                self._tokenizer.currentToken == GrammarLanguage.CONSTRUCTOR.value or
+                    self._tokenizer.currentToken == GrammarLanguage.FUNCTION.value):
+                self.compile_subroutine()
 
-            # TODO: compile all statements
-            # now compile all the class elements
-            # self.compile_class_var_declaration()
-
-            if (self._tokenizer.token_type() == GrammarLanguage.SYMBOL.value and
-                    self._tokenizer.currentToken == "}"):
-                self.write_terminal_tag(GrammarLanguage.SYMBOL.value)
-                break
+        self.write_non_terminal_tag(GrammarLanguage.CLASS.value, True)
 
     def compile_class_var_declaration(self):
         """Compiles a static declaration or a field declaration"""
