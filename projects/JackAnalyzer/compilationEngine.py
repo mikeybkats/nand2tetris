@@ -235,6 +235,7 @@ class CompilationEngine:
                 self.write_terminal_tag(self._tokenizer.token_type().value.lower())
                 self._tokenizer.advance()
                 self.compile_statements()
+                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
             self._tokenizer.advance()
 
@@ -246,19 +247,27 @@ class CompilationEngine:
         self.write_non_terminal_tag(GrammarLanguage.IF_STATEMENT.value, False)
         self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
+        self._tokenizer.advance()
+
+        if self._tokenizer.currentToken == "(":
+            self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+            self.compile_expression()
+            self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+            self._tokenizer.advance()
+
         while self._tokenizer.currentToken != "}":
-            if self._tokenizer.currentToken == "(":
-                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-                self.compile_expression()
-                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
             if self._tokenizer.currentToken == "{":
                 self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+                self._tokenizer.advance()
                 self.compile_statements()
+                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+                break
 
             self._tokenizer.advance()
 
-        self.write_terminal_tag(GrammarLanguage.IF_STATEMENT.value)
+        # self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+        self.write_non_terminal_tag(GrammarLanguage.IF_STATEMENT.value, True)
 
     def compile_return(self):
         """Compiles a return statement"""

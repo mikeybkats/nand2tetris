@@ -3,7 +3,7 @@ import io
 from io import StringIO
 from CompilationEngine import CompilationEngine
 from JackTokenizer import JackTokenizer
-
+from textwrap import dedent
 
 class CompilationEngineTest(unittest.TestCase):
     def test_init(self):
@@ -302,17 +302,18 @@ class CompilationEngineTest(unittest.TestCase):
         self.assertEqual("</whileStatement>\n", file_lines[41])
 
     def test_compile_subroutine(self):
-        jack_mock_class = """
-        function void main(int x, int y) {
-            var SquareGame game;
-            let game = game;
-            do game.run();
-            do game.dispose();
+        mock_sub_routine = """
+        method void moveSquare() {
+            if (direction = 1) { do square.moveUp(); }
+            if (direction = 2) { do square.moveDown(); }
+            if (direction = 3) { do square.moveLeft(); }
+            if (direction = 4) { do square.moveRight(); }
+            do Sys.wait(5);  // delays the next movement
             return;
-        }
+         }
         """
 
-        jack_mock_in_file = StringIO(jack_mock_class)
+        jack_mock_in_file = StringIO(mock_sub_routine)
         mock_output_file = StringIO()
         comp_eng = CompilationEngine(
             input_stream=jack_mock_in_file, output_stream=mock_output_file)
@@ -322,35 +323,178 @@ class CompilationEngineTest(unittest.TestCase):
             comp_eng.compile_subroutine()
 
         comp_eng.outfile.seek(0)
-        count = 0
         file_lines = comp_eng.outfile.readlines()
-        self.assertEqual("<subroutineDec>\n", file_lines[0])
-        self.assertEqual("<keyword> function </keyword>\n", file_lines[1])
-        self.assertEqual("<keyword> void </keyword>\n", file_lines[2])
-        self.assertEqual("<identifier> main </identifier>\n", file_lines[3])
-        self.assertEqual("<symbol> ( </symbol>\n", file_lines[4])
-        self.assertEqual("<parameterList>\n", file_lines[5])
-        self.assertEqual("<keyword> int </keyword>\n", file_lines[6])
-        self.assertEqual("<identifier> x </identifier>\n", file_lines[7])
-        self.assertEqual("<symbol> , </symbol>\n", file_lines[8])
-        self.assertEqual("<keyword> int </keyword>\n", file_lines[9])
-        self.assertEqual("<identifier> y </identifier>\n", file_lines[10])
-        self.assertEqual("</parameterList>\n", file_lines[11])
-        self.assertEqual("<symbol> ) </symbol>\n", file_lines[12])
-        self.assertEqual("<subroutineBody>\n", file_lines[13])
-        self.assertEqual("<symbol> { </symbol>\n", file_lines[14])
-        self.assertEqual("<varDec>\n", file_lines[15])
-        self.assertEqual("<keyword> var </keyword>\n", file_lines[16])
-        self.assertEqual("<identifier> SquareGame </identifier>\n", file_lines[17])
-        self.assertEqual("<identifier> game </identifier>\n", file_lines[18])
-        self.assertEqual("<symbol> ; </symbol>\n", file_lines[19])
-        self.assertEqual("</varDec>\n", file_lines[20])
-        self.assertEqual("<statements>\n", file_lines[21])
-        self.assertEqual("<letStatement>\n", file_lines[22])
-        self.assertEqual("<keyword> let </keyword>\n", file_lines[23])
-        self.assertEqual("<identifier> game </identifier>\n", file_lines[24])
-        self.assertEqual("<symbol> = </symbol>\n", file_lines[25])
-        self.assertEqual("<expression>\n", file_lines[26])
+
+        result = dedent("""\
+        <subroutineDec>
+        <keyword> method </keyword>
+        <keyword> void </keyword>
+        <identifier> moveSquare </identifier>
+        <symbol> ( </symbol>
+        <parameterList>
+        </parameterList>
+        <symbol> ) </symbol>
+        <subroutineBody>
+        <symbol> { </symbol>
+        <statements>
+        <ifStatement>
+        <keyword> if </keyword>
+        <symbol> ( </symbol>
+        <expression>
+        <term>
+        <identifier> direction </identifier>
+        </term>
+        <symbol> = </symbol>
+        <term>
+        <integerConstant> 1 </integerConstant>
+        </term>
+        </expression>
+        <symbol> ) </symbol>
+        <symbol> { </symbol>
+        <statements>
+        <doStatement>
+        <keyword> do </keyword>
+        <identifier> square </identifier>
+        <symbol> . </symbol>
+        <identifier> moveUp </identifier>
+        <symbol> ( </symbol>
+        <expressionList>
+        </expressionList>
+        <symbol> ) </symbol>
+        <symbol> ; </symbol>
+        </doStatement>
+        </statements>
+        <symbol> } </symbol>
+        </ifStatement>
+        <ifStatement>
+        <keyword> if </keyword>
+        <symbol> ( </symbol>
+        <expression>
+        <term>
+        <identifier> direction </identifier>
+        </term>
+        <symbol> = </symbol>
+        <term>
+        <integerConstant> 2 </integerConstant>
+        </term>
+        </expression>
+        <symbol> ) </symbol>
+        <symbol> { </symbol>
+        <statements>
+        <doStatement>
+        <keyword> do </keyword>
+        <identifier> square </identifier>
+        <symbol> . </symbol>
+        <identifier> moveDown </identifier>
+        <symbol> ( </symbol>
+        <expressionList>
+        </expressionList>
+        <symbol> ) </symbol>
+        <symbol> ; </symbol>
+        </doStatement>
+        </statements>
+        <symbol> } </symbol>
+        </ifStatement>
+        <ifStatement>
+        <keyword> if </keyword>
+        <symbol> ( </symbol>
+        <expression>
+        <term>
+        <identifier> direction </identifier>
+        </term>
+        <symbol> = </symbol>
+        <term>
+        <integerConstant> 3 </integerConstant>
+        </term>
+        </expression>
+        <symbol> ) </symbol>
+        <symbol> { </symbol>
+        <statements>
+        <doStatement>
+        <keyword> do </keyword>
+        <identifier> square </identifier>
+        <symbol> . </symbol>
+        <identifier> moveLeft </identifier>
+        <symbol> ( </symbol>
+        <expressionList>
+        </expressionList>
+        <symbol> ) </symbol>
+        <symbol> ; </symbol>
+        </doStatement>
+        </statements>
+        <symbol> } </symbol>
+        </ifStatement>
+        <ifStatement>
+        <keyword> if </keyword>
+        <symbol> ( </symbol>
+        <expression>
+        <term>
+        <identifier> direction </identifier>
+        </term>
+        <symbol> = </symbol>
+        <term>
+        <integerConstant> 4 </integerConstant>
+        </term>
+        </expression>
+        <symbol> ) </symbol>
+        <symbol> { </symbol>
+        <statements>
+        <doStatement>
+        <keyword> do </keyword>
+        <identifier> square </identifier>
+        <symbol> . </symbol>
+        <identifier> moveRight </identifier>
+        <symbol> ( </symbol>
+        <expressionList>
+        </expressionList>
+        <symbol> ) </symbol>
+        <symbol> ; </symbol>
+        </doStatement>
+        </statements>
+        <symbol> } </symbol>
+        </ifStatement>
+        <doStatement>
+        <keyword> do </keyword>
+        <identifier> Sys </identifier>
+        <symbol> . </symbol>
+        <identifier> wait </identifier>
+        <symbol> ( </symbol>
+        <expressionList>
+        <expression>
+        <term>
+        <integerConstant> 5 </integerConstant>
+        </term>
+        </expression>
+        </expressionList>
+        <symbol> ) </symbol>
+        <symbol> ; </symbol>
+        </doStatement>
+        <returnStatement>
+        <keyword> return </keyword>
+        <symbol> ; </symbol>
+        </returnStatement>
+        </statements>
+        <symbol> } </symbol>
+        </subroutineBody>
+        </subroutineDec>
+        """)
+
+        result_buffer = io.StringIO(result)
+        result_lines = result_buffer.readlines()
+
+        self.assertEqual("<symbol> ; </symbol>\n", file_lines[35])
+        self.assertEqual("</doStatement>\n", file_lines[36])
+        self.assertEqual("</statements>\n", file_lines[37])
+        self.assertEqual("<symbol> } </symbol>\n", file_lines[38])
+        self.assertEqual("</ifStatement>\n", file_lines[39])
+        self.assertEqual("<ifStatement>\n", file_lines[40])
+        self.assertEqual("<symbol> } </symbol>\n", file_lines[67])
+        self.assertEqual("<returnStatement>\n", file_lines[144])
+
+        count = 0
+        for line in result_lines:
+            self.assertEqual(line, file_lines[count])
+            count = count + 1
 
     def test_compile_parameter_list(self):
         jack_mock_class = """
