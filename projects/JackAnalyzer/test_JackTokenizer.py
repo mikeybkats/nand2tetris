@@ -139,6 +139,32 @@ class TokenizerTest(unittest.TestCase):
         token = tokenizer.currentToken
         self.assertEqual(token, ">")
 
+        # test comments
+        test_string_comments = """ 
+            var int x; // x is used for blah
+            var Boolean xgt; // another comment
+        }
+        """
+        test_file = StringIO(test_string_comments)
+        tokenizer = JackTokenizer(inputStreamOrFile=test_file)
+
+        tokenizer.advance()
+        tokenizer.advance()
+        tokenizer.advance()
+        tokenizer.advance()
+        tokenizer.advance()
+        self.assertEqual(Token_Type.SYMBOL, tokenizer.token_type())
+        self.assertNotEqual("/", tokenizer.currentToken)
+
+    def test_strip_comments_from_infile(self):
+        test_string_comments = "var // x is used for blah"
+        test_file = StringIO(test_string_comments)
+        tokenizer = JackTokenizer(inputStreamOrFile=test_file)
+        replacement = tokenizer.strip_inline_comments_from_infile()
+        self.assertEqual("var", replacement.getvalue())
+        result_lines = tokenizer.infile.readlines()
+        self.assertEqual("var", result_lines[0])
+
     def test_advance(self):
         testString = """ 
         class Main {

@@ -11,6 +11,8 @@ class JackTokenizer:
             self._infile = inputStreamOrFile
         else:
             self._infile = open(inputStreamOrFile, mode='rt', encoding='utf-8')
+
+        self.strip_inline_comments_from_infile()
         self._currentToken = ""
         self._tokenTypeTable = TokenTypeTable()
         self._prevTokenLoc = 0
@@ -39,6 +41,21 @@ class JackTokenizer:
 
         self._infile.seek(current_location)
         return has_more_tokens
+
+    @property
+    def infile(self):
+        return self._infile
+
+    def strip_inline_comments_from_infile(self):
+        replacement = io.StringIO()
+
+        for line in self._infile:
+            changes = line.split("//", 1)[0].rstrip()
+            replacement.write(changes)
+
+        self._infile = replacement
+        self._infile.seek(0)
+        return replacement
 
     def get_next_token(self, file):
         """

@@ -489,7 +489,15 @@ class CompilationEngineTest(unittest.TestCase):
         self.assertEqual("</ifStatement>\n", file_lines[39])
         self.assertEqual("<ifStatement>\n", file_lines[40])
         self.assertEqual("<symbol> } </symbol>\n", file_lines[67])
-        self.assertEqual("<returnStatement>\n", file_lines[144])
+        self.assertEqual("<keyword> if </keyword>\n", file_lines[99])
+        self.assertEqual("<symbol> ( </symbol>\n", file_lines[100])
+
+        self.assertEqual("<symbol> ) </symbol>\n", file_lines[140])
+        self.assertEqual("<symbol> ; </symbol>\n", file_lines[141])
+        self.assertEqual("</doStatement>\n", file_lines[142])
+
+        self.assertEqual("<returnStatement>\n", file_lines[143])
+        self.assertEqual("</returnStatement>\n", file_lines[146])
 
         count = 0
         for line in result_lines:

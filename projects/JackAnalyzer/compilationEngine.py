@@ -134,6 +134,9 @@ class CompilationEngine:
                     # write the closing ')' symbol
                     self.write_terminal_tag(GrammarLanguage.SYMBOL.value)
 
+            self.write_xml_closing_tag(GrammarLanguage.SUB_ROUTINE_BOD.value)
+            self.write_xml_closing_tag(GrammarLanguage.SUB_ROUTINE_DEC.value)
+
     def compile_parameter_list(self):
         """Compiles a (possibly empty) parameter list, not including the enclosing "()"."""
         self.write_xml_tag_2(GrammarLanguage.PARAMETER_LIST.value, False)
@@ -169,6 +172,7 @@ class CompilationEngine:
         self.write_xml_tag_2(GrammarLanguage.STATEMENTS.value, False)
 
         while (self._tokenizer.currentToken == GrammarLanguage.DO.value or
+                self._tokenizer.currentToken == GrammarLanguage.RETURN.value or
                 self._tokenizer.currentToken == GrammarLanguage.LET.value or
                 self._tokenizer.currentToken == GrammarLanguage.IF.value):
 
@@ -180,6 +184,8 @@ class CompilationEngine:
                 self.compile_if()
             if self._tokenizer.currentToken == GrammarLanguage.WHILE.value:
                 self.compile_while()
+            if self._tokenizer.currentToken == GrammarLanguage.RETURN.value:
+                self.compile_return()
 
             self._tokenizer.advance()
 
