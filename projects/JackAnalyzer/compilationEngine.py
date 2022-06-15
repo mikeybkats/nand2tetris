@@ -7,7 +7,7 @@ from io import TextIOBase
 class CompilationEngine:
     def __init__(self, input_stream, output_stream):
         """ 
-        Creates a new compilation engin with the given input and output. The next routine called must be compileClass()
+        Creates a new compilation engine with the given input and output. The next routine called must be compileClass()
         """
 
         # make a jack tokenizer
@@ -124,8 +124,6 @@ class CompilationEngine:
                     self.compile_statements()
                     self._tokenizer.advance()
 
-                # TODO: resolve how to write this properly so it does not repeat writing
-                #  tags that have already been written.
                 self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
                 # compile parameter list
@@ -186,6 +184,7 @@ class CompilationEngine:
                 self.compile_while()
             if self._tokenizer.currentToken == GrammarLanguage.RETURN.value:
                 self.compile_return()
+                break
 
             self._tokenizer.advance()
 
@@ -257,6 +256,7 @@ class CompilationEngine:
 
         if self._tokenizer.currentToken == "(":
             self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+            self._tokenizer.advance()
             self.compile_expression()
             self.write_terminal_tag(self._tokenizer.token_type().value.lower())
             self._tokenizer.advance()
@@ -296,7 +296,8 @@ class CompilationEngine:
 
         expression = True
         while expression:
-
+            if self._tokenizer.currentToken == "(":
+                self.compile_term()
             if is_op(self._tokenizer.currentToken):
                 self.write_terminal_tag(GrammarLanguage.SYMBOL.value)
             elif self._tokenizer.token_type() != Token_Type.SYMBOL:
@@ -320,6 +321,13 @@ class CompilationEngine:
         """
         self.write_xml_tag(GrammarLanguage.TERM.value)
         self.outfile.write("\n")
+
+        if self._tokenizer.currentToken == "(":
+            self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+            self._tokenizer.advance()
+            self.compile_expression()
+
+            self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
         if self._tokenizer.token_type() == Token_Type.INT_CONST:
             self.write_terminal_tag(GrammarLanguage.INT_CONSTANT.value)

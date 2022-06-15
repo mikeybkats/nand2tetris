@@ -3,6 +3,7 @@ import os
 from JackTokenizer import JackTokenizer
 from io import StringIO
 from TokenTypes import TokenTypeTable, Token_Type
+from textwrap import dedent
 
 
 class TokenizerTest(unittest.TestCase):
@@ -156,14 +157,35 @@ class TokenizerTest(unittest.TestCase):
         self.assertEqual(Token_Type.SYMBOL, tokenizer.token_type())
         self.assertNotEqual("/", tokenizer.currentToken)
 
-    def test_strip_comments_from_infile(self):
-        test_string_comments = "var // x is used for blah"
-        test_file = StringIO(test_string_comments)
-        tokenizer = JackTokenizer(inputStreamOrFile=test_file)
-        replacement = tokenizer.strip_inline_comments_from_infile()
-        self.assertEqual("var", replacement.getvalue())
-        result_lines = tokenizer.infile.readlines()
-        self.assertEqual("var", result_lines[0])
+    def test_strip_comments(self):
+        mock_comment = dedent("""\
+                          // This file is part of www.nand2tetris.org
+                          // and the book "The Elements of Computing Systems"
+                          // by Nisan and Schocken, MIT Press.
+                          // File name: projects/10/Square/SquareGame.jack
+                          
+                          // (same as projects/09/Square/SquareGame.jack)
+                          
+                          /**
+                          * Implements the Square Dance game.
+                          * This simple game allows the user to move a black square around
+                          * the screen, and change the square's size during the movement.
+                          * When the game starts, a square of 30 by 30 pixels is shown at the
+                          * top-left corner of the screen. The user controls the square as follows.
+                          * The 4 arrow keys are used to move the square up, down, left, and right.
+                          * The 'z' and 'x' keys are used, respectively, to decrement and increment
+                          * the square's size. The 'q' key is used to quit the game.
+                          */
+                          
+                          int foo = arg1; // this is a comment
+                          """)
+        mock_input = StringIO(mock_comment)
+        mock_output = "int foo = arg1;"
+
+        tokenizer = JackTokenizer(inputStreamOrFile=mock_input)
+        result = tokenizer.strip_comments_from_infile()
+
+        self.assertEqual(mock_output, result.getvalue())
 
     def test_advance(self):
         testString = """ 
