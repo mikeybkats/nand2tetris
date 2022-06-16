@@ -1175,21 +1175,21 @@
 <symbol> , </symbol>
 <expression>
 <term>
-  <identifier> x </identifier>
+<identifier> x </identifier>
 </term>
 <symbol> + </symbol>
 <term>
-  <identifier> size </identifier>
+<identifier> size </identifier>
 </term>
 </expression>
 <symbol> , </symbol>
 <expression>
 <term>
-  <identifier> y </identifier>
+<identifier> y </identifier>
 </term>
 <symbol> + </symbol>
 <term>
-  <identifier> size </identifier>
+<identifier> size </identifier>
 </term>
 </expression>
 </expressionList>

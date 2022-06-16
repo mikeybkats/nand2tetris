@@ -18,6 +18,7 @@ def is_op(token):
             token == "<" or
             token == ">" or
             token == "~" or
+            token == "&" or
             token == "="):
         return True
     else:

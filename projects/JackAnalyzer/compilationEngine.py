@@ -1,7 +1,7 @@
 from JackTokenizer import JackTokenizer
-from TagTypes import Tag_Types
 from TokenTypes import Token_Type, GrammarLanguage, TerminalTypeTable, is_op
 from io import TextIOBase
+import html
 
 
 class CompilationEngine:
@@ -43,7 +43,10 @@ class CompilationEngine:
         self._outfile.write("</" + tag_type + ">\n")
 
     def write_token(self):
-        self._outfile.write(" " + self._tokenizer.currentToken + " ")
+        token = self._tokenizer.currentToken
+        if is_op(token):
+            token = html.escape(token)
+        self._outfile.write(" " + token + " ")
 
     def write_non_terminal_tag(self, tag_type, closed):
         """Writes an open token tag: <tokenType>\n or </tokenType>\n"""
@@ -82,6 +85,7 @@ class CompilationEngine:
                     self._tokenizer.currentToken == GrammarLanguage.FUNCTION.value):
                 self.compile_subroutine()
 
+        self.write_terminal_tag(self._tokenizer.token_type().value.lower())
         self.write_non_terminal_tag(GrammarLanguage.CLASS.value, True)
 
     def compile_class_var_declaration(self):
