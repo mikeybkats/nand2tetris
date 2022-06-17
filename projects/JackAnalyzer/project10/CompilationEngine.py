@@ -116,26 +116,19 @@ class CompilationEngine:
                 if self._tokenizer.currentToken == "{":
                     self.write_xml_tag_2(GrammarLanguage.SUB_ROUTINE_BOD.value, False)
 
-                if ((self._tokenizer.currentToken != GrammarLanguage.VAR.value and
-                     self._tokenizer.currentToken != GrammarLanguage.INT.value and
-                     self._tokenizer.currentToken != GrammarLanguage.DO.value and
-                     self._tokenizer.currentToken != GrammarLanguage.IF.value and
-                     self._tokenizer.currentToken != GrammarLanguage.LET.value) and
-                        self._tokenizer.token_type().value.lower() == GrammarLanguage.KEYWORD.value or
-                        self._tokenizer.token_type().value.lower() == GrammarLanguage.IDENTIFIER.value or
-                        self._tokenizer.token_type().value.lower() == GrammarLanguage.SYMBOL.value):
-                    self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-
                 # compile declarations
-                if (self._tokenizer.currentToken == GrammarLanguage.VAR.value or
-                        self._tokenizer.currentToken == GrammarLanguage.INT.value):
+                if self._tokenizer.currentToken == GrammarLanguage.VAR.value:
                     self.compile_var_declaration()
+                    self._tokenizer.advance()
 
                 # compile statements
                 if (self._tokenizer.currentToken == GrammarLanguage.LET.value or
                     self._tokenizer.currentToken == GrammarLanguage.DO.value or
                         self._tokenizer.currentToken == GrammarLanguage.IF.value):
                     self.compile_statements()
+                    self._tokenizer.advance()
+
+                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
                 # compile parameter list
                 if self._tokenizer.currentToken == "(":
@@ -143,7 +136,6 @@ class CompilationEngine:
                     # write the closing ')' symbol
                     self.write_terminal_tag(GrammarLanguage.SYMBOL.value)
 
-            self.write_terminal_tag(self._tokenizer.token_type().value.lower())
             self.write_xml_closing_tag(GrammarLanguage.SUB_ROUTINE_BOD.value)
             self.write_xml_closing_tag(GrammarLanguage.SUB_ROUTINE_DEC.value)
 
@@ -183,8 +175,7 @@ class CompilationEngine:
 
         while (self._tokenizer.currentToken == GrammarLanguage.DO.value or
                 self._tokenizer.currentToken == GrammarLanguage.RETURN.value or
-               self._tokenizer.currentToken == GrammarLanguage.WHILE.value or
-               self._tokenizer.currentToken == GrammarLanguage.LET.value or
+                self._tokenizer.currentToken == GrammarLanguage.LET.value or
                 self._tokenizer.currentToken == GrammarLanguage.IF.value):
 
             if self._tokenizer.currentToken == GrammarLanguage.LET.value:
@@ -197,6 +188,7 @@ class CompilationEngine:
                 self.compile_while()
             if self._tokenizer.currentToken == GrammarLanguage.RETURN.value:
                 self.compile_return()
+                break
 
             self._tokenizer.advance()
 
@@ -209,14 +201,6 @@ class CompilationEngine:
 
         while self._tokenizer.currentToken != ";":
             self._tokenizer.advance()
-
-            if self.tokenizer.look_ahead() == "[":
-                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-                self.tokenizer.advance()
-                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-                self.compile_expression()
-                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-                self.tokenizer.advance()
 
             if self.tokenizer.currentToken == "=":
                 self.write_terminal_tag(self._tokenizer.token_type().value.lower())
@@ -251,11 +235,8 @@ class CompilationEngine:
         self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
         while self._tokenizer.currentToken != "}":
-            self._tokenizer.advance()
-
             if self._tokenizer.currentToken == "(":
                 self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-                self._tokenizer.advance()
                 self.compile_expression()
                 self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
@@ -263,7 +244,9 @@ class CompilationEngine:
                 self.write_terminal_tag(self._tokenizer.token_type().value.lower())
                 self._tokenizer.advance()
                 self.compile_statements()
-                # self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+
+            self._tokenizer.advance()
 
         self.write_terminal_tag(self._tokenizer.token_type().value.lower())
         self.write_xml_closing_tag(GrammarLanguage.WHILE_STATEMENT.value)
@@ -328,7 +311,6 @@ class CompilationEngine:
 
             if (self._tokenizer.currentToken == ";" or
                     self._tokenizer.currentToken == ")" or
-                    self._tokenizer.currentToken == "]" or
                     self._tokenizer.currentToken == ","):
                 expression = False
 
@@ -363,30 +345,12 @@ class CompilationEngine:
             if (self._tokenizer.look_ahead() == "." or
                 self._tokenizer.look_ahead() == "[" or
                     self._tokenizer.look_ahead() == "("):
-
                 while (self._tokenizer.currentToken != ";" and
                         self._tokenizer.currentToken != "{" and
                         self._tokenizer.currentToken != ")" and
-                       self._tokenizer.currentToken != "]" and
                         self._tokenizer.currentToken != "="):
                     self._tokenizer.advance()
-
-                    if self._tokenizer.currentToken == ".":
-                        self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-                        self._tokenizer.advance()
-                        self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-                        self._tokenizer.advance()
-
-                        if self._tokenizer.currentToken == "(":
-                            self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-                            self.compile_expression_list()
-                            self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-
-                    if self._tokenizer.currentToken == "[":
-                        self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-                        self._tokenizer.advance()
-                        self.compile_expression()
-                        self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+                    self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
         self.write_xml_closing_tag(GrammarLanguage.TERM.value)
 

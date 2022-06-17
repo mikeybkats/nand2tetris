@@ -31,10 +31,10 @@ class TokenTypeTable:
 
     def get_token_type(self, token):
         if token.isnumeric():
-            token = Token_Type.INT_CONST.value.lower()
+            token = "int_const"
             return self._table.get(token)
         if token[0] == "\'" or token[0] == "\"":
-            token = Token_Type.STRING_CONST.value.lower()
+            token = "string_const"
             return self._table.get(token)
         if (
             self._table.get(token) != Token_Type.KEYWORD and
