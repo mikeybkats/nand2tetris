@@ -29,6 +29,8 @@
 <symbol> . </symbol>
 <identifier> new </identifier>
 <symbol> ( </symbol>
+<expressionList>
+</expressionList>
 <symbol> ) </symbol>
 </term>
 </expression>
@@ -82,10 +84,12 @@
 <identifier> j </identifier>
 <symbol> ; </symbol>
 </varDec>
+<varDec>
 <keyword> var </keyword>
 <identifier> String </identifier>
 <identifier> s </identifier>
 <symbol> ; </symbol>
+</varDec>
 <varDec>
 <keyword> var </keyword>
 <identifier> Array </identifier>
@@ -110,9 +114,7 @@
 <symbol> = </symbol>
 <expression>
 <term>
-</term>
-<term>
-<identifier> constant" </identifier>
+<identifier> string constant </identifier>
 </term>
 </expression>
 <symbol> ; </symbol>
@@ -132,27 +134,39 @@
 <keyword> let </keyword>
 <identifier> a </identifier>
 <symbol> [ </symbol>
-<int_const> 1 </int_const>
+<expression>
+<term>
+<integerConstant> 1 </integerConstant>
+</term>
+</expression>
 <symbol> ] </symbol>
 <symbol> = </symbol>
 <expression>
 <term>
 <identifier> a </identifier>
 <symbol> [ </symbol>
-<int_const> 2 </int_const>
+<expression>
+<term>
+<integerConstant> 2 </integerConstant>
+</term>
+</expression>
 <symbol> ] </symbol>
+</term>
+</expression>
 <symbol> ; </symbol>
-</term>
-<term>
-<keyword> else </keyword>
-</term>
-<term>
+</letStatement>
+</statements>
+<symbol> } </symbol>
+</ifStatement>
+</statements>
+<subroutineBody>
+<symbol> { </symbol>
+<statements>
+<letStatement>
 <keyword> let </keyword>
-</term>
-<term>
 <identifier> i </identifier>
-</term>
 <symbol> = </symbol>
+<expression>
 <term>
 <identifier> i </identifier>
 </term>
@@ -207,13 +221,6 @@
 </expression>
 <symbol> ; </symbol>
 </letStatement>
-</statements>
-<symbol> } </symbol>
-</ifStatement>
-<returnStatement>
-<keyword> return </keyword>
-<symbol> ; </symbol>
-</returnStatement>
 </statements>
 <symbol> } </symbol>
 </subroutineBody>

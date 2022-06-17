@@ -77,6 +77,7 @@ class CompilationEngine:
                 self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
             if (self._tokenizer.currentToken == GrammarLanguage.VAR.value or
+                    self._tokenizer.currentToken == GrammarLanguage.STATIC.value or
                     self._tokenizer.currentToken == GrammarLanguage.FIELD.value):
                 self.compile_class_var_declaration()
 
@@ -185,7 +186,7 @@ class CompilationEngine:
                 self._tokenizer.currentToken == GrammarLanguage.RETURN.value or
                self._tokenizer.currentToken == GrammarLanguage.WHILE.value or
                self._tokenizer.currentToken == GrammarLanguage.LET.value or
-                self._tokenizer.currentToken == GrammarLanguage.IF.value):
+               self._tokenizer.currentToken == GrammarLanguage.IF.value):
 
             if self._tokenizer.currentToken == GrammarLanguage.LET.value:
                 self.compile_let()
@@ -293,8 +294,24 @@ class CompilationEngine:
 
             self._tokenizer.advance()
 
-        # self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+        self._tokenizer.advance()
+        if self._tokenizer.currentToken == GrammarLanguage.ELSE.value:
+            self.compile_else()
+
         self.write_non_terminal_tag(GrammarLanguage.IF_STATEMENT.value, True)
+
+    def compile_else(self):
+        self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+
+        while self._tokenizer.currentToken != "}":
+            if self._tokenizer.currentToken == "{":
+                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+                self._tokenizer.advance()
+                self.compile_statements()
+                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+                break
+
+            self._tokenizer.advance()
 
     def compile_return(self):
         """Compiles a return statement"""

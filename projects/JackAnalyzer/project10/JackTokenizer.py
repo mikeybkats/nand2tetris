@@ -84,13 +84,21 @@ class JackTokenizer:
         char = first_char
 
         # if the char is a symbol then return the token
-        if self._tokenTypeTable.get_token_type(char) == Token_Type.SYMBOL:
+        if char and self._tokenTypeTable.get_token_type(char) == Token_Type.SYMBOL:
             return char
 
         # if the char is not a symbol then build the token word
         while not token_found_or_end:
             # if a symbol is reached end the loop
-            if self._tokenTypeTable.get_token_type(char) == Token_Type.SYMBOL:
+            if char == "\"" or char == "\'":
+                # if a quotation is reached build the sentence
+                char = file.read(1)
+                sentence = ""
+                while char != "\"" or char == "\'":
+                    sentence = sentence + char
+                    char = file.read(1)
+                return sentence
+            if char and self._tokenTypeTable.get_token_type(char) == Token_Type.SYMBOL:
                 # decrement the file reader back one space and break so the token
                 # can be read the next time the function is called
                 self._infile.seek(prev_read_loc)

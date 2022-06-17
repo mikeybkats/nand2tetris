@@ -31,30 +31,7 @@
 <symbol> = </symbol>
 <expression>
 <term>
-<identifier> Square </identifier>
-<symbol> . </symbol>
-<identifier> new </identifier>
-<symbol> ( </symbol>
-<expressionList>
-<expression>
-<term>
-<integerConstant> 0 </integerConstant>
-</term>
-</expression>
-<symbol> , </symbol>
-<expression>
-<term>
-<integerConstant> 0 </integerConstant>
-</term>
-</expression>
-<symbol> , </symbol>
-<expression>
-<term>
-<integerConstant> 30 </integerConstant>
-</term>
-</expression>
-</expressionList>
-<symbol> ) </symbol>
+<identifier> square </identifier>
 </term>
 </expression>
 <symbol> ; </symbol>
@@ -65,7 +42,7 @@
 <symbol> = </symbol>
 <expression>
 <term>
-<integerConstant> 0 </integerConstant>
+<identifier> direction </identifier>
 </term>
 </expression>
 <symbol> ; </symbol>
@@ -74,7 +51,7 @@
 <keyword> return </keyword>
 <expression>
 <term>
-<keyword> this </keyword>
+<identifier> square </identifier>
 </term>
 </expression>
 <symbol> ; </symbol>
@@ -114,7 +91,7 @@
 <expressionList>
 <expression>
 <term>
-<keyword> this </keyword>
+<identifier> square </identifier>
 </term>
 </expression>
 </expressionList>
@@ -147,10 +124,6 @@
 <term>
 <identifier> direction </identifier>
 </term>
-<symbol> = </symbol>
-<term>
-<integerConstant> 1 </integerConstant>
-</term>
 </expression>
 <symbol> ) </symbol>
 <symbol> { </symbol>
@@ -169,19 +142,12 @@
 </statements>
 <symbol> } </symbol>
 </ifStatement>
-<ifStatement>
-<keyword> if </keyword>
-<symbol> ( </symbol>
-<expression>
-<term>
+</statements>
+<parameterList>
 <identifier> direction </identifier>
-</term>
-<symbol> = </symbol>
-<term>
-<integerConstant> 2 </integerConstant>
-</term>
-</expression>
+</parameterList>
 <symbol> ) </symbol>
+<subroutineBody>
 <symbol> { </symbol>
 <statements>
 <doStatement>
@@ -195,87 +161,6 @@
 <symbol> ) </symbol>
 <symbol> ; </symbol>
 </doStatement>
-</statements>
-<symbol> } </symbol>
-</ifStatement>
-<ifStatement>
-<keyword> if </keyword>
-<symbol> ( </symbol>
-<expression>
-<term>
-<identifier> direction </identifier>
-</term>
-<symbol> = </symbol>
-<term>
-<integerConstant> 3 </integerConstant>
-</term>
-</expression>
-<symbol> ) </symbol>
-<symbol> { </symbol>
-<statements>
-<doStatement>
-<keyword> do </keyword>
-<identifier> square </identifier>
-<symbol> . </symbol>
-<identifier> moveLeft </identifier>
-<symbol> ( </symbol>
-<expressionList>
-</expressionList>
-<symbol> ) </symbol>
-<symbol> ; </symbol>
-</doStatement>
-</statements>
-<symbol> } </symbol>
-</ifStatement>
-<ifStatement>
-<keyword> if </keyword>
-<symbol> ( </symbol>
-<expression>
-<term>
-<identifier> direction </identifier>
-</term>
-<symbol> = </symbol>
-<term>
-<integerConstant> 4 </integerConstant>
-</term>
-</expression>
-<symbol> ) </symbol>
-<symbol> { </symbol>
-<statements>
-<doStatement>
-<keyword> do </keyword>
-<identifier> square </identifier>
-<symbol> . </symbol>
-<identifier> moveRight </identifier>
-<symbol> ( </symbol>
-<expressionList>
-</expressionList>
-<symbol> ) </symbol>
-<symbol> ; </symbol>
-</doStatement>
-</statements>
-<symbol> } </symbol>
-</ifStatement>
-<doStatement>
-<keyword> do </keyword>
-<identifier> Sys </identifier>
-<symbol> . </symbol>
-<identifier> wait </identifier>
-<symbol> ( </symbol>
-<expressionList>
-<expression>
-<term>
-<integerConstant> 5 </integerConstant>
-</term>
-</expression>
-</expressionList>
-<symbol> ) </symbol>
-<symbol> ; </symbol>
-</doStatement>
-<returnStatement>
-<keyword> return </keyword>
-<symbol> ; </symbol>
-</returnStatement>
 </statements>
 <symbol> } </symbol>
 </subroutineBody>
@@ -309,7 +194,7 @@
 <symbol> = </symbol>
 <expression>
 <term>
-<keyword> false </keyword>
+<identifier> key </identifier>
 </term>
 </expression>
 <symbol> ; </symbol>
@@ -318,7 +203,6 @@
 <keyword> while </keyword>
 <symbol> ( </symbol>
 <expression>
-<symbol> ~ </symbol>
 <term>
 <identifier> exit </identifier>
 </term>
@@ -333,10 +217,6 @@
 <term>
 <identifier> key </identifier>
 </term>
-<symbol> = </symbol>
-<term>
-<integerConstant> 0 </integerConstant>
-</term>
 </expression>
 <symbol> ) </symbol>
 <symbol> { </symbol>
@@ -347,13 +227,7 @@
 <symbol> = </symbol>
 <expression>
 <term>
-<identifier> Keyboard </identifier>
-<symbol> . </symbol>
-<identifier> keyPressed </identifier>
-<symbol> ( </symbol>
-<expressionList>
-</expressionList>
-<symbol> ) </symbol>
+<identifier> key </identifier>
 </term>
 </expression>
 <symbol> ; </symbol>
@@ -377,10 +251,6 @@
 <term>
 <identifier> key </identifier>
 </term>
-<symbol> = </symbol>
-<term>
-<integerConstant> 81 </integerConstant>
-</term>
 </expression>
 <symbol> ) </symbol>
 <symbol> { </symbol>
@@ -391,7 +261,7 @@
 <symbol> = </symbol>
 <expression>
 <term>
-<keyword> true </keyword>
+<identifier> exit </identifier>
 </term>
 </expression>
 <symbol> ; </symbol>
@@ -399,19 +269,7 @@
 </statements>
 <symbol> } </symbol>
 </ifStatement>
-<ifStatement>
-<keyword> if </keyword>
-<symbol> ( </symbol>
-<expression>
-<term>
-<identifier> key </identifier>
-</term>
-<symbol> = </symbol>
-<term>
-<integerConstant> 90 </integerConstant>
-</term>
-</expression>
-<symbol> ) </symbol>
+</statements>
 <symbol> { </symbol>
 <statements>
 <doStatement>
@@ -427,17 +285,13 @@
 </doStatement>
 </statements>
 <symbol> } </symbol>
-</ifStatement>
+</whileStatement>
 <ifStatement>
 <keyword> if </keyword>
 <symbol> ( </symbol>
 <expression>
 <term>
 <identifier> key </identifier>
-</term>
-<symbol> = </symbol>
-<term>
-<integerConstant> 88 </integerConstant>
 </term>
 </expression>
 <symbol> ) </symbol>
@@ -457,19 +311,12 @@
 </statements>
 <symbol> } </symbol>
 </ifStatement>
-<ifStatement>
-<keyword> if </keyword>
-<symbol> ( </symbol>
-<expression>
-<term>
+</statements>
+<parameterList>
 <identifier> key </identifier>
-</term>
-<symbol> = </symbol>
-<term>
-<integerConstant> 131 </integerConstant>
-</term>
-</expression>
+</parameterList>
 <symbol> ) </symbol>
+<subroutineBody>
 <symbol> { </symbol>
 <statements>
 <letStatement>
@@ -478,159 +325,11 @@
 <symbol> = </symbol>
 <expression>
 <term>
-<integerConstant> 1 </integerConstant>
+<identifier> exit </identifier>
 </term>
 </expression>
 <symbol> ; </symbol>
 </letStatement>
-</statements>
-<symbol> } </symbol>
-</ifStatement>
-<ifStatement>
-<keyword> if </keyword>
-<symbol> ( </symbol>
-<expression>
-<term>
-<identifier> key </identifier>
-</term>
-<symbol> = </symbol>
-<term>
-<integerConstant> 133 </integerConstant>
-</term>
-</expression>
-<symbol> ) </symbol>
-<symbol> { </symbol>
-<statements>
-<letStatement>
-<keyword> let </keyword>
-<identifier> direction </identifier>
-<symbol> = </symbol>
-<expression>
-<term>
-<integerConstant> 2 </integerConstant>
-</term>
-</expression>
-<symbol> ; </symbol>
-</letStatement>
-</statements>
-<symbol> } </symbol>
-</ifStatement>
-<ifStatement>
-<keyword> if </keyword>
-<symbol> ( </symbol>
-<expression>
-<term>
-<identifier> key </identifier>
-</term>
-<symbol> = </symbol>
-<term>
-<integerConstant> 130 </integerConstant>
-</term>
-</expression>
-<symbol> ) </symbol>
-<symbol> { </symbol>
-<statements>
-<letStatement>
-<keyword> let </keyword>
-<identifier> direction </identifier>
-<symbol> = </symbol>
-<expression>
-<term>
-<integerConstant> 3 </integerConstant>
-</term>
-</expression>
-<symbol> ; </symbol>
-</letStatement>
-</statements>
-<symbol> } </symbol>
-</ifStatement>
-<ifStatement>
-<keyword> if </keyword>
-<symbol> ( </symbol>
-<expression>
-<term>
-<identifier> key </identifier>
-</term>
-<symbol> = </symbol>
-<term>
-<integerConstant> 132 </integerConstant>
-</term>
-</expression>
-<symbol> ) </symbol>
-<symbol> { </symbol>
-<statements>
-<letStatement>
-<keyword> let </keyword>
-<identifier> direction </identifier>
-<symbol> = </symbol>
-<expression>
-<term>
-<integerConstant> 4 </integerConstant>
-</term>
-</expression>
-<symbol> ; </symbol>
-</letStatement>
-</statements>
-<symbol> } </symbol>
-</ifStatement>
-<whileStatement>
-<keyword> while </keyword>
-<symbol> ( </symbol>
-<expression>
-<symbol> ~ </symbol>
-<term>
-<symbol> ( </symbol>
-<expression>
-<term>
-<identifier> key </identifier>
-</term>
-<symbol> = </symbol>
-<term>
-<integerConstant> 0 </integerConstant>
-</term>
-</expression>
-<symbol> ) </symbol>
-</term>
-</expression>
-<symbol> ) </symbol>
-<symbol> { </symbol>
-<statements>
-<letStatement>
-<keyword> let </keyword>
-<identifier> key </identifier>
-<symbol> = </symbol>
-<expression>
-<term>
-<identifier> Keyboard </identifier>
-<symbol> . </symbol>
-<identifier> keyPressed </identifier>
-<symbol> ( </symbol>
-<expressionList>
-</expressionList>
-<symbol> ) </symbol>
-</term>
-</expression>
-<symbol> ; </symbol>
-</letStatement>
-<doStatement>
-<keyword> do </keyword>
-<identifier> moveSquare </identifier>
-<symbol> ( </symbol>
-<expressionList>
-</expressionList>
-<symbol> ) </symbol>
-<symbol> ; </symbol>
-</doStatement>
-</statements>
-<symbol> } </symbol>
-</whileStatement>
-</statements>
-<symbol> } </symbol>
-</whileStatement>
-<returnStatement>
-<keyword> return </keyword>
-<symbol> ; </symbol>
-</returnStatement>
 </statements>
 <symbol> } </symbol>
 </subroutineBody>
