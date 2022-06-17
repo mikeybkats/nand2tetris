@@ -44,8 +44,8 @@ class CompilationEngine:
 
     def write_token(self):
         token = self._tokenizer.currentToken
-        if is_op(token):
-            token = html.escape(token)
+        # if is_op(token):
+        #     token = html.escape(token)
         self._outfile.write(" " + token + " ")
 
     def write_non_terminal_tag(self, tag_type, closed):
@@ -404,6 +404,10 @@ class CompilationEngine:
                         self._tokenizer.advance()
                         self.compile_expression()
                         self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+
+        if self._tokenizer.token_type() == Token_Type.STRING_CONST:
+            self._tokenizer.currentToken = self._tokenizer.currentToken.strip("\"")
+            self.write_terminal_tag(GrammarLanguage.STRING_CONST.value)
 
         self.write_xml_closing_tag(GrammarLanguage.TERM.value)
 

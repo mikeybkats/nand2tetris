@@ -44,8 +44,8 @@ class CompilationEngine:
 
     def write_token(self):
         token = self._tokenizer.currentToken
-        if is_op(token):
-            token = html.escape(token)
+        # if is_op(token):
+        #     token = html.escape(token)
         self._outfile.write(" " + token + " ")
 
     def write_non_terminal_tag(self, tag_type, closed):
@@ -294,8 +294,8 @@ class CompilationEngine:
 
             self._tokenizer.advance()
 
-        self._tokenizer.advance()
-        if self._tokenizer.currentToken == GrammarLanguage.ELSE.value:
+        if self._tokenizer.look_ahead() == GrammarLanguage.ELSE.value:
+            self._tokenizer.advance()
             self.compile_else()
 
         self.write_non_terminal_tag(GrammarLanguage.IF_STATEMENT.value, True)
