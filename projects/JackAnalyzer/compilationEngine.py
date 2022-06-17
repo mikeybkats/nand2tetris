@@ -294,8 +294,8 @@ class CompilationEngine:
 
             self._tokenizer.advance()
 
-        self._tokenizer.advance()
-        if self._tokenizer.currentToken == GrammarLanguage.ELSE.value:
+        if self._tokenizer.look_ahead() == GrammarLanguage.ELSE.value:
+            self._tokenizer.advance()
             self.compile_else()
 
         self.write_non_terminal_tag(GrammarLanguage.IF_STATEMENT.value, True)

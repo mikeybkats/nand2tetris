@@ -1624,7 +1624,6 @@ class Square {
             return;
          }
         """
-
         jack_mock_in_file = StringIO(mock_sub_routine)
         mock_output_file = StringIO()
         comp_eng = CompilationEngine(
@@ -1793,23 +1792,6 @@ class Square {
 
         result_buffer = io.StringIO(result)
         result_lines = result_buffer.readlines()
-
-        self.assertEqual("<symbol> ; </symbol>\n", file_lines[35])
-        self.assertEqual("</doStatement>\n", file_lines[36])
-        self.assertEqual("</statements>\n", file_lines[37])
-        self.assertEqual("<symbol> } </symbol>\n", file_lines[38])
-        self.assertEqual("</ifStatement>\n", file_lines[39])
-        self.assertEqual("<ifStatement>\n", file_lines[40])
-        self.assertEqual("<symbol> } </symbol>\n", file_lines[67])
-        self.assertEqual("<keyword> if </keyword>\n", file_lines[99])
-        self.assertEqual("<symbol> ( </symbol>\n", file_lines[100])
-
-        self.assertEqual("<symbol> ) </symbol>\n", file_lines[140])
-        self.assertEqual("<symbol> ; </symbol>\n", file_lines[141])
-        self.assertEqual("</doStatement>\n", file_lines[142])
-
-        self.assertEqual("<returnStatement>\n", file_lines[143])
-        self.assertEqual("</returnStatement>\n", file_lines[146])
 
         count = 0
         for line in result_lines:
