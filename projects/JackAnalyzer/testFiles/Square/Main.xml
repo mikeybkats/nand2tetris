@@ -2,6 +2,12 @@
 <keyword> class </keyword>
 <identifier> Main </identifier>
 <symbol> { </symbol>
+<classVarDec>
+<keyword> static </keyword>
+<keyword> boolean </keyword>
+<identifier> test </identifier>
+<symbol> ; </symbol>
+</classVarDec>
 <subroutineDec>
 <keyword> function </keyword>
 <keyword> void </keyword>
@@ -114,7 +120,7 @@
 <symbol> = </symbol>
 <expression>
 <term>
-<identifier> string constant </identifier>
+<stringConstant> string constant </stringConstant>
 </term>
 </expression>
 <symbol> ; </symbol>
@@ -157,9 +163,7 @@
 </letStatement>
 </statements>
 <symbol> } </symbol>
-</ifStatement>
-</statements>
-<subroutineBody>
+<keyword> else </keyword>
 <symbol> { </symbol>
 <statements>
 <letStatement>
@@ -174,9 +178,11 @@
 <term>
 <symbol> ( </symbol>
 <expression>
+<term>
 <symbol> - </symbol>
 <term>
 <identifier> j </identifier>
+</term>
 </term>
 </expression>
 <symbol> ) </symbol>
@@ -196,9 +202,11 @@
 <term>
 <symbol> ( </symbol>
 <expression>
+<term>
 <symbol> - </symbol>
 <term>
 <integerConstant> 2 </integerConstant>
+</term>
 </term>
 </expression>
 <symbol> ) </symbol>
@@ -221,6 +229,13 @@
 </expression>
 <symbol> ; </symbol>
 </letStatement>
+</statements>
+<symbol> } </symbol>
+</ifStatement>
+<returnStatement>
+<keyword> return </keyword>
+<symbol> ; </symbol>
+</returnStatement>
 </statements>
 <symbol> } </symbol>
 </subroutineBody>

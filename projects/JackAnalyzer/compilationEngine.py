@@ -44,8 +44,8 @@ class CompilationEngine:
 
     def write_token(self):
         token = self._tokenizer.currentToken
-        # if is_op(token):
-        #     token = html.escape(token)
+        if is_op(token):
+            token = html.escape(token)
         self._outfile.write(" " + token + " ")
 
     def write_non_terminal_tag(self, tag_type, closed):
@@ -333,6 +333,12 @@ class CompilationEngine:
             self._tokenizer.advance()
 
         expression = True
+
+        if is_op(self._tokenizer.currentToken):
+            self.compile_term()
+            self._tokenizer.advance()
+            expression = False
+
         while expression:
             if self._tokenizer.currentToken == "(":
                 self.compile_term()
@@ -365,7 +371,6 @@ class CompilationEngine:
             self.write_terminal_tag(self._tokenizer.token_type().value.lower())
             self._tokenizer.advance()
             self.compile_expression()
-
             self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
         if self._tokenizer.token_type() == Token_Type.INT_CONST:
@@ -408,6 +413,11 @@ class CompilationEngine:
         if self._tokenizer.token_type() == Token_Type.STRING_CONST:
             self._tokenizer.currentToken = self._tokenizer.currentToken.strip("\"")
             self.write_terminal_tag(GrammarLanguage.STRING_CONST.value)
+
+        if is_op(self._tokenizer.currentToken):
+            self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+            self._tokenizer.advance()
+            self.compile_term()
 
         self.write_xml_closing_tag(GrammarLanguage.TERM.value)
 

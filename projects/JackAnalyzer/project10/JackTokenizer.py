@@ -21,6 +21,10 @@ class JackTokenizer:
     def currentToken(self):
         return self._currentToken
 
+    @currentToken.setter
+    def currentToken(self, new):
+        self._currentToken = new
+
     @property
     def prev_token_loc(self):
         return self._prevTokenLoc
@@ -97,7 +101,7 @@ class JackTokenizer:
                 while char != "\"" or char == "\'":
                     sentence = sentence + char
                     char = file.read(1)
-                return sentence
+                return "\"" + sentence + "\""
             if char and self._tokenTypeTable.get_token_type(char) == Token_Type.SYMBOL:
                 # decrement the file reader back one space and break so the token
                 # can be read the next time the function is called

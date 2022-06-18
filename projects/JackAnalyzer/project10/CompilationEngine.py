@@ -405,6 +405,10 @@ class CompilationEngine:
                         self.compile_expression()
                         self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
+        if self._tokenizer.token_type() == Token_Type.STRING_CONST:
+            self._tokenizer.currentToken = self._tokenizer.currentToken.strip("\"")
+            self.write_terminal_tag(GrammarLanguage.STRING_CONST.value)
+
         self.write_xml_closing_tag(GrammarLanguage.TERM.value)
 
     def compile_expression_list(self):

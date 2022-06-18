@@ -318,10 +318,12 @@
 <keyword> while </keyword>
 <symbol> ( </symbol>
 <expression>
-<symbol> ~ </symbol>
-<term>
-<identifier> exit </identifier>
-</term>
+    <term>
+        <symbol> ~ </symbol>
+        <term>
+            <identifier> exit </identifier>
+        </term>
+    </term>
 </expression>
 <symbol> ) </symbol>
 <symbol> { </symbol>
@@ -577,6 +579,7 @@
 <keyword> while </keyword>
 <symbol> ( </symbol>
 <expression>
+<term>
 <symbol> ~ </symbol>
 <term>
 <symbol> ( </symbol>
@@ -590,6 +593,7 @@
 </term>
 </expression>
 <symbol> ) </symbol>
+</term>
 </term>
 </expression>
 <symbol> ) </symbol>
