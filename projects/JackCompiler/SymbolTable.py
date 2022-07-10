@@ -1,41 +1,72 @@
+from enum import Enum
+
+class IdentifierKind(Enum):
+    STATIC = "static"
+    FIELD = "field"
+    ARGUMENT = "argument"
+    VAR = "var"
+    NONE = "none"
+
+class IdentifierType(Enum):
+    INT = "int"
+    STRING = "String"
+    BOOLEAN = "boolean"
+    CHAR = "char"
+
+
+class CurrentScope(Enum):
+    CLASS = "class"
+    SUBROUTINE = "subroutine"
+
 
 class SymbolTable:
+    _index = 0
     """
     :field _current_scope:
-        "class" | "subroutine
+        CurrentScope "class" | "subroutine
     """
-    _current_scope = None
+    _scope = None
     """
     :field _table_subroutine:
         dictionary
     """
-    _table_subroutine_scope = dict()
+    _table_subroutine = dict()
     """
     :field _table_class:
         dictionary
     """
-    _table_class_scope = dict()
+    _table_class = dict()
+
+    _tables = dict({CurrentScope.CLASS: _table_class, CurrentScope.SUBROUTINE: _table_subroutine})
 
     def __init__(self):
         """Creates a new empty symbol tables"""
+        self._scope = CurrentScope.CLASS
+        self._index = 0
 
-    def set_scope(self, scope):
-        """
-        sets the Symbol table scope
+    @property
+    def index(self):
+        return self._index
 
-        :param scope:
-            "class" | "subroutine"
-        :return:
-            The current scope
-            "class" | "subroutine"
-        """
-        self._current_scope = scope
+    @property
+    def scope(self):
+        return self._scope
 
-        return self._current_scope
+    @scope.setter
+    def scope(self, scope):
+        self._scope = scope
 
     def start_subroutine(self):
         """Starts a new subroutine scope (i.e., resets the subroutine's symbol table)"""
-        pass
+        self._scope = CurrentScope.SUBROUTINE
+        self._table_subroutine.clear()
+        self._index = 0
+
+    def start_class(self):
+        """Starts a new class scope"""
+        self._scope = CurrentScope.CLASS
+        self._table_class.clear()
+        self._index = 0
 
     def define(self, i_name, i_type, i_kind):
         """
@@ -45,21 +76,30 @@ class SymbolTable:
         :param i_name:
             string identifier name
         :param i_type:
-            string identifier type
+            IdentifierKind identifier type
         :param i_kind:
-            STATIC, FIELD, ARG or VAR
+            IdentifierKind STATIC, FIELD, ARG, VAR, NONE
         :return:
         """
+        self._tables[self._scope][self._index] = {"name": i_name, "type": i_type, "kind": i_kind}
+        # creates entry like this: (0, { "name": xxx, "type": xxx, "kind": xxx })
+        self._index = self._index + 1
 
     def var_count(self, kind):
         """
         Returns the number of variables of the given kind already defined in the current scope.
 
         :param kind:
-            STATIC, int, FIELD, ARG or VAR
+            IdentifierKind STATIC, int, FIELD, ARG or VAR
         :return:
             int
         """
+        count = 0
+        for symbolEntry in self._tables[self._scope].items():
+            if symbolEntry[1]["kind"] == kind:
+                count = count + 1
+
+        return count
 
     def kind_of(self, name):
         """

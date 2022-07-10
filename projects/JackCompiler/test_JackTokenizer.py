@@ -5,7 +5,6 @@ from io import StringIO
 from TokenTypes import TokenTypeTable, Token_Type
 from textwrap import dedent
 
-
 class TokenizerTest(unittest.TestCase):
     def test_look_ahead(self):
         jack_mock_class = """
