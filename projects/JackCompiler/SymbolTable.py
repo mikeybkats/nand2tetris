@@ -20,7 +20,8 @@ class CurrentScope(Enum):
 
 
 class SymbolTable:
-    _index = 0
+    _current_kind = None
+    _current_kind_index = 0
     """
     :field _current_scope:
         CurrentScope "class" | "subroutine
@@ -45,10 +46,6 @@ class SymbolTable:
         self._index = 0
 
     @property
-    def index(self):
-        return self._index
-
-    @property
     def scope(self):
         return self._scope
 
@@ -60,13 +57,20 @@ class SymbolTable:
         """Starts a new subroutine scope (i.e., resets the subroutine's symbol table)"""
         self._scope = CurrentScope.SUBROUTINE
         self._table_subroutine.clear()
-        self._index = 0
+        self._current_kind_index = 0
 
     def start_class(self):
         """Starts a new class scope"""
         self._scope = CurrentScope.CLASS
         self._table_class.clear()
-        self._index = 0
+        self._current_kind_index = 0
+
+    def reset_cc_index(self, kind):
+        if self._current_kind != kind:
+            self._current_kind = kind
+            self._current_kind_index = 0
+        else:
+            self._current_kind_index = self._current_kind_index + 1
 
     def define(self, i_name, i_type, i_kind):
         """
@@ -81,9 +85,14 @@ class SymbolTable:
             IdentifierKind STATIC, FIELD, ARG, VAR, NONE
         :return:
         """
-        self._tables[self._scope][self._index] = {"name": i_name, "type": i_type, "kind": i_kind}
-        # creates entry like this: (0, { "name": xxx, "type": xxx, "kind": xxx })
-        self._index = self._index + 1
+        self._tables[self._scope][i_name] = {
+            "name": i_name,
+            "type": i_type,
+            "kind": i_kind,
+            "#": self._current_kind_index
+        }
+        # creates entry like this: (i_name, { "name": xxx, "type": xxx, "kind": xxx, "#": xxx })
+        self.reset_cc_index(i_kind)
 
     def var_count(self, kind):
         """
@@ -111,6 +120,7 @@ class SymbolTable:
         :return:
             STATIC, FIELD, ARG, VAR, None
         """
+        return self._tables[self._scope][name]["kind"]
 
     def type_of(self, name):
         """
@@ -121,6 +131,7 @@ class SymbolTable:
         :return:
             string
         """
+        return self._tables[self._scope][name]["type"]
 
     def index_of(self, name):
         """
@@ -131,3 +142,4 @@ class SymbolTable:
         :return:
             int
         """
+        return self._tables[self._scope][name]["#"]
