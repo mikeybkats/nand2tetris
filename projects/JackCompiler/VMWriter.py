@@ -1,7 +1,9 @@
 from io import TextIOBase
+from string import Template
+
 
 class VMWriter:
-    def __int__(self, output_file_stream):
+    def __init__(self, output_file_stream):
         """
         Creates a new file and prepares for writing
 
@@ -22,6 +24,9 @@ class VMWriter:
         :param index: INT
         :return: None
         """
+        command = Template("push $segment $index\n")
+        command = command.substitute(segment=segment, index=index)
+        self._outfile.write(command)
 
     def write_pop(self, segment, index):
         """
@@ -31,14 +36,20 @@ class VMWriter:
         :param index: INT
         :return: None
         """
+        command = Template("pop $segment $index\n")
+        command = command.substitute(segment=segment, index=index)
+        self._outfile.write(command)
 
-    def write_arithmetic(self, command):
+    def write_arithmetic(self, arithmetic_command):
         """
         Writes a VM arithmetic command
 
-        :param command: ADD, SUB, NEG, EQ, GT, LT, AND, OR, NOT
+        :param arithmetic_command: ADD, SUB, NEG, EQ, GT, LT, AND, OR, NOT
         :return: None
         """
+        command = Template("$command\n")
+        command = command.substitute(command=arithmetic_command)
+        self._outfile.write(command)
 
     def write_label(self, label):
         """
@@ -47,6 +58,9 @@ class VMWriter:
         :param label: String
         :return: None
         """
+        label_command = Template("label $label_command\n")
+        label_command = label_command.substitute(label_command=label)
+        self._outfile.write(label_command)
 
     def write_goto(self, label):
         """
@@ -54,6 +68,9 @@ class VMWriter:
         :param label: String
         :return: None
         """
+        goto_command = Template("goto $label\n")
+        goto_command = goto_command.substitute(label=label)
+        self._outfile.write(goto_command)
 
     def write_if(self, label):
         """
@@ -61,6 +78,9 @@ class VMWriter:
         :param label: String
         :return: None
         """
+        if_goto_command = Template("if-goto $label\n")
+        if_goto_command = if_goto_command.substitute(label=label)
+        self._outfile.write(if_goto_command)
 
     def write_call(self, name, n_args):
         """
@@ -69,6 +89,9 @@ class VMWriter:
         :param n_args: Int
         :return: None
         """
+        call_command = Template("call $name $n_args\n")
+        call_command = call_command.substitute(name=name, n_args=n_args)
+        self._outfile.write(call_command)
 
     def write_function(self, name, n_locals):
         """
@@ -77,9 +100,14 @@ class VMWriter:
         :param n_locals: Int
         :return: None
         """
+        function_command = Template("function $name $n_locals\n")
+        function_command = function_command.substitute(name=name, n_locals=n_locals)
+        self._outfile.write(function_command)
 
     def write_return(self):
         """Writes VM return command"""
+        self._outfile.write("return\n")
 
     def close(self):
         """Closes the output file"""
+        self._outfile.close()

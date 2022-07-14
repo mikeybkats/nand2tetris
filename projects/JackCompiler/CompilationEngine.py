@@ -5,6 +5,16 @@ from VMWriter import VMWriter
 import html
 
 
+def is_object_or_array(current_token):
+    if (current_token != ";" and
+            current_token != "{" and
+            current_token != ")" and
+            current_token != "]" and
+            current_token != "="):
+        return True
+    return False
+
+
 class CompilationEngine:
     def __init__(self, input_stream, output_stream, write_xml):
         """
@@ -43,11 +53,11 @@ class CompilationEngine:
         self._outfile.close()
 
     def write_xml_tag_open(self, tag_type):
-        if self.write_xml:
+        if self._write_xml:
             self._outfile.write("<" + tag_type + ">")
 
     def write_xml_tag_smart(self, tag_type, tag_open):
-        if self.write_xml:
+        if self._write_xml:
             terminal_types = TerminalTypeTable()
             if terminal_types.is_terminal(tag_type):
                 self.write_terminal_tag(tag_type)
@@ -55,11 +65,11 @@ class CompilationEngine:
                 self.write_non_terminal_tag(tag_type, tag_open)
 
     def write_xml_closing_tag(self, tag_type):
-        if self.write_xml:
+        if self._write_xml:
             self._outfile.write("</" + tag_type + ">\n")
 
     def write_token(self):
-        if self.write_xml:
+        if self._write_xml:
             token = self._tokenizer.currentToken
             if is_op(token):
                 token = html.escape(token)
@@ -67,7 +77,7 @@ class CompilationEngine:
 
     def write_non_terminal_tag(self, tag_type, closed):
         """Writes an open token tag: <tokenType>\n or </tokenType>\n"""
-        if self.write_xml:
+        if self._write_xml:
             if closed:
                 self.write_xml_closing_tag(tag_type)
             else:
@@ -76,7 +86,7 @@ class CompilationEngine:
 
     def write_terminal_tag(self, token_type):
         """Writes a closed token tag: <tokenType> currentToken </tokenType>\n"""
-        if self.write_xml:
+        if self._write_xml:
             self.write_xml_tag_open(token_type)
             self.write_token()
             self.write_xml_closing_tag(token_type)
@@ -405,11 +415,7 @@ class CompilationEngine:
                 self._tokenizer.look_ahead() == "[" or
                     self._tokenizer.look_ahead() == "("):
 
-                while (self._tokenizer.currentToken != ";" and
-                        self._tokenizer.currentToken != "{" and
-                        self._tokenizer.currentToken != ")" and
-                       self._tokenizer.currentToken != "]" and
-                        self._tokenizer.currentToken != "="):
+                while is_object_or_array(self._tokenizer.currentToken):
                     self._tokenizer.advance()
 
                     if self._tokenizer.currentToken == ".":
@@ -432,6 +438,10 @@ class CompilationEngine:
         if self._tokenizer.token_type() == Token_Type.STRING_CONST:
             self._tokenizer.currentToken = self._tokenizer.currentToken.strip("\"")
             self.write_terminal_tag(GrammarLanguage.STRING_CONST.value)
+
+            # write string constant
+            # for each character
+            # self._vm_writer.write_push()
 
         if is_op(self._tokenizer.currentToken):
             self.write_terminal_tag(self._tokenizer.token_type().value.lower())
