@@ -13,6 +13,7 @@ class TestCompilationEngine(TestCase):
         class Square {
            field int x, y;
            field int size;
+           static int pointCount;
         """)
         jack_mock_in_file = StringIO(jack_mock_class)
 
@@ -21,7 +22,7 @@ class TestCompilationEngine(TestCase):
 
         self._comp_eng.compile_class()
 
-        self.assertEqual(3, len(self._comp_eng._symbol_table._table_class))
+        self.assertEqual(4, len(self._comp_eng._symbol_table._table_class))
 
         item_x = self._comp_eng._symbol_table._table_class.get("x")
         self.assertEqual({"name": "x", "type": "int", "kind": "field", "#": 0}, item_x)
@@ -31,6 +32,9 @@ class TestCompilationEngine(TestCase):
 
         item_size = self._comp_eng._symbol_table._table_class.get("size")
         self.assertEqual({"name": "size", "type": "int", "kind": "field", "#": 2}, item_size)
+
+        item_point_count = self._comp_eng._symbol_table._table_class.get("pointCount")
+        self.assertEqual({"name": "pointCount", "type": "int", "kind": "static", "#": 0}, item_point_count)
 
     def test_compile_subroutine(self):
         self.fail()
