@@ -1,11 +1,13 @@
 from enum import Enum
 
+
 class IdentifierKind(Enum):
     STATIC = "static"
     FIELD = "field"
     ARGUMENT = "argument"
     VAR = "var"
     NONE = "none"
+
 
 class IdentifierType(Enum):
     INT = "int"
@@ -65,7 +67,8 @@ class SymbolTable:
         self._table_class.clear()
         self._current_kind_index = 0
 
-    def reset_cc_index(self, kind):
+    # private method
+    def __reset_cc_index(self, kind):
         if self._current_kind != kind:
             self._current_kind = kind
             self._current_kind_index = 0
@@ -85,6 +88,9 @@ class SymbolTable:
             IdentifierKind STATIC, FIELD, ARG, VAR, NONE
         :return:
         """
+        if not self._current_kind:
+            self._current_kind = i_kind
+
         self._tables[self._scope][i_name] = {
             "name": i_name,
             "type": i_type,
@@ -92,7 +98,7 @@ class SymbolTable:
             "#": self._current_kind_index
         }
         # creates entry like this: (i_name, { "name": xxx, "type": xxx, "kind": xxx, "#": xxx })
-        self.reset_cc_index(i_kind)
+        self.__reset_cc_index(i_kind)
 
     def var_count(self, kind):
         """

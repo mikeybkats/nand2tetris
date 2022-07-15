@@ -37,6 +37,11 @@ class SymbolTableTest(unittest.TestCase):
             {"name": "nAccounts", "type": IdentifierType.INT.value, "kind": IdentifierKind.STATIC.value, "#": 0},
             self.symbol_table._table_class["nAccounts"]
         )
+
+        self.assertEqual(
+            {"name": "owner", "type": IdentifierType.STRING.value, "kind": IdentifierKind.FIELD.value, "#": 1},
+            self.symbol_table._table_class["owner"])
+
         self.assertEqual(
             {"name": "balance", "type": IdentifierType.INT.value, "kind": IdentifierKind.FIELD.value, "#": 2},
             self.symbol_table._table_class["balance"]

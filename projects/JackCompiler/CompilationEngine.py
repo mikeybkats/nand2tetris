@@ -2,6 +2,7 @@ from JackTokenizer import JackTokenizer
 from TokenTypes import Token_Type, GrammarLanguage, TerminalTypeTable, is_op
 from io import TextIOBase
 from VMWriter import VMWriter
+from SymbolTable import SymbolTable
 import html
 
 
@@ -39,6 +40,10 @@ class CompilationEngine:
 
         # make VMWriter
         self._vm_writer = VMWriter(output_stream)
+
+        # make SymbolTable
+        self._table_obj = {"name": "", "type": "", "kind": ""}
+        self._symbol_table = SymbolTable()
 
 
     @property
@@ -90,9 +95,15 @@ class CompilationEngine:
             self.write_xml_tag_open(token_type)
             self.write_token()
             self.write_xml_closing_tag(token_type)
+        else:
+            if token_type == GrammarLanguage.KEYWORD.value:
+                self._table_obj["type"] = self._tokenizer.currentToken
+            if token_type == GrammarLanguage.IDENTIFIER.value:
+                self._table_obj["name"] = self._tokenizer.currentToken
 
     def compile_class(self):
         """Compiles a complete class"""
+        self._symbol_table.start_class()
 
         while self._tokenizer.has_more_tokens():
             self._tokenizer.advance()
@@ -120,15 +131,25 @@ class CompilationEngine:
 
     def compile_class_var_declaration(self):
         """Compiles a static declaration or a field declaration"""
+
         if (self._tokenizer.currentToken == GrammarLanguage.STATIC.value or
                 self._tokenizer.currentToken == GrammarLanguage.FIELD.value):
 
             self.write_xml_tag_smart(GrammarLanguage.CLASS_VAR_DEC.value, False)
             self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
+            self._table_obj["kind"] = self._tokenizer.currentToken
+
             while self._tokenizer.currentToken != ";":
                 self._tokenizer.advance()
                 self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+
+                if self._tokenizer.currentToken == "," or self._tokenizer.currentToken == ";":
+                    self._symbol_table.define(
+                        i_name=self._table_obj["name"],
+                        i_type=self._table_obj["type"],
+                        i_kind=self._table_obj["kind"]
+                    )
 
             self.write_xml_closing_tag(GrammarLanguage.CLASS_VAR_DEC.value)
 
