@@ -169,6 +169,8 @@ class CompilationEngine:
         return False
 
     def compile_subroutine(self):
+        # TODO: verify this method is working correctly. check xml tests.
+
         """Compiles a complete method, function, or constructor"""
         if self.is_subroutine():
             self._symbol_table.start_subroutine()
@@ -182,33 +184,32 @@ class CompilationEngine:
             )
 
             self.write_xml_tag_smart(GrammarLanguage.SUB_ROUTINE_DEC.value, False)
-            self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+            # self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
             count = 0
             while count != 3:
                 # count 0 write the first label in the signature method / function / constructor
                 # count 1 write the return type in the signature
                 # count 2 write the name of the method / function / constructor
-                self.write_xml_tag_smart(self._tokenizer.token_type().value.lower(), True)
+                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
                 self._tokenizer.advance()
                 count = count + 1
 
-            while self._tokenizer.currentToken != ")":
-                # compile parameter list
-                if self._tokenizer.currentToken == "(":
-                    self.compile_parameter_list()
-                    # write the closing ')' symbol
-                    self.write_terminal_tag(GrammarLanguage.SYMBOL.value)
+            # while self._tokenizer.currentToken != ")":
+            #     # compile parameter list
+            if self._tokenizer.currentToken == "(":
+                # write the opening '(' symbol
+                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+                self.compile_parameter_list()
+                # write the closing ')' symbol
+                self.write_terminal_tag(GrammarLanguage.SYMBOL.value)
 
             while self.not_end_of_routine():
                 self._tokenizer.advance()
 
                 if self._tokenizer.currentToken == "{":
                     self.write_xml_tag_smart(GrammarLanguage.SUB_ROUTINE_BOD.value, False)
-
-                # is the method / subroutine signature (first line before subroutine body)
-                # if self.is_subroutine_identifier_signature():
-                #     self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+                    self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
                 # compile declarations
                 if (self._tokenizer.currentToken == GrammarLanguage.VAR.value or

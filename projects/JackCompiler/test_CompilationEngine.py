@@ -36,6 +36,424 @@ class TestCompilationEngine(TestCase):
         item_point_count = self._comp_eng._symbol_table._table_class.get("pointCount")
         self.assertEqual({"name": "pointCount", "type": "int", "kind": "static", "#": 0}, item_point_count)
 
+    def test_compile_subroutine_xml(self):
+        mock_sub_routine = """
+        method void moveSquare() {
+            if (direction = 1) { do square.moveUp(); }
+            if (direction = 2) { do square.moveDown(); }
+            if (direction = 3) { do square.moveLeft(); }
+            if (direction = 4) { do square.moveRight(); }
+            do Sys.wait(5);  // delays the next movement
+            return;
+         }
+        """
+        jack_mock_in_file = StringIO(mock_sub_routine)
+        mock_output_file = StringIO()
+        comp_eng = CompilationEngine(
+            input_stream=jack_mock_in_file, output_stream=mock_output_file, write_xml=True)
+
+        # while comp_eng.tokenizer.has_more_tokens():
+        comp_eng.tokenizer.advance()
+        comp_eng.compile_subroutine()
+
+        comp_eng.outfile.seek(0)
+        file_lines = comp_eng.outfile.readlines()
+
+        result = dedent("""\
+        <subroutineDec>
+        <keyword> method </keyword>
+        <keyword> void </keyword>
+        <identifier> moveSquare </identifier>
+        <symbol> ( </symbol>
+        <parameterList>
+        </parameterList>
+        <symbol> ) </symbol>
+        <subroutineBody>
+        <symbol> { </symbol>
+        <statements>
+        <ifStatement>
+        <keyword> if </keyword>
+        <symbol> ( </symbol>
+        <expression>
+        <term>
+        <identifier> direction </identifier>
+        </term>
+        <symbol> = </symbol>
+        <term>
+        <integerConstant> 1 </integerConstant>
+        </term>
+        </expression>
+        <symbol> ) </symbol>
+        <symbol> { </symbol>
+        <statements>
+        <doStatement>
+        <keyword> do </keyword>
+        <identifier> square </identifier>
+        <symbol> . </symbol>
+        <identifier> moveUp </identifier>
+        <symbol> ( </symbol>
+        <expressionList>
+        </expressionList>
+        <symbol> ) </symbol>
+        <symbol> ; </symbol>
+        </doStatement>
+        </statements>
+        <symbol> } </symbol>
+        </ifStatement>
+        <ifStatement>
+        <keyword> if </keyword>
+        <symbol> ( </symbol>
+        <expression>
+        <term>
+        <identifier> direction </identifier>
+        </term>
+        <symbol> = </symbol>
+        <term>
+        <integerConstant> 2 </integerConstant>
+        </term>
+        </expression>
+        <symbol> ) </symbol>
+        <symbol> { </symbol>
+        <statements>
+        <doStatement>
+        <keyword> do </keyword>
+        <identifier> square </identifier>
+        <symbol> . </symbol>
+        <identifier> moveDown </identifier>
+        <symbol> ( </symbol>
+        <expressionList>
+        </expressionList>
+        <symbol> ) </symbol>
+        <symbol> ; </symbol>
+        </doStatement>
+        </statements>
+        <symbol> } </symbol>
+        </ifStatement>
+        <ifStatement>
+        <keyword> if </keyword>
+        <symbol> ( </symbol>
+        <expression>
+        <term>
+        <identifier> direction </identifier>
+        </term>
+        <symbol> = </symbol>
+        <term>
+        <integerConstant> 3 </integerConstant>
+        </term>
+        </expression>
+        <symbol> ) </symbol>
+        <symbol> { </symbol>
+        <statements>
+        <doStatement>
+        <keyword> do </keyword>
+        <identifier> square </identifier>
+        <symbol> . </symbol>
+        <identifier> moveLeft </identifier>
+        <symbol> ( </symbol>
+        <expressionList>
+        </expressionList>
+        <symbol> ) </symbol>
+        <symbol> ; </symbol>
+        </doStatement>
+        </statements>
+        <symbol> } </symbol>
+        </ifStatement>
+        <ifStatement>
+        <keyword> if </keyword>
+        <symbol> ( </symbol>
+        <expression>
+        <term>
+        <identifier> direction </identifier>
+        </term>
+        <symbol> = </symbol>
+        <term>
+        <integerConstant> 4 </integerConstant>
+        </term>
+        </expression>
+        <symbol> ) </symbol>
+        <symbol> { </symbol>
+        <statements>
+        <doStatement>
+        <keyword> do </keyword>
+        <identifier> square </identifier>
+        <symbol> . </symbol>
+        <identifier> moveRight </identifier>
+        <symbol> ( </symbol>
+        <expressionList>
+        </expressionList>
+        <symbol> ) </symbol>
+        <symbol> ; </symbol>
+        </doStatement>
+        </statements>
+        <symbol> } </symbol>
+        </ifStatement>
+        <doStatement>
+        <keyword> do </keyword>
+        <identifier> Sys </identifier>
+        <symbol> . </symbol>
+        <identifier> wait </identifier>
+        <symbol> ( </symbol>
+        <expressionList>
+        <expression>
+        <term>
+        <integerConstant> 5 </integerConstant>
+        </term>
+        </expression>
+        </expressionList>
+        <symbol> ) </symbol>
+        <symbol> ; </symbol>
+        </doStatement>
+        <returnStatement>
+        <keyword> return </keyword>
+        <symbol> ; </symbol>
+        </returnStatement>
+        </statements>
+        <symbol> } </symbol>
+        </subroutineBody>
+        </subroutineDec>
+        """)
+
+        result_buffer = StringIO(result)
+        result_lines = result_buffer.readlines()
+
+        self.assertEqual(result_lines, file_lines)
+        self.assertEqual(len(result_lines), len(file_lines))
+
+        count = 0
+        for line in result_lines:
+            self.assertEqual(line, file_lines[count])
+            count = count + 1
+
+        mock_sub_routine = """
+        method void moveDown() {
+           if ((y + size) < 254) {
+              do Screen.setColor(false);
+              do Screen.drawRectangle(x, y, x + size, y + 1);
+              let y = y + 2;
+              do Screen.setColor(true);
+              do Screen.drawRectangle(x, (y + size) - 1, x + size, y + size);
+           }
+           return;
+        }
+        """
+        jack_mock_in_file = StringIO(mock_sub_routine)
+        mock_output_file = StringIO()
+        comp_eng = CompilationEngine(
+            input_stream=jack_mock_in_file, output_stream=mock_output_file, write_xml=True)
+
+        # while comp_eng.tokenizer.has_more_tokens():
+        comp_eng.tokenizer.advance()
+        comp_eng.compile_subroutine()
+
+        comp_eng.outfile.seek(0)
+        file_lines = comp_eng.outfile.readlines()
+
+        result = dedent("""\
+<subroutineDec>
+<keyword> method </keyword>
+<keyword> void </keyword>
+<identifier> moveDown </identifier>
+<symbol> ( </symbol>
+<parameterList>
+</parameterList>
+<symbol> ) </symbol>
+<subroutineBody>
+<symbol> { </symbol>
+<statements>
+<ifStatement>
+<keyword> if </keyword>
+<symbol> ( </symbol>
+<expression>
+<term>
+<symbol> ( </symbol>
+<expression>
+<term>
+<identifier> y </identifier>
+</term>
+<symbol> + </symbol>
+<term>
+<identifier> size </identifier>
+</term>
+</expression>
+<symbol> ) </symbol>
+</term>
+<symbol> &lt; </symbol>
+<term>
+<integerConstant> 254 </integerConstant>
+</term>
+</expression>
+<symbol> ) </symbol>
+<symbol> { </symbol>
+<statements>
+<doStatement>
+<keyword> do </keyword>
+<identifier> Screen </identifier>
+<symbol> . </symbol>
+<identifier> setColor </identifier>
+<symbol> ( </symbol>
+<expressionList>
+<expression>
+<term>
+<keyword> false </keyword>
+</term>
+</expression>
+</expressionList>
+<symbol> ) </symbol>
+<symbol> ; </symbol>
+</doStatement>
+<doStatement>
+<keyword> do </keyword>
+<identifier> Screen </identifier>
+<symbol> . </symbol>
+<identifier> drawRectangle </identifier>
+<symbol> ( </symbol>
+<expressionList>
+<expression>
+<term>
+<identifier> x </identifier>
+</term>
+</expression>
+<symbol> , </symbol>
+<expression>
+<term>
+<identifier> y </identifier>
+</term>
+</expression>
+<symbol> , </symbol>
+<expression>
+<term>
+<identifier> x </identifier>
+</term>
+<symbol> + </symbol>
+<term>
+<identifier> size </identifier>
+</term>
+</expression>
+<symbol> , </symbol>
+<expression>
+<term>
+<identifier> y </identifier>
+</term>
+<symbol> + </symbol>
+<term>
+<integerConstant> 1 </integerConstant>
+</term>
+</expression>
+</expressionList>
+<symbol> ) </symbol>
+<symbol> ; </symbol>
+</doStatement>
+<letStatement>
+<keyword> let </keyword>
+<identifier> y </identifier>
+<symbol> = </symbol>
+<expression>
+<term>
+<identifier> y </identifier>
+</term>
+<symbol> + </symbol>
+<term>
+<integerConstant> 2 </integerConstant>
+</term>
+</expression>
+<symbol> ; </symbol>
+</letStatement>
+<doStatement>
+<keyword> do </keyword>
+<identifier> Screen </identifier>
+<symbol> . </symbol>
+<identifier> setColor </identifier>
+<symbol> ( </symbol>
+<expressionList>
+<expression>
+<term>
+<keyword> true </keyword>
+</term>
+</expression>
+</expressionList>
+<symbol> ) </symbol>
+<symbol> ; </symbol>
+</doStatement>
+<doStatement>
+<keyword> do </keyword>
+<identifier> Screen </identifier>
+<symbol> . </symbol>
+<identifier> drawRectangle </identifier>
+<symbol> ( </symbol>
+<expressionList>
+<expression>
+<term>
+<identifier> x </identifier>
+</term>
+</expression>
+<symbol> , </symbol>
+<expression>
+<term>
+<symbol> ( </symbol>
+<expression>
+<term>
+<identifier> y </identifier>
+</term>
+<symbol> + </symbol>
+<term>
+<identifier> size </identifier>
+</term>
+</expression>
+<symbol> ) </symbol>
+</term>
+<symbol> - </symbol>
+<term>
+<integerConstant> 1 </integerConstant>
+</term>
+</expression>
+<symbol> , </symbol>
+<expression>
+<term>
+<identifier> x </identifier>
+</term>
+<symbol> + </symbol>
+<term>
+<identifier> size </identifier>
+</term>
+</expression>
+<symbol> , </symbol>
+<expression>
+<term>
+<identifier> y </identifier>
+</term>
+<symbol> + </symbol>
+<term>
+<identifier> size </identifier>
+</term>
+</expression>
+</expressionList>
+<symbol> ) </symbol>
+<symbol> ; </symbol>
+</doStatement>
+</statements>
+<symbol> } </symbol>
+</ifStatement>
+<returnStatement>
+<keyword> return </keyword>
+<symbol> ; </symbol>
+</returnStatement>
+</statements>
+<symbol> } </symbol>
+</subroutineBody>
+</subroutineDec>
+        """)
+
+        result_buffer = StringIO(result)
+        result_lines = result_buffer.readlines()
+
+        self.assertEqual(result_lines, file_lines)
+        self.assertEqual(len(result_lines), len(file_lines))
+
+        count = 0
+        for line in result_lines:
+            self.assertEqual(line, file_lines[count])
+            count = count + 1
+
     def test_compile_subroutine(self):
         jack_mock_subroutine = dedent("""\
         method int distance(Point other) {
