@@ -1,2 +1,6 @@
-__psychach__
-__psychach__/*
+__pycache__
+__pycache__/*
+**/__pycache__/*
+.idea
+.idea/*
+*.iml

@@ -17,6 +17,9 @@ def is_object_or_array(current_token):
 
 
 class CompilationEngine:
+    """The name of the class being compiled"""
+    _class_name = ""
+
     def __init__(self, input_stream, output_stream, write_xml):
         """
         Creates a new compilation engine with the given input and output. The next routine called must be compileClass()
@@ -31,7 +34,7 @@ class CompilationEngine:
         self._tokenizer = JackTokenizer(inputStreamOrFile=input_stream)
         self._write_xml = write_xml
 
-        # make the outfile for xml
+        # make the outfile
         if write_xml:
             if isinstance(output_stream, TextIOBase):
                 self._outfile = output_stream
@@ -42,8 +45,8 @@ class CompilationEngine:
         self._vm_writer = VMWriter(output_stream)
 
         # make SymbolTable
-        self._table_obj = {"name": "", "type": "", "kind": ""}
         self._symbol_table = SymbolTable()
+        self._table_obj = {"name": "", "type": "", "kind": ""}
 
 
     @property
@@ -101,19 +104,31 @@ class CompilationEngine:
             if token_type == GrammarLanguage.IDENTIFIER.value:
                 self._table_obj["name"] = self._tokenizer.currentToken
 
+    def reset_table_obj(self):
+        self._table_obj = {"name": "", "type": "", "kind": ""}
+
     def compile_class(self):
         """Compiles a complete class"""
         self._symbol_table.start_class()
+        self.reset_table_obj()
 
         while self._tokenizer.has_more_tokens():
             self._tokenizer.advance()
 
             if self._tokenizer.currentToken == GrammarLanguage.CLASS.value:
+                # write class tag
                 self.write_non_terminal_tag(GrammarLanguage.CLASS.value, False)
+
+                # write class keyword
                 self.write_terminal_tag(self._tokenizer.token_type().value.lower())
                 self._tokenizer.advance()
+
+                # write the class name
+                self._class_name = self._tokenizer.currentToken
                 self.write_terminal_tag(self._tokenizer.token_type().value.lower())
                 self._tokenizer.advance()
+
+                # write the opening curly brace
                 self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
             if (self._tokenizer.currentToken == GrammarLanguage.VAR.value or
@@ -128,6 +143,117 @@ class CompilationEngine:
 
         self.write_terminal_tag(self._tokenizer.token_type().value.lower())
         self.write_non_terminal_tag(GrammarLanguage.CLASS.value, True)
+
+    def is_subroutine(self):
+        if (self._tokenizer.currentToken == GrammarLanguage.FUNCTION.value or
+                self._tokenizer.currentToken == GrammarLanguage.METHOD.value or
+                self._tokenizer.currentToken == GrammarLanguage.CONSTRUCTOR.value):
+            return True
+        return False
+
+    def not_end_of_routine(self):
+        if self._tokenizer.currentToken != "}":
+            return True
+        return False
+
+    def is_subroutine_identifier_signature(self):
+        if ((self._tokenizer.currentToken != GrammarLanguage.VAR.value and
+             self._tokenizer.currentToken != GrammarLanguage.INT.value and
+             self._tokenizer.currentToken != GrammarLanguage.DO.value and
+             self._tokenizer.currentToken != GrammarLanguage.IF.value and
+             self._tokenizer.currentToken != GrammarLanguage.LET.value) and
+                self._tokenizer.token_type().value.lower() == GrammarLanguage.KEYWORD.value or
+                self._tokenizer.token_type().value.lower() == GrammarLanguage.IDENTIFIER.value or
+                self._tokenizer.token_type().value.lower() == GrammarLanguage.SYMBOL.value):
+            return True
+        return False
+
+    def compile_subroutine(self):
+        """Compiles a complete method, function, or constructor"""
+        if self.is_subroutine():
+            self._symbol_table.start_subroutine()
+            self.reset_table_obj()
+
+            # write the first subroutine entry
+            self._symbol_table.define(
+                i_name="this",
+                i_type=self._class_name,
+                i_kind="argument"
+            )
+
+            self.write_xml_tag_smart(GrammarLanguage.SUB_ROUTINE_DEC.value, False)
+            self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+
+            count = 0
+            while count != 3:
+                # count 0 write the first label in the signature method / function / constructor
+                # count 1 write the return type in the signature
+                # count 2 write the name of the method / function / constructor
+                self.write_xml_tag_smart(self._tokenizer.token_type().value.lower(), True)
+                self._tokenizer.advance()
+                count = count + 1
+
+            while self._tokenizer.currentToken != ")":
+                # compile parameter list
+                if self._tokenizer.currentToken == "(":
+                    self.compile_parameter_list()
+                    # write the closing ')' symbol
+                    self.write_terminal_tag(GrammarLanguage.SYMBOL.value)
+
+            while self.not_end_of_routine():
+                self._tokenizer.advance()
+
+                if self._tokenizer.currentToken == "{":
+                    self.write_xml_tag_smart(GrammarLanguage.SUB_ROUTINE_BOD.value, False)
+
+                # is the method / subroutine signature (first line before subroutine body)
+                # if self.is_subroutine_identifier_signature():
+                #     self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+
+                # compile declarations
+                if (self._tokenizer.currentToken == GrammarLanguage.VAR.value or
+                        self._tokenizer.currentToken == GrammarLanguage.INT.value):
+                    self.compile_var_declaration()
+
+                # compile statements
+                if (self._tokenizer.currentToken == GrammarLanguage.LET.value or
+                    self._tokenizer.currentToken == GrammarLanguage.DO.value or
+                        self._tokenizer.currentToken == GrammarLanguage.IF.value):
+                    self.compile_statements()
+
+            self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+            self.write_xml_closing_tag(GrammarLanguage.SUB_ROUTINE_BOD.value)
+            self.write_xml_closing_tag(GrammarLanguage.SUB_ROUTINE_DEC.value)
+
+    def compile_parameter_list(self):
+        """Compiles a (possibly empty) parameter list, not including the enclosing "()"."""
+        self.write_xml_tag_smart(GrammarLanguage.PARAMETER_LIST.value, False)
+        self._table_obj["kind"] = "argument"
+
+        if self._tokenizer.currentToken == "(":
+            self._tokenizer.advance()
+
+        # ((type varName)(',' type varName)*)?
+        while self._tokenizer.currentToken != ")":
+            # self._symbol_table.define(i_name=)
+            next_token = self._tokenizer.look_ahead()
+            if (not self._tokenizer.currentToken == "," and
+                    not next_token == ","
+                    and self._tokenizer.get_token_type(next_token) == "identifier"):
+                # then it must be the parameter type
+                self._table_obj["type"] = self._tokenizer.currentToken
+            elif self._tokenizer.token_type().value.lower() == "identifier":
+                self._table_obj["name"] = self._tokenizer.currentToken
+                self._symbol_table.define(
+                    i_name=self._table_obj["name"],
+                    i_kind=self._table_obj["kind"],
+                    i_type=self._table_obj["type"]
+                )
+
+            self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+            self._tokenizer.advance()
+
+        self.write_xml_closing_tag(GrammarLanguage.PARAMETER_LIST.value)
 
     def compile_class_var_declaration(self):
         """Compiles a static declaration or a field declaration"""
@@ -153,65 +279,6 @@ class CompilationEngine:
 
             self.write_xml_closing_tag(GrammarLanguage.CLASS_VAR_DEC.value)
 
-    def compile_subroutine(self):
-        """Compiles a complete method, function, or constructor"""
-        if (self._tokenizer.currentToken == GrammarLanguage.FUNCTION.value or
-                self._tokenizer.currentToken == GrammarLanguage.METHOD.value or
-                self._tokenizer.currentToken == GrammarLanguage.CONSTRUCTOR.value):
-            self.write_xml_tag_smart(GrammarLanguage.SUB_ROUTINE_DEC.value, False)
-            self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-
-            while self._tokenizer.currentToken != "}":
-                self._tokenizer.advance()
-
-                if self._tokenizer.currentToken == "{":
-                    self.write_xml_tag_smart(GrammarLanguage.SUB_ROUTINE_BOD.value, False)
-
-                if ((self._tokenizer.currentToken != GrammarLanguage.VAR.value and
-                     self._tokenizer.currentToken != GrammarLanguage.INT.value and
-                     self._tokenizer.currentToken != GrammarLanguage.DO.value and
-                     self._tokenizer.currentToken != GrammarLanguage.IF.value and
-                     self._tokenizer.currentToken != GrammarLanguage.LET.value) and
-                        self._tokenizer.token_type().value.lower() == GrammarLanguage.KEYWORD.value or
-                        self._tokenizer.token_type().value.lower() == GrammarLanguage.IDENTIFIER.value or
-                        self._tokenizer.token_type().value.lower() == GrammarLanguage.SYMBOL.value):
-                    self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-
-                # compile declarations
-                if (self._tokenizer.currentToken == GrammarLanguage.VAR.value or
-                        self._tokenizer.currentToken == GrammarLanguage.INT.value):
-                    self.compile_var_declaration()
-
-                # compile statements
-                if (self._tokenizer.currentToken == GrammarLanguage.LET.value or
-                    self._tokenizer.currentToken == GrammarLanguage.DO.value or
-                        self._tokenizer.currentToken == GrammarLanguage.IF.value):
-                    self.compile_statements()
-
-                # compile parameter list
-                if self._tokenizer.currentToken == "(":
-                    self.compile_parameter_list()
-                    # write the closing ')' symbol
-                    self.write_terminal_tag(GrammarLanguage.SYMBOL.value)
-
-            self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-            self.write_xml_closing_tag(GrammarLanguage.SUB_ROUTINE_BOD.value)
-            self.write_xml_closing_tag(GrammarLanguage.SUB_ROUTINE_DEC.value)
-
-    def compile_parameter_list(self):
-        """Compiles a (possibly empty) parameter list, not including the enclosing "()"."""
-        self.write_xml_tag_smart(GrammarLanguage.PARAMETER_LIST.value, False)
-
-        if self._tokenizer.currentToken == "(":
-            self._tokenizer.advance()
-
-        # ((type varName)(',' type varName)*)?
-        while self._tokenizer.currentToken != ")":
-            self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-            self._tokenizer.advance()
-
-        self.write_xml_closing_tag(GrammarLanguage.PARAMETER_LIST.value)
-
     def compile_var_declaration(self):
         """
         Compiles var declaration
@@ -221,9 +288,18 @@ class CompilationEngine:
         self.write_xml_tag_smart(GrammarLanguage.VAR_DEC.value, False)
         self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
+        self._table_obj["kind"] = "local"
+
         while self._tokenizer.currentToken != ";":
             self._tokenizer.advance()
             self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+
+            if self._tokenizer.currentToken == "," or self._tokenizer.currentToken == ";":
+                self._symbol_table.define(
+                    i_name=self._table_obj["name"],
+                    i_type=self._table_obj["type"],
+                    i_kind=self._table_obj["kind"]
+                )
 
         self.write_xml_closing_tag(GrammarLanguage.VAR_DEC.value)
 
@@ -415,7 +491,8 @@ class CompilationEngine:
         '[', or '(', or '.'. Any other token is not part of the term
         """
         self.write_xml_tag_open(GrammarLanguage.TERM.value)
-        self.outfile.write("\n")
+        if self._write_xml:
+            self._outfile.write("\n")
 
         if self._tokenizer.currentToken == "(":
             self.write_terminal_tag(self._tokenizer.token_type().value.lower())

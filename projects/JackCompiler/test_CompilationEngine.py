@@ -37,7 +37,36 @@ class TestCompilationEngine(TestCase):
         self.assertEqual({"name": "pointCount", "type": "int", "kind": "static", "#": 0}, item_point_count)
 
     def test_compile_subroutine(self):
-        self.fail()
+        jack_mock_subroutine = dedent("""\
+        method int distance(Point other) {
+            var int dx, dy;
+            let dx = x - other.getx();
+            let dy = y - other.gety();
+            return Math.sqrt((dx*dy)+(dy*dy));
+        }
+        """)
+        jack_mock_in_file = StringIO(jack_mock_subroutine)
+
+        self._comp_eng = CompilationEngine(
+            input_stream=jack_mock_in_file, output_stream=StringIO(), write_xml=False)
+        self._comp_eng._class_name = "Point"
+        self._comp_eng._tokenizer.advance()
+
+        self._comp_eng.compile_subroutine()
+
+        self.assertEqual(4, len(self._comp_eng._symbol_table._table_subroutine))
+
+        item_this = self._comp_eng._symbol_table._table_subroutine.get("this")
+        self.assertEqual({"name": "this", "type": "Point", "kind": "argument", "#": 0}, item_this)
+
+        item_other = self._comp_eng._symbol_table._table_subroutine.get("other")
+        self.assertEqual({"name": "other", "type": "Point", "kind": "argument", "#": 1}, item_other)
+
+        item_dx = self._comp_eng._symbol_table._table_subroutine.get("dx")
+        self.assertEqual({"name": "dx", "type": "int", "kind": "local", "#": 0}, item_dx)
+
+        item_dy = self._comp_eng._symbol_table._table_subroutine.get("dy")
+        self.assertEqual({"name": "dy", "type": "int", "kind": "local", "#": 1}, item_dy)
 
     def test_compile_parameter_list(self):
         self.fail()

@@ -158,6 +158,10 @@ class JackTokenizer:
         """
         return self._tokenTypeTable.get_token_type(self._currentToken)
 
+    def get_token_type(self, token):
+        """returns the type of the token argument"""
+        return self._tokenTypeTable.get_token_type(token).value.lower()
+
     def key_word(self):
         """
         Returns the keyword which is the current token. Should be called only when the tokenType() is KEYWORD
