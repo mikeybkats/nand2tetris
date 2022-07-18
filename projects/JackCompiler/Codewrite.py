@@ -8,32 +8,25 @@ class Codewrite:
     def is_exp_op_exp(self, exp):
         return False
 
-
     def is_op_exp(self, exp):
         return False
-
 
     def get_exp_1(self, exp):
         pass
 
-
     def get_exp_2(self, exp):
         pass
-
 
     def get_op(self, exp):
         pass
 
-
     def get_function_name(self, exp_func):
         pass
-
 
     def get_exp_args(self, exp):
         pass
 
-
-    def codewrite(self, exp):
+    def code_write(self, exp):
         if exp.isnumeric():
             self._vm_writer.write_push(exp)
         if self._symbol_table.kind_of(exp) == GrammarLanguage.VAR.value.lower():

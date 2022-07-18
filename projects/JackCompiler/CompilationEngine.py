@@ -3,6 +3,7 @@ from TokenTypes import Token_Type, GrammarLanguage, TerminalTypeTable, is_op
 from io import TextIOBase
 from VMWriter import VMWriter, Segments
 from SymbolTable import SymbolTable
+from Codewrite import Codewrite
 import html
 
 
@@ -19,6 +20,9 @@ def is_object_or_array(current_token):
 class CompilationEngine:
     """The name of the class being compiled"""
     _class_name = ""
+
+    """The current expression being processed"""
+    _exp = ""
 
     def __init__(self, input_stream, output_stream, write_xml):
         """
@@ -451,6 +455,13 @@ class CompilationEngine:
         self.write_terminal_tag(self._tokenizer.token_type().value.lower())
         self.write_xml_closing_tag(GrammarLanguage.RETURN_STATEMENT.value)
 
+    @property
+    def exp(self):
+        return self._exp
+
+    def build_exp(self):
+        self._exp = self._exp + self._tokenizer.currentToken
+
     def compile_expression(self):
         """Compiles an expression - expression grammar: term (op term) """
         self.write_non_terminal_tag(GrammarLanguage.EXPRESSION.value, False)
@@ -462,6 +473,7 @@ class CompilationEngine:
 
         if is_op(self._tokenizer.currentToken):
             self.compile_term()
+
             self._tokenizer.advance()
             expression = False
 
@@ -473,6 +485,7 @@ class CompilationEngine:
             elif self._tokenizer.token_type() != Token_Type.SYMBOL:
                 self.compile_term()
 
+            self.build_exp()
             self._tokenizer.advance()
 
             if (self._tokenizer.currentToken == ";" or
@@ -497,11 +510,13 @@ class CompilationEngine:
         # is function call
         if self._tokenizer.currentToken == "(":
             self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+            self.build_exp()
             self._tokenizer.advance()
+
             self.compile_expression()
             self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
-        # if exp.is_numeric then write_push int constant
+        # code_write if exp.is_numeric then write_push int constant
         if self._tokenizer.token_type() == Token_Type.INT_CONST:
             self.write_terminal_tag(GrammarLanguage.INT_CONSTANT.value)
 
@@ -512,15 +527,11 @@ class CompilationEngine:
         if self._tokenizer.token_type() == Token_Type.IDENTIFIER:
             self.write_terminal_tag(GrammarLanguage.IDENTIFIER.value)
 
-        # if exp.is_var then write_push(exp)
-        if (self._tokenizer.token_type() == Token_Type.KEYWORD or
-                self._tokenizer.token_type() == Token_Type.IDENTIFIER):
+            # code_write if exp.is_var then write_push(exp)
             if self._symbol_table.is_var(self._tokenizer.currentToken):
-                # if it's a local variable then push the local segment
                 segment = self._symbol_table.kind_of(self._tokenizer.currentToken)
                 index = self._symbol_table.index_of(self._tokenizer.currentToken)
                 self._vm_writer.write_push(segment=segment, index=index)
-                # if it's an argument variable then push to the argument segment
 
             # is function call array or object
             if (self._tokenizer.look_ahead() == "." or
@@ -528,12 +539,19 @@ class CompilationEngine:
                     self._tokenizer.look_ahead() == "("):
 
                 while is_object_or_array(self._tokenizer.currentToken):
+                    # build exp
+                    self.build_exp()
                     self._tokenizer.advance()
 
                     if self._tokenizer.currentToken == ".":
                         self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+                        # build exp
+                        self.build_exp()
                         self._tokenizer.advance()
+
                         self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+                        # build exp
+                        self.build_exp()
                         self._tokenizer.advance()
 
                         if self._tokenizer.currentToken == "(":
@@ -543,7 +561,10 @@ class CompilationEngine:
 
                     if self._tokenizer.currentToken == "[":
                         self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+                        # build exp
+                        self.build_exp()
                         self._tokenizer.advance()
+
                         self.compile_expression()
                         self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
@@ -553,7 +574,11 @@ class CompilationEngine:
 
         if is_op(self._tokenizer.currentToken):
             self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+
+            # build exp
+            self.build_exp()
             self._tokenizer.advance()
+
             self.compile_term()
 
         self.write_xml_closing_tag(GrammarLanguage.TERM.value)
@@ -563,7 +588,11 @@ class CompilationEngine:
         self.write_xml_tag_smart(GrammarLanguage.EXPRESSION_LIST.value, False)
 
         while self._tokenizer.currentToken != ";" and self._tokenizer.currentToken != ")":
+            # build exp
+            self.build_exp()
+
             self._tokenizer.advance()
+
             if self._tokenizer.currentToken != ")":
                 self.compile_expression()
 

@@ -514,7 +514,18 @@ class TestCompilationEngine(TestCase):
         self.fail()
 
     def test_compile_expression(self):
-        self.fail()
+        jack_mock_expression = dedent("""\
+        x - other.getx();
+        """)
+        jack_mock_in_file = StringIO(jack_mock_expression)
+
+        self._comp_eng = CompilationEngine(
+            input_stream=jack_mock_in_file, output_stream=StringIO(), write_xml=False)
+        self._comp_eng._tokenizer.advance()
+
+        self._comp_eng.compile_expression()
+
+        self.assertEqual("x-other.getx()", self._comp_eng.exp)
 
     def test_compile_term(self):
         self.fail()
