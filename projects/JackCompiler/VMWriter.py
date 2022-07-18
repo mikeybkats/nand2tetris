@@ -1,5 +1,17 @@
 from io import TextIOBase
 from string import Template
+from enum import Enum
+
+
+class Segments(Enum):
+    CONST = "const"
+    ARG = "arg"
+    LOCAL = "local"
+    STATIC = "static"
+    THIS = "this"
+    THAT = "that"
+    POINTER = "pointer"
+    TEMP = "temp"
 
 
 class VMWriter:
@@ -107,6 +119,9 @@ class VMWriter:
     def write_return(self):
         """Writes VM return command"""
         self._outfile.write("return\n")
+
+    def write_custom(self, custom):
+        self._outfile.write(Template("$custom\n").substitute(custom=custom))
 
     def close(self):
         """Closes the output file"""

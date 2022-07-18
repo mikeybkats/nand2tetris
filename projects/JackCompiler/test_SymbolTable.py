@@ -65,7 +65,7 @@ class SymbolTableTest(unittest.TestCase):
     def test_var_count(self):
         self.add_class_scope()
         self.assertEqual(
-            {"name": "balance", "type": IdentifierType.INT.value, "kind": IdentifierKind.FIELD.value},
+            {"name": "balance", "type": IdentifierType.INT.value, "kind": IdentifierKind.FIELD.value, "#": 3},
             self.symbol_table._table_class["balance"]
         )
         self.assertEqual(CurrentScope.CLASS, self.symbol_table.scope)
@@ -90,10 +90,10 @@ class SymbolTableTest(unittest.TestCase):
     def test_index_of(self):
         self.add_class_scope()
         index_of = self.symbol_table.index_of("balance")
-        self.assertEqual(2, index_of)
+        self.assertEqual(3, index_of)
 
         index_of = self.symbol_table.index_of("id")
-        self.assertEqual(1, index_of)
+        self.assertEqual(0, index_of)
 
         self.test_start_subroutine()
         self.add_subroutine_scope()
@@ -103,6 +103,20 @@ class SymbolTableTest(unittest.TestCase):
 
         index_of = self.symbol_table.index_of("when")
         self.assertEqual(3, index_of)
+
+    def test_is_var(self):
+        self.add_class_scope()
+        self.symbol_table.start_subroutine()
+        self.add_subroutine_scope()
+
+        is_accounts_var = self.symbol_table.is_var("nAccounts")
+        self.assertEqual(True, is_accounts_var)
+
+        is_owner_var = self.symbol_table.is_var("owner")
+        self.assertEqual(True, is_owner_var)
+
+        is_j_var = self.symbol_table.is_var("j")
+        self.assertEqual(True, is_j_var)
 
 
 

@@ -1,7 +1,7 @@
 from JackTokenizer import JackTokenizer
 from TokenTypes import Token_Type, GrammarLanguage, TerminalTypeTable, is_op
 from io import TextIOBase
-from VMWriter import VMWriter
+from VMWriter import VMWriter, Segments
 from SymbolTable import SymbolTable
 import html
 
@@ -47,7 +47,6 @@ class CompilationEngine:
         # make SymbolTable
         self._symbol_table = SymbolTable()
         self._table_obj = {"name": "", "type": "", "kind": ""}
-
 
     @property
     def tokenizer(self):
@@ -495,21 +494,35 @@ class CompilationEngine:
         if self._write_xml:
             self._outfile.write("\n")
 
+        # is function call
         if self._tokenizer.currentToken == "(":
             self.write_terminal_tag(self._tokenizer.token_type().value.lower())
             self._tokenizer.advance()
             self.compile_expression()
             self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
+        # if exp.is_numeric then write_push int constant
         if self._tokenizer.token_type() == Token_Type.INT_CONST:
             self.write_terminal_tag(GrammarLanguage.INT_CONSTANT.value)
 
+            self._vm_writer.write_push(segment=Segments.CONST.value, index=self._tokenizer.currentToken)
+
         if self._tokenizer.token_type() == Token_Type.KEYWORD:
             self.write_terminal_tag(GrammarLanguage.KEYWORD.value)
-
         if self._tokenizer.token_type() == Token_Type.IDENTIFIER:
             self.write_terminal_tag(GrammarLanguage.IDENTIFIER.value)
 
+        # if exp.is_var then write_push(exp)
+        if (self._tokenizer.token_type() == Token_Type.KEYWORD or
+                self._tokenizer.token_type() == Token_Type.IDENTIFIER):
+            if self._symbol_table.is_var(self._tokenizer.currentToken):
+                # if it's a local variable then push the local segment
+                segment = self._symbol_table.kind_of(self._tokenizer.currentToken)
+                index = self._symbol_table.index_of(self._tokenizer.currentToken)
+                self._vm_writer.write_push(segment=segment, index=index)
+                # if it's an argument variable then push to the argument segment
+
+            # is function call array or object
             if (self._tokenizer.look_ahead() == "." or
                 self._tokenizer.look_ahead() == "[" or
                     self._tokenizer.look_ahead() == "("):
@@ -537,10 +550,6 @@ class CompilationEngine:
         if self._tokenizer.token_type() == Token_Type.STRING_CONST:
             self._tokenizer.currentToken = self._tokenizer.currentToken.strip("\"")
             self.write_terminal_tag(GrammarLanguage.STRING_CONST.value)
-
-            # write string constant
-            # for each character
-            # self._vm_writer.write_push()
 
         if is_op(self._tokenizer.currentToken):
             self.write_terminal_tag(self._tokenizer.token_type().value.lower())

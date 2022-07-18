@@ -147,3 +147,16 @@ class SymbolTable:
             int
         """
         return self._tables[self._scope][name]["#"]
+
+    def is_var(self, name):
+        """
+        Checks to see if the var is in either scoped table
+
+        :param name:
+        :return: Boolean
+        """
+        for key, value in self._tables.items():
+            for entry_key, entry in value.items():
+                if entry["name"] == name:
+                    return True
+        return False
