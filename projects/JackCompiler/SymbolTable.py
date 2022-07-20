@@ -1,6 +1,7 @@
 from enum import Enum
 
 
+# the Kind corresponds to grammatical reading of the jack code and does not translate directly to the vm code.
 class IdentifierKind(Enum):
     STATIC = "static"
     FIELD = "field"

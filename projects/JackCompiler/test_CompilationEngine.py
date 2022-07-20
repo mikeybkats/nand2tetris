@@ -1,5 +1,6 @@
 from unittest import TestCase
 from CompilationEngine import CompilationEngine
+from SymbolTable import SymbolTable, IdentifierKind, IdentifierType, CurrentScope
 from io import StringIO
 from textwrap import dedent
 
@@ -486,6 +487,55 @@ class TestCompilationEngine(TestCase):
         item_dy = self._comp_eng._symbol_table._table_subroutine.get("dy")
         self.assertEqual({"name": "dy", "type": "int", "kind": "local", "#": 1}, item_dy)
 
+    def add_subroutine_scope(self):
+        self._comp_eng._symbol_table.start_class()
+        self._comp_eng._symbol_table.define("total", IdentifierType.INT.value, IdentifierKind.FIELD.value)
+
+        self._comp_eng._symbol_table.start_subroutine()
+        self._comp_eng._symbol_table.define("x", IdentifierType.INT.value, IdentifierKind.VAR.value)
+        self._comp_eng._symbol_table.define("sum", IdentifierType.INT.value, IdentifierKind.VAR.value)
+
+    def test_compile_expression(self):
+        jack_mock_expression = dedent("""\
+        x - 10;
+        """)
+        jack_mock_in_file = StringIO(jack_mock_expression)
+
+        self._comp_eng = CompilationEngine(
+            input_stream=jack_mock_in_file, output_stream=StringIO(), write_xml=False)
+
+        self.add_subroutine_scope()
+        self.assertEqual("var", self._comp_eng._symbol_table.kind_of("x"))
+
+        self._comp_eng._tokenizer.advance()
+        self._comp_eng.compile_expression()
+
+        correct_output = dedent("""\
+        push local 0
+        push constant 10
+        sub
+        """)
+        mock_output = StringIO(correct_output)
+        mock_result = mock_output.readlines()
+
+        self._comp_eng._vm_writer.outfile.seek(0)
+        lines = self._comp_eng._vm_writer.outfile.readlines()
+
+        self.assertEqual(mock_result, lines)
+
+        jack_mock_expression = dedent("""\
+        x - other.getx();
+        """)
+        jack_mock_in_file = StringIO(jack_mock_expression)
+
+        self._comp_eng = CompilationEngine(
+            input_stream=jack_mock_in_file, output_stream=StringIO(), write_xml=False)
+        self._comp_eng._tokenizer.advance()
+
+        self._comp_eng.compile_expression()
+
+        self.assertEqual("x-other.getx()", self._comp_eng.exp)
+
     def test_compile_parameter_list(self):
         self.fail()
 
@@ -512,20 +562,6 @@ class TestCompilationEngine(TestCase):
 
     def test_compile_return(self):
         self.fail()
-
-    def test_compile_expression(self):
-        jack_mock_expression = dedent("""\
-        x - other.getx();
-        """)
-        jack_mock_in_file = StringIO(jack_mock_expression)
-
-        self._comp_eng = CompilationEngine(
-            input_stream=jack_mock_in_file, output_stream=StringIO(), write_xml=False)
-        self._comp_eng._tokenizer.advance()
-
-        self._comp_eng.compile_expression()
-
-        self.assertEqual("x-other.getx()", self._comp_eng.exp)
 
     def test_compile_term(self):
         self.fail()

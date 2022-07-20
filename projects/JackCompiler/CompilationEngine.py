@@ -464,12 +464,12 @@ class CompilationEngine:
 
     def compile_expression(self):
         """Compiles an expression - expression grammar: term (op term) """
+        expression = True
+
         self.write_non_terminal_tag(GrammarLanguage.EXPRESSION.value, False)
 
         if self._tokenizer.currentToken == "=":
             self._tokenizer.advance()
-
-        expression = True
 
         if is_op(self._tokenizer.currentToken):
             self.compile_term()
@@ -477,11 +477,20 @@ class CompilationEngine:
             self._tokenizer.advance()
             expression = False
 
+        cur_operator = ""
         while expression:
             if self._tokenizer.currentToken == "(":
                 self.compile_term()
             if is_op(self._tokenizer.currentToken):
                 self.write_terminal_tag(GrammarLanguage.SYMBOL.value)
+
+                ####
+                cur_operator = self._tokenizer.currentToken
+                # if self._tokenizer.look_ahead() != ";":
+                #     self._tokenizer.advance()
+                #     self.compile_expression()
+                ####
+
             elif self._tokenizer.token_type() != Token_Type.SYMBOL:
                 self.compile_term()
 
@@ -493,6 +502,10 @@ class CompilationEngine:
                     self._tokenizer.currentToken == "]" or
                     self._tokenizer.currentToken == ","):
                 expression = False
+
+            if cur_operator:
+                arithmetic_command = VMWriter.get_arithmetic_command(cur_operator)
+                self._vm_writer.write_arithmetic(arithmetic_command)
 
         self.write_non_terminal_tag(GrammarLanguage.EXPRESSION.value, True)
 
@@ -529,8 +542,10 @@ class CompilationEngine:
 
             # code_write if exp.is_var then write_push(exp)
             if self._symbol_table.is_var(self._tokenizer.currentToken):
-                segment = self._symbol_table.kind_of(self._tokenizer.currentToken)
+                kind = self._symbol_table.kind_of(self._tokenizer.currentToken)
+                segment = VMWriter.get_segment_from_kind(kind)
                 index = self._symbol_table.index_of(self._tokenizer.currentToken)
+
                 self._vm_writer.write_push(segment=segment, index=index)
 
             # is function call array or object
@@ -574,6 +589,9 @@ class CompilationEngine:
 
         if is_op(self._tokenizer.currentToken):
             self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+
+            # arithmetic_command = VMWriter.get_arithmetic_command(self._tokenizer.currentToken)
+            # self._vm_writer.write_arithmetic(arithmetic_command)
 
             # build exp
             self.build_exp()

@@ -3,8 +3,9 @@ from string import Template
 from enum import Enum
 
 
+# class segments correspond directly to vm output code
 class Segments(Enum):
-    CONST = "const"
+    CONST = "constant"
     ARG = "arg"
     LOCAL = "local"
     STATIC = "static"
@@ -12,7 +13,6 @@ class Segments(Enum):
     THAT = "that"
     POINTER = "pointer"
     TEMP = "temp"
-
 
 class VMWriter:
     def __init__(self, output_file_stream):
@@ -27,6 +27,39 @@ class VMWriter:
             self._outfile = output_file_stream
         else:
             self._outfile = open(output_file_stream, mode="w+", encoding='utf-8')
+
+    @property
+    def outfile(self):
+        return self._outfile
+
+    @staticmethod
+    def get_segment_from_kind(identifier_kind):
+        if identifier_kind == "var" or identifier_kind == "field":
+            return Segments.LOCAL.value
+        if identifier_kind == "static":
+            return Segments.STATIC.value
+        if identifier_kind == "argument":
+            return Segments.ARG.value
+
+    @staticmethod
+    def get_arithmetic_command(symbol):
+        # :param arithmetic_command: ADD, SUB, NEG, EQ, GT, LT, AND, OR, NOT
+        if symbol == "-":
+            return "sub"
+        if symbol == "+":
+            return "add"
+        if symbol == ">":
+            return "gt"
+        if symbol == "<":
+            return "lt"
+        if symbol == "&":
+            return "and"
+        if symbol == "|":
+            return "or"
+        if symbol == "~":
+            return "not"
+        return None
+        # TODO: add other arithmetic commands
 
     def write_push(self, segment, index):
         """
