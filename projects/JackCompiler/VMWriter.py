@@ -14,6 +14,7 @@ class Segments(Enum):
     POINTER = "pointer"
     TEMP = "temp"
 
+
 class VMWriter:
     def __init__(self, output_file_stream):
         """
@@ -58,6 +59,10 @@ class VMWriter:
             return "or"
         if symbol == "~":
             return "not"
+        if symbol == "*":
+            return "Math.multiply 2"
+        if symbol == "/":
+            return "Math.divide 2"
         return None
         # TODO: add other arithmetic commands
 

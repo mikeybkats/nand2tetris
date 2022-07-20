@@ -471,30 +471,43 @@ class CompilationEngine:
         if self._tokenizer.currentToken == "=":
             self._tokenizer.advance()
 
+        cur_operator = ""
+
         if is_op(self._tokenizer.currentToken):
+            cur_operator = self._tokenizer.currentToken
+            arithmetic_command = VMWriter.get_arithmetic_command(cur_operator)
+            self._vm_writer.write_arithmetic(arithmetic_command)
+
+            self.build_exp()
+            self._tokenizer.advance()
+
             self.compile_term()
 
             self._tokenizer.advance()
             expression = False
 
-        cur_operator = ""
         while expression:
             if self._tokenizer.currentToken == "(":
                 self.compile_term()
             if is_op(self._tokenizer.currentToken):
                 self.write_terminal_tag(GrammarLanguage.SYMBOL.value)
 
-                ####
                 cur_operator = self._tokenizer.currentToken
-                # if self._tokenizer.look_ahead() != ";":
-                #     self._tokenizer.advance()
-                #     self.compile_expression()
-                ####
+                self.build_exp()
+                self._tokenizer.advance()
+
+                if self._tokenizer.currentToken != ";":
+                    self.compile_term()
+
+                arithmetic_command = VMWriter.get_arithmetic_command(cur_operator)
+                self._vm_writer.write_arithmetic(arithmetic_command)
 
             elif self._tokenizer.token_type() != Token_Type.SYMBOL:
                 self.compile_term()
 
-            self.build_exp()
+            if self._tokenizer.currentToken != ";":
+                self.build_exp()
+
             self._tokenizer.advance()
 
             if (self._tokenizer.currentToken == ";" or
@@ -503,9 +516,9 @@ class CompilationEngine:
                     self._tokenizer.currentToken == ","):
                 expression = False
 
-            if cur_operator:
-                arithmetic_command = VMWriter.get_arithmetic_command(cur_operator)
-                self._vm_writer.write_arithmetic(arithmetic_command)
+        # if cur_operator:
+        #     arithmetic_command = VMWriter.get_arithmetic_command(cur_operator)
+        #     self._vm_writer.write_arithmetic(arithmetic_command)
 
         self.write_non_terminal_tag(GrammarLanguage.EXPRESSION.value, True)
 
@@ -520,7 +533,7 @@ class CompilationEngine:
         if self._write_xml:
             self._outfile.write("\n")
 
-        # is function call
+        # is function call or arithmetic priority
         if self._tokenizer.currentToken == "(":
             self.write_terminal_tag(self._tokenizer.token_type().value.lower())
             self.build_exp()
@@ -590,8 +603,8 @@ class CompilationEngine:
         if is_op(self._tokenizer.currentToken):
             self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
-            # arithmetic_command = VMWriter.get_arithmetic_command(self._tokenizer.currentToken)
-            # self._vm_writer.write_arithmetic(arithmetic_command)
+            arithmetic_command = VMWriter.get_arithmetic_command(self._tokenizer.currentToken)
+            self._vm_writer.write_arithmetic(arithmetic_command)
 
             # build exp
             self.build_exp()

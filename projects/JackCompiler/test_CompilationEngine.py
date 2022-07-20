@@ -1,6 +1,7 @@
 from unittest import TestCase
 from CompilationEngine import CompilationEngine
 from SymbolTable import SymbolTable, IdentifierKind, IdentifierType, CurrentScope
+from VMWriter import  VMWriter
 from io import StringIO
 from textwrap import dedent
 
@@ -493,9 +494,18 @@ class TestCompilationEngine(TestCase):
 
         self._comp_eng._symbol_table.start_subroutine()
         self._comp_eng._symbol_table.define("x", IdentifierType.INT.value, IdentifierKind.VAR.value)
+        self._comp_eng._symbol_table.define("a", IdentifierType.INT.value, IdentifierKind.VAR.value)
+        self._comp_eng._symbol_table.define("b", IdentifierType.INT.value, IdentifierKind.VAR.value)
+        self._comp_eng._symbol_table.define("c", IdentifierType.INT.value, IdentifierKind.VAR.value)
         self._comp_eng._symbol_table.define("sum", IdentifierType.INT.value, IdentifierKind.VAR.value)
 
-    def test_compile_expression(self):
+    def add_subroutine_scope_2(self):
+        self._comp_eng._symbol_table.start_subroutine()
+        self._comp_eng._symbol_table.define("a", IdentifierType.INT.value, IdentifierKind.VAR.value)
+        self._comp_eng._symbol_table.define("b", IdentifierType.INT.value, IdentifierKind.VAR.value)
+        self._comp_eng._symbol_table.define("c", IdentifierType.INT.value, IdentifierKind.VAR.value)
+
+    def test_compile_expression_simple(self):
         jack_mock_expression = dedent("""\
         x - 10;
         """)
@@ -505,6 +515,7 @@ class TestCompilationEngine(TestCase):
             input_stream=jack_mock_in_file, output_stream=StringIO(), write_xml=False)
 
         self.add_subroutine_scope()
+
         self.assertEqual("var", self._comp_eng._symbol_table.kind_of("x"))
 
         self._comp_eng._tokenizer.advance()
@@ -524,17 +535,91 @@ class TestCompilationEngine(TestCase):
         self.assertEqual(mock_result, lines)
 
         jack_mock_expression = dedent("""\
-        x - other.getx();
+        a + b * c;
         """)
         jack_mock_in_file = StringIO(jack_mock_expression)
 
         self._comp_eng = CompilationEngine(
             input_stream=jack_mock_in_file, output_stream=StringIO(), write_xml=False)
+        self.add_subroutine_scope_2()
+
+        self._comp_eng._tokenizer.advance()
+        self._comp_eng.compile_expression()
+
+        correct_output = dedent("""\
+        push local 0
+        push local 1
+        add
+        push local 2
+        Math.multiply 2
+        """)
+        mock_output = StringIO(correct_output)
+        mock_result = mock_output.readlines()
+
+        self._comp_eng._vm_writer.outfile.seek(0)
+        lines = self._comp_eng._vm_writer.outfile.readlines()
+
+        self.assertEqual(mock_result, lines)
+
+    def test_compile_expression_priority(self):
+        jack_mock_expression = dedent("""\
+        a + (b * c);
+        """)
+        jack_mock_in_file = StringIO(jack_mock_expression)
+
+        self._comp_eng = CompilationEngine(
+            input_stream=jack_mock_in_file, output_stream=StringIO(), write_xml=False)
+        self.add_subroutine_scope_2()
+
+        self._comp_eng._tokenizer.advance()
+        self._comp_eng.compile_expression()
+
+        correct_output = dedent("""\
+        push local 0
+        push local 1
+        push local 2
+        Math.multiply 2
+        add
+        """)
+        mock_output = StringIO(correct_output)
+        mock_result = mock_output.readlines()
+
+        self._comp_eng._vm_writer.outfile.seek(0)
+        lines = self._comp_eng._vm_writer.outfile.readlines()
+
+        self.assertEqual(mock_result, lines)
+
+    def test_compile_expression_object(self):
+        jack_mock_expression = dedent("""\
+        x - other.getx(point);
+        """)
+
+        jack_mock_in_file = StringIO(jack_mock_expression)
+
+        self._comp_eng = CompilationEngine(
+            input_stream=jack_mock_in_file, output_stream=StringIO(), write_xml=False)
+
+        self._comp_eng._symbol_table.start_class()
+        self._comp_eng._symbol_table.define("other", "Other", IdentifierKind.FIELD)
+
+        self._comp_eng._symbol_table.start_subroutine()
+        self._comp_eng._symbol_table.define("x", IdentifierType.INT.value, IdentifierKind.VAR.value)
+        self._comp_eng._symbol_table.define("point", "Point", IdentifierKind.VAR.value)
+
         self._comp_eng._tokenizer.advance()
 
         self._comp_eng.compile_expression()
 
         self.assertEqual("x-other.getx()", self._comp_eng.exp)
+
+        correct_output = dedent("""\
+        push local 0
+        push local 1
+        call other.getX 1
+        sub
+        """)
+        mock_output = StringIO(correct_output)
+        mock_result = mock_output.readlines()
 
     def test_compile_parameter_list(self):
         self.fail()
