@@ -23,8 +23,6 @@ class CurrentScope(Enum):
 
 
 class SymbolTable:
-    _current_kind = None
-    _current_kind_index = 0
     """
     :field _current_scope:
         CurrentScope "class" | "subroutine
@@ -60,21 +58,14 @@ class SymbolTable:
         """Starts a new subroutine scope (i.e., resets the subroutine's symbol table)"""
         self._scope = CurrentScope.SUBROUTINE
         self._table_subroutine.clear()
-        self._current_kind_index = 0
 
     def start_class(self):
         """Starts a new class scope"""
         self._scope = CurrentScope.CLASS
         self._table_class.clear()
-        self._current_kind_index = 0
 
-    # private method
-    def __reset_cc_index(self, kind):
-        if not self._current_kind == kind:
-            self._current_kind = kind
-            self._current_kind_index = 0
-        else:
-            self._current_kind_index = self._current_kind_index + 1
+    def not_scope(self):
+        return CurrentScope.CLASS if self._scope == CurrentScope.SUBROUTINE else CurrentScope.SUBROUTINE
 
     def define(self, i_name, i_type, i_kind):
         """
@@ -89,15 +80,19 @@ class SymbolTable:
             IdentifierKind STATIC, FIELD, ARG, VAR, NONE
         :return:
         """
-        self.__reset_cc_index(i_kind)
+        if not self.is_var(i_name):
+            if i_kind == IdentifierKind.FIELD.value or i_kind == IdentifierKind.STATIC.value:
+                self._scope = CurrentScope.CLASS
+            if i_kind == IdentifierKind.VAR.value or i_kind == IdentifierKind.ARGUMENT.value:
+                self._scope = CurrentScope.SUBROUTINE
 
-        self._tables[self._scope][i_name] = {
-            "name": i_name,
-            "type": i_type,
-            "kind": i_kind,
-            "#": self._current_kind_index
-        }
-        # creates entry like this: (i_name, { "name": xxx, "type": xxx, "kind": xxx, "#": xxx })
+            self._tables[self._scope][i_name] = {
+                "name": i_name,
+                "type": i_type,
+                "kind": i_kind,
+                "#": self.var_count(i_kind)
+            }
+            # creates entry like this: (i_name, { "name": xxx, "type": xxx, "kind": xxx, "#": xxx })
 
     def var_count(self, kind):
         """
@@ -125,7 +120,11 @@ class SymbolTable:
         :return:
             STATIC, FIELD, ARG, VAR, None
         """
-        return self._tables[self._scope][name]["kind"]
+        if name in self._tables[self._scope]:
+            return self._tables[self._scope][name]["kind"]
+        elif name in self._tables[self.not_scope()]:
+            return self._tables[self.not_scope()][name]["kind"]
+        return None
 
     def type_of(self, name):
         """
@@ -136,7 +135,10 @@ class SymbolTable:
         :return:
             string
         """
-        return self._tables[self._scope][name]["type"]
+        if name in self._tables[self._scope]:
+            return self._tables[self._scope][name]["type"]
+        elif name in self._tables[self.not_scope()]:
+            return self._tables[self.not_scope()][name]["type"]
 
     def index_of(self, name):
         """
@@ -147,7 +149,10 @@ class SymbolTable:
         :return:
             int
         """
-        return self._tables[self._scope][name]["#"]
+        if name in self._tables[self._scope]:
+            return self._tables[self._scope][name]["#"]
+        elif name in self._tables[self.not_scope()]:
+            return self._tables[self.not_scope()][name]["#"]
 
     def is_var(self, name):
         """

@@ -35,7 +35,9 @@ class VMWriter:
 
     @staticmethod
     def get_segment_from_kind(identifier_kind):
-        if identifier_kind == "var" or identifier_kind == "field":
+        if identifier_kind == "field":
+            return Segments.THIS.value;
+        if identifier_kind == "var":
             return Segments.LOCAL.value
         if identifier_kind == "static":
             return Segments.STATIC.value

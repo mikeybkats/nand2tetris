@@ -499,11 +499,17 @@ class TestCompilationEngine(TestCase):
         self._comp_eng._symbol_table.define("c", IdentifierType.INT.value, IdentifierKind.VAR.value)
         self._comp_eng._symbol_table.define("sum", IdentifierType.INT.value, IdentifierKind.VAR.value)
 
+    def add_class_scope(self):
+        self._comp_eng._symbol_table.start_class()
+        self._comp_eng._symbol_table.define("other", "Other", IdentifierKind.FIELD.value)
+
     def add_subroutine_scope_2(self):
         self._comp_eng._symbol_table.start_subroutine()
         self._comp_eng._symbol_table.define("a", IdentifierType.INT.value, IdentifierKind.VAR.value)
         self._comp_eng._symbol_table.define("b", IdentifierType.INT.value, IdentifierKind.VAR.value)
         self._comp_eng._symbol_table.define("c", IdentifierType.INT.value, IdentifierKind.VAR.value)
+        self._comp_eng._symbol_table.define("d", IdentifierType.INT.value, IdentifierKind.VAR.value)
+        self._comp_eng._symbol_table.define("x", IdentifierType.INT.value, IdentifierKind.VAR.value)
 
     def test_compile_expression_simple(self):
         jack_mock_expression = dedent("""\
@@ -589,9 +595,49 @@ class TestCompilationEngine(TestCase):
 
         self.assertEqual(mock_result, lines)
 
-    def test_compile_expression_object(self):
+        # more priority
         jack_mock_expression = dedent("""\
-        x - other.getx(point);
+        a + (b + (c * d));
+        """)
+        jack_mock_in_file = StringIO(jack_mock_expression)
+
+        self._comp_eng = CompilationEngine(
+            input_stream=jack_mock_in_file, output_stream=StringIO(), write_xml=False)
+        self.add_subroutine_scope_2()
+
+        self._comp_eng._tokenizer.advance()
+        self._comp_eng.compile_expression()
+
+        correct_output = dedent("""\
+        push local 0
+        push local 1
+        push local 2
+        push local 3
+        Math.multiply 2
+        add
+        add
+        """)
+        mock_output = StringIO(correct_output)
+        mock_result = mock_output.readlines()
+
+        self._comp_eng._vm_writer.outfile.seek(0)
+        lines = self._comp_eng._vm_writer.outfile.readlines()
+
+        self.assertEqual(mock_result, lines)
+
+    def test_compile_expression_object(self):
+        # class foo {
+        #   field Other other;
+        #   method bar(){
+        #       var int x;
+        #       var Point point;
+        #       var int newX;
+        #       let point = Point.new();
+        #       let newX = x - other.getX(point);
+        #   }
+        # }
+        jack_mock_expression = dedent("""\
+        x - other.getX(point);
         """)
 
         jack_mock_in_file = StringIO(jack_mock_expression)
@@ -599,10 +645,9 @@ class TestCompilationEngine(TestCase):
         self._comp_eng = CompilationEngine(
             input_stream=jack_mock_in_file, output_stream=StringIO(), write_xml=False)
 
-        self._comp_eng._symbol_table.start_class()
-        self._comp_eng._symbol_table.define("other", "Other", IdentifierKind.FIELD)
-
+        self.add_class_scope()
         self._comp_eng._symbol_table.start_subroutine()
+        self._comp_eng._symbol_table.define("this", "foo", "argument")
         self._comp_eng._symbol_table.define("x", IdentifierType.INT.value, IdentifierKind.VAR.value)
         self._comp_eng._symbol_table.define("point", "Point", IdentifierKind.VAR.value)
 
@@ -610,16 +655,23 @@ class TestCompilationEngine(TestCase):
 
         self._comp_eng.compile_expression()
 
-        self.assertEqual("x-other.getx()", self._comp_eng.exp)
+        self._comp_eng._vm_writer.outfile.seek(0)
+        output_lines = self._comp_eng._vm_writer.outfile.readlines()
 
+        self.assertEqual("x-other.getX(point)", self._comp_eng.exp)
+
+        # push this 0 is the value of the field
         correct_output = dedent("""\
         push local 0
+        push this 0
         push local 1
-        call other.getX 1
+        call Other.getX 1
         sub
         """)
         mock_output = StringIO(correct_output)
         mock_result = mock_output.readlines()
+
+        self.assertEqual(mock_result, output_lines)
 
     def test_compile_parameter_list(self):
         self.fail()

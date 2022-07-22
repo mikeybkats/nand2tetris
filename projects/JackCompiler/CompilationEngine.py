@@ -24,6 +24,9 @@ class CompilationEngine:
     """The current expression being processed"""
     _exp = ""
 
+    """Expression list count. The count of the number of arguments passed to a function or methdod"""
+    _expression_list_count = 0
+
     def __init__(self, input_stream, output_stream, write_xml):
         """
         Creates a new compilation engine with the given input and output. The next routine called must be compileClass()
@@ -566,20 +569,25 @@ class CompilationEngine:
                 self._tokenizer.look_ahead() == "[" or
                     self._tokenizer.look_ahead() == "("):
 
+                # get the name of the calling function and save it in a variable
+                calling_function = self._symbol_table.type_of(self._tokenizer.currentToken)
                 while is_object_or_array(self._tokenizer.currentToken):
                     # build exp
                     self.build_exp()
                     self._tokenizer.advance()
 
+                    # push each argument to the stack
                     if self._tokenizer.currentToken == ".":
                         self.write_terminal_tag(self._tokenizer.token_type().value.lower())
                         # build exp
                         self.build_exp()
+                        calling_function = calling_function + self._tokenizer.currentToken
                         self._tokenizer.advance()
 
                         self.write_terminal_tag(self._tokenizer.token_type().value.lower())
                         # build exp
                         self.build_exp()
+                        calling_function = calling_function + self._tokenizer.currentToken
                         self._tokenizer.advance()
 
                         if self._tokenizer.currentToken == "(":
@@ -595,6 +603,9 @@ class CompilationEngine:
 
                         self.compile_expression()
                         self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+                # push calling function to the stack
+                if calling_function:
+                    self._vm_writer.write_call(calling_function, self._expression_list_count)
 
         if self._tokenizer.token_type() == Token_Type.STRING_CONST:
             self._tokenizer.currentToken = self._tokenizer.currentToken.strip("\"")
@@ -618,6 +629,7 @@ class CompilationEngine:
         """Compiles a possibly empty comma-separated list of expressions"""
         self.write_xml_tag_smart(GrammarLanguage.EXPRESSION_LIST.value, False)
 
+        self._expression_list_count = 0
         while self._tokenizer.currentToken != ";" and self._tokenizer.currentToken != ")":
             # build exp
             self.build_exp()
@@ -625,6 +637,7 @@ class CompilationEngine:
             self._tokenizer.advance()
 
             if self._tokenizer.currentToken != ")":
+                self._expression_list_count = self._expression_list_count + 1
                 self.compile_expression()
 
             if self._tokenizer.currentToken == ",":
