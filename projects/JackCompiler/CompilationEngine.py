@@ -1,9 +1,8 @@
 from JackTokenizer import JackTokenizer
 from TokenTypes import Token_Type, GrammarLanguage, TerminalTypeTable, is_op
 from io import TextIOBase
-from VMWriter import VMWriter, Segments
-from SymbolTable import SymbolTable
-from Codewrite import Codewrite
+from VMWriter import VMWriter, Segments, get_math_lib_args
+from SymbolTable import SymbolTable, is_standard_lib
 import html
 
 
@@ -24,7 +23,7 @@ class CompilationEngine:
     """The current expression being processed"""
     _exp = ""
 
-    """Expression list count. The count of the number of arguments passed to a function or methdod"""
+    """Expression list count. The count of the number of arguments passed to a function or method"""
     _expression_list_count = 0
 
     def __init__(self, input_stream, output_stream, write_xml):
@@ -174,20 +173,27 @@ class CompilationEngine:
             return True
         return False
 
-    def compile_subroutine(self):
-        # TODO: verify this method is working correctly. check xml tests.
+    def is_method(self):
+        if self._tokenizer.currentToken == GrammarLanguage.METHOD:
+            return True
+        else:
+            return False
 
+    def compile_subroutine(self):
         """Compiles a complete method, function, or constructor"""
         if self.is_subroutine():
             self._symbol_table.start_subroutine()
             self.reset_table_obj()
 
             # write the first subroutine entry
-            self._symbol_table.define(
-                i_name="this",
-                i_type=self._class_name,
-                i_kind="argument"
-            )
+            if not self.is_method():
+                self._symbol_table.define(
+                    i_name="this",
+                    i_type=self._class_name,
+                    i_kind="argument"
+                )
+                self._vm_writer.write_push(segment="argument", index=0)
+                self._vm_writer.write_pop(segment="pointer", index=0)
 
             self.write_xml_tag_smart(GrammarLanguage.SUB_ROUTINE_DEC.value, False)
             # self.write_terminal_tag(self._tokenizer.token_type().value.lower())
@@ -295,7 +301,7 @@ class CompilationEngine:
         self.write_xml_tag_smart(GrammarLanguage.VAR_DEC.value, False)
         self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
-        self._table_obj["kind"] = "local"
+        self._table_obj["kind"] = "var"
 
         while self._tokenizer.currentToken != ";":
             self._tokenizer.advance()
@@ -341,8 +347,13 @@ class CompilationEngine:
         self.write_xml_tag_smart(GrammarLanguage.LET_STATEMENT.value, False)
         self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
+        count = 0
         while self._tokenizer.currentToken != ";":
             self._tokenizer.advance()
+            count = count + 1
+
+            if count == 1:
+                assignment_destination = self._tokenizer.currentToken
 
             if self.tokenizer.look_ahead() == "[":
                 self.write_terminal_tag(self._tokenizer.token_type().value.lower())
@@ -358,6 +369,12 @@ class CompilationEngine:
                 break
 
             self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+        # self._vm_writer.write_custom("CUSTOM: " + assignment_destination)
+        # self._vm_writer.write_custom("CUSTOM: " + self._symbol_table.kind_of(assignment_destination))
+
+        segment = self._vm_writer.get_segment_from_kind(self._symbol_table.kind_of(assignment_destination))
+        index = self._symbol_table.var_count(self._tokenizer.currentToken)
+        self._vm_writer.write_pop(segment=segment, index=index)
 
         self.write_terminal_tag(self._tokenizer.token_type().value.lower())
         self.write_xml_closing_tag(GrammarLanguage.LET_STATEMENT.value)
@@ -455,6 +472,7 @@ class CompilationEngine:
         if self._tokenizer.currentToken != ";":
             self.compile_expression()
 
+        self._vm_writer.write_return()
         self.write_terminal_tag(self._tokenizer.token_type().value.lower())
         self.write_xml_closing_tag(GrammarLanguage.RETURN_STATEMENT.value)
 
@@ -465,6 +483,13 @@ class CompilationEngine:
     def build_exp(self):
         self._exp = self._exp + self._tokenizer.currentToken
 
+    def write_arithmetic_vm(self, operator):
+        arithmetic_command = VMWriter.get_arithmetic_command(operator)
+        if is_standard_lib(arithmetic_command):
+            self._vm_writer.write_call(arithmetic_command, get_math_lib_args(arithmetic_command))
+        else:
+            self._vm_writer.write_arithmetic(arithmetic_command)
+
     def compile_expression(self):
         """Compiles an expression - expression grammar: term (op term) """
         expression = True
@@ -474,12 +499,12 @@ class CompilationEngine:
         if self._tokenizer.currentToken == "=":
             self._tokenizer.advance()
 
-        cur_operator = ""
-
         if is_op(self._tokenizer.currentToken):
             cur_operator = self._tokenizer.currentToken
-            arithmetic_command = VMWriter.get_arithmetic_command(cur_operator)
-            self._vm_writer.write_arithmetic(arithmetic_command)
+
+            self.write_arithmetic_vm(cur_operator)
+            # arithmetic_command = VMWriter.get_arithmetic_command(cur_operator)
+            # self._vm_writer.write_arithmetic(arithmetic_command)
 
             self.build_exp()
             self._tokenizer.advance()
@@ -502,8 +527,9 @@ class CompilationEngine:
                 if self._tokenizer.currentToken != ";":
                     self.compile_term()
 
-                arithmetic_command = VMWriter.get_arithmetic_command(cur_operator)
-                self._vm_writer.write_arithmetic(arithmetic_command)
+                # arithmetic_command = VMWriter.get_arithmetic_command(cur_operator)
+                # self._vm_writer.write_arithmetic(arithmetic_command)
+                self.write_arithmetic_vm(cur_operator)
 
             elif self._tokenizer.token_type() != Token_Type.SYMBOL:
                 self.compile_term()
@@ -519,23 +545,14 @@ class CompilationEngine:
                     self._tokenizer.currentToken == ","):
                 expression = False
 
-        # if cur_operator:
-        #     arithmetic_command = VMWriter.get_arithmetic_command(cur_operator)
-        #     self._vm_writer.write_arithmetic(arithmetic_command)
-
         self.write_non_terminal_tag(GrammarLanguage.EXPRESSION.value, True)
 
-    def compile_term(self):
-        """
-        term: varName | constant
-        Compiles a term. This routine must distinguish between variables, arrays and objects and subroutine calls.
-        This routine will require a look ahead token which will be one of
-        '[', or '(', or '.'. Any other token is not part of the term
-        """
+    def compile_term_write_opening_tag(self):
         self.write_xml_tag_open(GrammarLanguage.TERM.value)
         if self._write_xml:
             self._outfile.write("\n")
 
+    def compile_term_write_function_call(self):
         # is function call or arithmetic priority
         if self._tokenizer.currentToken == "(":
             self.write_terminal_tag(self._tokenizer.token_type().value.lower())
@@ -545,12 +562,55 @@ class CompilationEngine:
             self.compile_expression()
             self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
+    def compile_term_write_int_constant(self):
         # code_write if exp.is_numeric then write_push int constant
         if self._tokenizer.token_type() == Token_Type.INT_CONST:
             self.write_terminal_tag(GrammarLanguage.INT_CONSTANT.value)
 
             self._vm_writer.write_push(segment=Segments.CONST.value, index=self._tokenizer.currentToken)
 
+    def compile_term_write_objects_and_arrays(self):
+        # get the name of the calling function and save it in a variable
+        type_of = self._symbol_table.type_of(self._tokenizer.currentToken)
+        calling_function = type_of
+        # write objects and arrays
+        while is_object_or_array(self._tokenizer.currentToken):
+            # build exp
+            self.build_exp()
+            self._tokenizer.advance()
+
+            # push each argument to the stack
+            if self._tokenizer.currentToken == ".":
+                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+                # build exp
+                self.build_exp()
+                calling_function = calling_function + self._tokenizer.currentToken
+                self._tokenizer.advance()
+
+                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+                # build exp
+                self.build_exp()
+                calling_function = calling_function + self._tokenizer.currentToken
+                self._tokenizer.advance()
+
+                if self._tokenizer.currentToken == "(":
+                    self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+                    self.compile_expression_list()
+                    self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+
+            if self._tokenizer.currentToken == "[":
+                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+                # build exp
+                self.build_exp()
+                self._tokenizer.advance()
+
+                self.compile_expression()
+                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+        # push calling function to the stack
+        if calling_function:
+            self._vm_writer.write_call(calling_function, self._expression_list_count)
+
+    def compile_term_write_keywords_and_identifiers(self):
         if self._tokenizer.token_type() == Token_Type.KEYWORD:
             self.write_terminal_tag(GrammarLanguage.KEYWORD.value)
         if self._tokenizer.token_type() == Token_Type.IDENTIFIER:
@@ -566,62 +626,41 @@ class CompilationEngine:
 
             # is function call array or object
             if (self._tokenizer.look_ahead() == "." or
-                self._tokenizer.look_ahead() == "[" or
+                    self._tokenizer.look_ahead() == "[" or
                     self._tokenizer.look_ahead() == "("):
+                self.compile_term_write_objects_and_arrays()
 
-                # get the name of the calling function and save it in a variable
-                calling_function = self._symbol_table.type_of(self._tokenizer.currentToken)
-                while is_object_or_array(self._tokenizer.currentToken):
-                    # build exp
-                    self.build_exp()
-                    self._tokenizer.advance()
-
-                    # push each argument to the stack
-                    if self._tokenizer.currentToken == ".":
-                        self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-                        # build exp
-                        self.build_exp()
-                        calling_function = calling_function + self._tokenizer.currentToken
-                        self._tokenizer.advance()
-
-                        self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-                        # build exp
-                        self.build_exp()
-                        calling_function = calling_function + self._tokenizer.currentToken
-                        self._tokenizer.advance()
-
-                        if self._tokenizer.currentToken == "(":
-                            self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-                            self.compile_expression_list()
-                            self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-
-                    if self._tokenizer.currentToken == "[":
-                        self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-                        # build exp
-                        self.build_exp()
-                        self._tokenizer.advance()
-
-                        self.compile_expression()
-                        self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-                # push calling function to the stack
-                if calling_function:
-                    self._vm_writer.write_call(calling_function, self._expression_list_count)
-
-        if self._tokenizer.token_type() == Token_Type.STRING_CONST:
-            self._tokenizer.currentToken = self._tokenizer.currentToken.strip("\"")
-            self.write_terminal_tag(GrammarLanguage.STRING_CONST.value)
-
+    def compile_term_write_operators(self):
         if is_op(self._tokenizer.currentToken):
             self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
-            arithmetic_command = VMWriter.get_arithmetic_command(self._tokenizer.currentToken)
-            self._vm_writer.write_arithmetic(arithmetic_command)
+            # arithmetic_command = VMWriter.get_arithmetic_command(self._tokenizer.currentToken)
+            # self._vm_writer.write_arithmetic(arithmetic_command)
+            self.write_arithmetic_vm(self._tokenizer.currentToken)
 
             # build exp
             self.build_exp()
             self._tokenizer.advance()
 
             self.compile_term()
+
+    def compile_term(self):
+        """
+        term: varName | constant
+        Compiles a term. This routine must distinguish between variables, arrays and objects and subroutine calls.
+        This routine will require a look ahead token which will be one of
+        '[', or '(', or '.'. Any other token is not part of the term
+        """
+        self.compile_term_write_opening_tag()
+        self.compile_term_write_function_call()
+        self.compile_term_write_int_constant()
+        self.compile_term_write_keywords_and_identifiers()
+
+        if self._tokenizer.token_type() == Token_Type.STRING_CONST:
+            self._tokenizer.currentToken = self._tokenizer.currentToken.strip("\"")
+            self.write_terminal_tag(GrammarLanguage.STRING_CONST.value)
+
+        self.compile_term_write_operators()
 
         self.write_xml_closing_tag(GrammarLanguage.TERM.value)
 
@@ -631,13 +670,13 @@ class CompilationEngine:
 
         self._expression_list_count = 0
         while self._tokenizer.currentToken != ";" and self._tokenizer.currentToken != ")":
+            self._expression_list_count = self._expression_list_count + 1
             # build exp
             self.build_exp()
 
             self._tokenizer.advance()
 
             if self._tokenizer.currentToken != ")":
-                self._expression_list_count = self._expression_list_count + 1
                 self.compile_expression()
 
             if self._tokenizer.currentToken == ",":

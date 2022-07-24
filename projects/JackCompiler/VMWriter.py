@@ -6,13 +6,22 @@ from enum import Enum
 # class segments correspond directly to vm output code
 class Segments(Enum):
     CONST = "constant"
-    ARG = "arg"
+    ARG = "argument"
     LOCAL = "local"
     STATIC = "static"
     THIS = "this"
     THAT = "that"
     POINTER = "pointer"
     TEMP = "temp"
+
+
+def get_math_lib_args(command):
+    if command == "Math.multiply":
+        return 2
+    if command == "Math.divide":
+        return 2
+    if command == "Math.sqrt":
+        return 1
 
 
 class VMWriter:
@@ -62,11 +71,10 @@ class VMWriter:
         if symbol == "~":
             return "not"
         if symbol == "*":
-            return "Math.multiply 2"
+            return "Math.multiply"
         if symbol == "/":
-            return "Math.divide 2"
+            return "Math.divide"
         return None
-        # TODO: add other arithmetic commands
 
     def write_push(self, segment, index):
         """

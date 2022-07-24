@@ -22,6 +22,33 @@ class CurrentScope(Enum):
     SUBROUTINE = "subroutine"
 
 
+def is_standard_lib(name):
+    match name:
+        case "Math":
+            return True
+        case "Math.multiply":
+            return True
+        case "Math.divide":
+            return True
+        case "Math.sqrt 2":
+            return True
+        case "String":
+            return True
+        case "Array":
+            return True
+        case "Output":
+            return True
+        case "Screen":
+            return True
+        case "Keyboard":
+            return True
+        case "Memory":
+            return True
+        case "Sys":
+            return False
+    return False
+
+
 class SymbolTable:
     """
     :field _current_scope:
@@ -135,6 +162,8 @@ class SymbolTable:
         :return:
             string
         """
+        if is_standard_lib(name):
+            return name
         if name in self._tables[self._scope]:
             return self._tables[self._scope][name]["type"]
         elif name in self._tables[self.not_scope()]:

@@ -469,24 +469,60 @@ class TestCompilationEngine(TestCase):
 
         self._comp_eng = CompilationEngine(
             input_stream=jack_mock_in_file, output_stream=StringIO(), write_xml=False)
-        self._comp_eng._class_name = "Point"
-        self._comp_eng._tokenizer.advance()
+        self._comp_eng._class_name = "Square"
+        self._comp_eng._symbol_table.start_class()
+        self._comp_eng._symbol_table.define(
+            i_name="x", i_type=IdentifierType.INT.value, i_kind=IdentifierKind.FIELD.value)
+        self._comp_eng._symbol_table.define(
+            i_name="y", i_type=IdentifierType.INT.value, i_kind=IdentifierKind.FIELD.value)
 
+        self._comp_eng._tokenizer.advance()
         self._comp_eng.compile_subroutine()
 
         self.assertEqual(4, len(self._comp_eng._symbol_table._table_subroutine))
 
         item_this = self._comp_eng._symbol_table._table_subroutine.get("this")
-        self.assertEqual({"name": "this", "type": "Point", "kind": "argument", "#": 0}, item_this)
+        self.assertEqual({"name": "this", "type": "Square", "kind": "argument", "#": 0}, item_this)
 
         item_other = self._comp_eng._symbol_table._table_subroutine.get("other")
         self.assertEqual({"name": "other", "type": "Point", "kind": "argument", "#": 1}, item_other)
 
         item_dx = self._comp_eng._symbol_table._table_subroutine.get("dx")
-        self.assertEqual({"name": "dx", "type": "int", "kind": "local", "#": 0}, item_dx)
+        self.assertEqual({"name": "dx", "type": "int", "kind": "var", "#": 0}, item_dx)
 
         item_dy = self._comp_eng._symbol_table._table_subroutine.get("dy")
-        self.assertEqual({"name": "dy", "type": "int", "kind": "local", "#": 1}, item_dy)
+        self.assertEqual({"name": "dy", "type": "int", "kind": "var", "#": 1}, item_dy)
+
+        correct_output = dedent("""\
+        push argument 0
+        pop pointer 0
+        push this 0
+        push argument 1
+        call Point.getx 1
+        sub
+        pop local 0
+        push this 1
+        push argument 1
+        call Point.gety 0
+        sub
+        pop local 1
+        push local 0
+        push local 1
+        call Math.multiply 2
+        push local 1
+        push local 1
+        call Math.multiply 2
+        add
+        call Math.sqrt 1
+        return
+        """)
+        mock_output = StringIO(correct_output)
+        mock_result = mock_output.readlines()
+
+        self._comp_eng._vm_writer.outfile.seek(0)
+        lines = self._comp_eng._vm_writer.outfile.readlines()
+
+        self.assertEqual(mock_result, lines)
 
     def add_subroutine_scope(self):
         self._comp_eng._symbol_table.start_class()
