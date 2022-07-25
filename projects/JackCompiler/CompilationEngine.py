@@ -369,11 +369,9 @@ class CompilationEngine:
                 break
 
             self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-        # self._vm_writer.write_custom("CUSTOM: " + assignment_destination)
-        # self._vm_writer.write_custom("CUSTOM: " + self._symbol_table.kind_of(assignment_destination))
 
         segment = self._vm_writer.get_segment_from_kind(self._symbol_table.kind_of(assignment_destination))
-        index = self._symbol_table.var_count(self._tokenizer.currentToken)
+        index = self._symbol_table.index_of(assignment_destination)
         self._vm_writer.write_pop(segment=segment, index=index)
 
         self.write_terminal_tag(self._tokenizer.token_type().value.lower())
@@ -569,10 +567,17 @@ class CompilationEngine:
 
             self._vm_writer.write_push(segment=Segments.CONST.value, index=self._tokenizer.currentToken)
 
+    def write_constructor(self):
+        pass
+
     def compile_term_write_objects_and_arrays(self):
         # get the name of the calling function and save it in a variable
-        type_of = self._symbol_table.type_of(self._tokenizer.currentToken)
+        type_of = self._symbol_table.type_of(self._tokenizer.currentToken) or self._tokenizer.currentToken
         calling_function = type_of
+        is_method = False
+        if self._tokenizer.currentToken[0].islower():
+            is_method = True
+
         # write objects and arrays
         while is_object_or_array(self._tokenizer.currentToken):
             # build exp
@@ -608,11 +613,18 @@ class CompilationEngine:
                 self.write_terminal_tag(self._tokenizer.token_type().value.lower())
         # push calling function to the stack
         if calling_function:
+            if is_method:
+                self._expression_list_count = self._expression_list_count + 1
             self._vm_writer.write_call(calling_function, self._expression_list_count)
 
     def compile_term_write_keywords_and_identifiers(self):
         if self._tokenizer.token_type() == Token_Type.KEYWORD:
             self.write_terminal_tag(GrammarLanguage.KEYWORD.value)
+            if self._tokenizer.currentToken == "true":
+                self._vm_writer.write_push("constant", 1)
+                self._vm_writer.write_arithmetic("neg")
+            if self._tokenizer.currentToken == "false" or self._tokenizer.currentToken == "null":
+                self._vm_writer.write_push("constant", 0)
         if self._tokenizer.token_type() == Token_Type.IDENTIFIER:
             self.write_terminal_tag(GrammarLanguage.IDENTIFIER.value)
 
@@ -670,13 +682,11 @@ class CompilationEngine:
 
         self._expression_list_count = 0
         while self._tokenizer.currentToken != ";" and self._tokenizer.currentToken != ")":
-            self._expression_list_count = self._expression_list_count + 1
-            # build exp
             self.build_exp()
-
             self._tokenizer.advance()
 
             if self._tokenizer.currentToken != ")":
+                self._expression_list_count = self._expression_list_count + 1
                 self.compile_expression()
 
             if self._tokenizer.currentToken == ",":
