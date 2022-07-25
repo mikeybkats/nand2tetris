@@ -752,12 +752,6 @@ class TestCompilationEngine(TestCase):
         self.assertEqual({"name": "offsetX", "type": "int", "kind": "argument", "#": 3}, subroutine_table.get("offsetX"))
         self.assertEqual({"name": "shift", "type": "int", "kind": "argument", "#": 4}, subroutine_table.get("shift"))
 
-    def test_compile_var_declaration(self):
-        pass
-
-    def test_compile_statements(self):
-        pass
-
     def add_blackjack_class_scope(self):
         self._comp_eng._symbol_table.start_class()
         self._comp_eng._symbol_table.define("prompt", "Prompt", "field")
@@ -868,3 +862,10 @@ class TestCompilationEngine(TestCase):
 
     def test_compile_expression_list(self):
         pass
+
+    def test_compile_var_declaration(self):
+        pass
+
+    def test_compile_statements(self):
+        pass
+

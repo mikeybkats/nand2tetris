@@ -3,6 +3,7 @@ from TokenTypes import Token_Type, GrammarLanguage, TerminalTypeTable, is_op
 from io import TextIOBase
 from VMWriter import VMWriter, Segments, get_math_lib_args
 from SymbolTable import SymbolTable, is_standard_lib
+from string import Template
 import html
 
 
@@ -25,6 +26,8 @@ class CompilationEngine:
 
     """Expression list count. The count of the number of arguments passed to a function or method"""
     _expression_list_count = 0
+
+    _var_declaration_count = 0
 
     def __init__(self, input_stream, output_stream, write_xml):
         """
@@ -63,7 +66,10 @@ class CompilationEngine:
         return self._outfile
 
     def close_outfile(self):
-        self._outfile.close()
+        if not self._write_xml:
+            self._vm_writer.close()
+        else:
+            self._outfile.close()
 
     def write_xml_tag_open(self, tag_type):
         if self._write_xml:
@@ -192,23 +198,22 @@ class CompilationEngine:
                     i_type=self._class_name,
                     i_kind="argument"
                 )
-                self._vm_writer.write_push(segment="argument", index=0)
-                self._vm_writer.write_pop(segment="pointer", index=0)
 
             self.write_xml_tag_smart(GrammarLanguage.SUB_ROUTINE_DEC.value, False)
-            # self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
+            class_function_name = self._class_name
             count = 0
             while count != 3:
                 # count 0 write the first label in the signature method / function / constructor
                 # count 1 write the return type in the signature
                 # count 2 write the name of the method / function / constructor
+                if count == 2:
+                    class_function_name = class_function_name + "." + self._tokenizer.currentToken
+
                 self.write_terminal_tag(self._tokenizer.token_type().value.lower())
                 self._tokenizer.advance()
                 count = count + 1
 
-            # while self._tokenizer.currentToken != ")":
-            #     # compile parameter list
             if self._tokenizer.currentToken == "(":
                 # write the opening '(' symbol
                 self.write_terminal_tag(self._tokenizer.token_type().value.lower())
@@ -232,6 +237,12 @@ class CompilationEngine:
                 if (self._tokenizer.currentToken == GrammarLanguage.LET.value or
                     self._tokenizer.currentToken == GrammarLanguage.DO.value or
                         self._tokenizer.currentToken == GrammarLanguage.IF.value):
+                    self._vm_writer.write_function(name=class_function_name, n_locals=self._var_declaration_count)
+                    if not self.is_method():
+                        self._vm_writer.write_push(segment="argument", index=0)
+                        self._vm_writer.write_pop(segment="pointer", index=0)
+                    self._var_declaration_count = 0
+
                     self.compile_statements()
 
             self.write_terminal_tag(self._tokenizer.token_type().value.lower())
@@ -313,6 +324,7 @@ class CompilationEngine:
                     i_type=self._table_obj["type"],
                     i_kind=self._table_obj["kind"]
                 )
+                self._var_declaration_count = self._var_declaration_count + 1
 
         self.write_xml_closing_tag(GrammarLanguage.VAR_DEC.value)
 

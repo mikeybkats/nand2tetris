@@ -24,9 +24,9 @@ class JackAnalyzer:
 
     def parse_file(self):
         # create a CompilationEngine from the xxx.jack input file
-        outfile_path = self._input_loc.replace(".jack", ".xml")
+        outfile_path = self._input_loc.replace(".jack", ".vm")
         # print(outfile_path)
-        self._comp_eng = CompilationEngine(input_stream=self._input_loc, output_stream=outfile_path)
+        self._comp_eng = CompilationEngine(input_stream=self._input_loc, output_stream=outfile_path, write_xml=False)
         self._comp_eng.compile_class()
         self._comp_eng.close_outfile()
 
