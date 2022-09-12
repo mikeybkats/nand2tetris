@@ -408,14 +408,27 @@ class CompilationEngine:
         self.write_xml_tag_smart(GrammarLanguage.DO_STATEMENT.value, False)
         self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
+        self._tokenizer.advance()
+        calling_function = self.get_name_of_calling_function()
+        is_method = False
+        if self._tokenizer.currentToken[0].islower():
+            is_method = True
+
         while self._tokenizer.currentToken != ";":
             self._tokenizer.advance()
+
+            calling_function = self.build_stack_methods(calling_function)
 
             if self._tokenizer.currentToken == "(":
                 self.write_terminal_tag(GrammarLanguage.SYMBOL.value.lower())
                 self.compile_expression_list()
 
             self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+
+        if calling_function:
+            if is_method:
+                self._expression_list_count = self._expression_list_count + 1
+            self._vm_writer.write_call(calling_function, self._expression_list_count)
 
         # self.write_terminal_tag(self._tokenizer.token_type().value.lower())
         self.write_xml_closing_tag(GrammarLanguage.DO_STATEMENT.value)
@@ -607,10 +620,35 @@ class CompilationEngine:
     def write_constructor(self):
         pass
 
+    def get_name_of_calling_function(self):
+        # get the name of the calling function and save it in a variable
+        return self._symbol_table.type_of(self._tokenizer.currentToken) or self._tokenizer.currentToken
+
+    def build_stack_methods(self, calling_function):
+        # push each argument to the stack
+        if self._tokenizer.currentToken == ".":
+            self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+            # build exp
+            self.build_exp()
+            calling_function = calling_function + self._tokenizer.currentToken
+            self._tokenizer.advance()
+
+            self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+            # build exp
+            self.build_exp()
+            calling_function = calling_function + self._tokenizer.currentToken
+            self._tokenizer.advance()
+
+            if self._tokenizer.currentToken == "(":
+                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+                self.compile_expression_list()
+                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+
+        return calling_function
+
     def compile_term_write_objects_and_arrays(self):
         # get the name of the calling function and save it in a variable
-        type_of = self._symbol_table.type_of(self._tokenizer.currentToken) or self._tokenizer.currentToken
-        calling_function = type_of
+        calling_function = self.get_name_of_calling_function()
         is_method = False
         if self._tokenizer.currentToken[0].islower():
             is_method = True
@@ -621,24 +659,7 @@ class CompilationEngine:
             self.build_exp()
             self._tokenizer.advance()
 
-            # push each argument to the stack
-            if self._tokenizer.currentToken == ".":
-                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-                # build exp
-                self.build_exp()
-                calling_function = calling_function + self._tokenizer.currentToken
-                self._tokenizer.advance()
-
-                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-                # build exp
-                self.build_exp()
-                calling_function = calling_function + self._tokenizer.currentToken
-                self._tokenizer.advance()
-
-                if self._tokenizer.currentToken == "(":
-                    self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-                    self.compile_expression_list()
-                    self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+            calling_function = self.build_stack_methods(calling_function)
 
             if self._tokenizer.currentToken == "[":
                 self.write_terminal_tag(self._tokenizer.token_type().value.lower())
@@ -648,6 +669,7 @@ class CompilationEngine:
                 self._tokenizer.advance()
                 self.compile_expression()
                 self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+
         # push calling function to the stack
         if calling_function:
             if is_method:

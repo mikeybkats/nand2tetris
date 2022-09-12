@@ -87,6 +87,8 @@ push constant 58
 call String.appendChar 2
 push constant 32
 call String.appendChar 2
+push local 0
+add
 call Keyboard.readInt 1
 pop temp 0
 pop pointer 1
