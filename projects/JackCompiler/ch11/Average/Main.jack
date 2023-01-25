@@ -17,7 +17,12 @@ class Main {
      
      let i = 0;
      while (i < length) {
+        // in the case of array assignment the local variables
+        // a and i are pushed to the stack and added immediately
         let a[i] = Keyboard.readInt("Enter a number: ");
+
+        // in the case of array addition the local variables
+        // sum, a, and i are pushed to stack and added during expression compilation
         let sum = sum + a[i];
         let i = i + 1;
      }
