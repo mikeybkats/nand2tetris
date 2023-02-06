@@ -94,6 +94,15 @@ class SymbolTable:
     def not_scope(self):
         return CurrentScope.CLASS if self._scope == CurrentScope.SUBROUTINE else CurrentScope.SUBROUTINE
 
+    def print_table(self):
+        print("---- class table ----")
+        for entry in self._tables[CurrentScope.CLASS]:
+            print(entry, ":", self._tables[CurrentScope.CLASS][entry])
+        print("---- subroutine table ----")
+        for entry in self._tables[CurrentScope.SUBROUTINE]:
+            print(entry, ":", self._tables[CurrentScope.SUBROUTINE][entry])
+        print("----")
+
     def define(self, i_name, i_type, i_kind):
         """
         Defines a new identifier of a given name, type, and kind and assigns it a running index. STATIC and FIELD

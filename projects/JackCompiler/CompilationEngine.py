@@ -115,11 +115,19 @@ class CompilationEngine:
             self.write_xml_tag_open(token_type)
             self.write_token()
             self.write_xml_closing_tag(token_type)
-        else:
-            if token_type == GrammarLanguage.KEYWORD.value:
-                self._table_obj["type"] = self._tokenizer.currentToken
-            if token_type == GrammarLanguage.IDENTIFIER.value:
-                self._table_obj["name"] = self._tokenizer.currentToken
+
+    def write_temp_table_object(self, token_type):
+        if token_type == GrammarLanguage.KEYWORD.value.lower():
+            self._table_obj["type"] = self._tokenizer.currentToken
+        if token_type == GrammarLanguage.IDENTIFIER.value.lower():
+            self._table_obj["name"] = self._tokenizer.currentToken
+
+    def write_table_object_definition(self):
+        self._symbol_table.define(
+            i_name=self._table_obj["name"],
+            i_type=self._table_obj["type"],
+            i_kind=self._table_obj["kind"]
+        )
 
     def reset_table_obj(self):
         self._table_obj = {"name": "", "type": "", "kind": ""}
@@ -274,11 +282,7 @@ class CompilationEngine:
                 self._table_obj["type"] = self._tokenizer.currentToken
             elif self._tokenizer.token_type().value.lower() == "identifier":
                 self._table_obj["name"] = self._tokenizer.currentToken
-                self._symbol_table.define(
-                    i_name=self._table_obj["name"],
-                    i_kind=self._table_obj["kind"],
-                    i_type=self._table_obj["type"]
-                )
+                self.write_table_object_definition()
 
             self.write_terminal_tag(self._tokenizer.token_type().value.lower())
             self._tokenizer.advance()
@@ -291,21 +295,21 @@ class CompilationEngine:
         if (self._tokenizer.currentToken == GrammarLanguage.STATIC.value or
                 self._tokenizer.currentToken == GrammarLanguage.FIELD.value):
 
-            self.write_xml_tag_smart(GrammarLanguage.CLASS_VAR_DEC.value, False)
-            self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+            # self.write_xml_tag_smart(GrammarLanguage.CLASS_VAR_DEC.value, False)
+            # self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
             self._table_obj["kind"] = self._tokenizer.currentToken
 
             while self._tokenizer.currentToken != ";":
                 self._tokenizer.advance()
-                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+
+                # TODO: refactor and remove write_temp_table_object!!
+                self.write_temp_table_object(self._tokenizer.token_type().value.lower())
+
+                # self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
                 if self._tokenizer.currentToken == "," or self._tokenizer.currentToken == ";":
-                    self._symbol_table.define(
-                        i_name=self._table_obj["name"],
-                        i_type=self._table_obj["type"],
-                        i_kind=self._table_obj["kind"]
-                    )
+                    self.write_table_object_definition()
 
             self.write_xml_closing_tag(GrammarLanguage.CLASS_VAR_DEC.value)
 
@@ -315,24 +319,30 @@ class CompilationEngine:
 
         var type varName (, varName)*;
         """
-        self.write_xml_tag_smart(GrammarLanguage.VAR_DEC.value, False)
-        self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+        # self.write_xml_tag_smart(GrammarLanguage.VAR_DEC.value, False)
+        # self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
+        self.write_temp_table_object(self._tokenizer.token_type().value.lower())
         self._table_obj["kind"] = "var"
 
+        count = 0
         while self._tokenizer.currentToken != ";":
             self._tokenizer.advance()
-            self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+            count = count + 1
+
+            if count == 1:
+                self._table_obj["type"] = self._tokenizer.currentToken
+
+            if count == 2:
+                self._table_obj["name"] = self._tokenizer.currentToken
 
             if self._tokenizer.currentToken == "," or self._tokenizer.currentToken == ";":
-                self._symbol_table.define(
-                    i_name=self._table_obj["name"],
-                    i_type=self._table_obj["type"],
-                    i_kind=self._table_obj["kind"]
-                )
+                count = 1
+                self.write_table_object_definition()
                 self._var_declaration_count = self._var_declaration_count + 1
 
-        self.write_xml_closing_tag(GrammarLanguage.VAR_DEC.value)
+        self._symbol_table.print_table()
+        # self.write_xml_closing_tag(GrammarLanguage.VAR_DEC.value)
 
     def compile_statements(self):
         """Compiles a sequence of statements, not including the
@@ -381,8 +391,8 @@ class CompilationEngine:
 
     def compile_let(self):
         """Compiles a let statement"""
-        self.write_xml_tag_smart(GrammarLanguage.LET_STATEMENT.value, False)
-        self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+        # self.write_xml_tag_smart(GrammarLanguage.LET_STATEMENT.value, False)
+        # self.write_terminal_tag(self._tokenizer.token_type().value.lower())
         array_object = ""
 
         count = 0
@@ -408,7 +418,8 @@ class CompilationEngine:
                     self._vm_writer.write_call(self._calling_function, self._expression_list_count)
                     self._calling_function = ""
 
-                    break
+            if self.tokenizer.currentToken == ";" and not array_object:
+                self._vm_writer.write_pop(segment=segment, index=index)
 
             self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
@@ -418,8 +429,8 @@ class CompilationEngine:
             self._vm_writer.write_push("temp", 0)
             self._vm_writer.write_pop("that", 0)
 
-        else:
-            self._vm_writer.write_pop(segment=segment, index=index)
+        # else:
+            # self._vm_writer.write_pop(segment=segment, index=index)
 
         self.write_terminal_tag(self._tokenizer.token_type().value.lower())
         self.write_xml_closing_tag(GrammarLanguage.LET_STATEMENT.value)
@@ -606,11 +617,6 @@ class CompilationEngine:
                     self._tokenizer.currentToken == "]" or
                     self._tokenizer.currentToken == ","):
                 expression = False
-                #
-                # if self._tokenizer.currentToken == "]":
-                #     self._vm_writer.write_pop("pointer", 1)
-                #     self._vm_writer.write_push("that", 0)
-                #     self._vm_writer.write_arithmetic("add")
 
         self.write_non_terminal_tag(GrammarLanguage.EXPRESSION.value, True)
 
