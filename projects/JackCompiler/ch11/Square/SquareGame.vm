@@ -3,37 +3,48 @@ push constant 0
 push constant 0
 push constant 30
 call Square.new 3
-pop None None
+pop this 0
 push constant 0
-pop None None
+pop this 1
 push constant 0
 return
 function SquareGame.dispose 0
-call square.dispose 1
+square
+call square 1
 pop temp 0
-call Memory.deAlloc 1
+Memory
+call Memory 1
 pop temp 0
 push constant 0
 return
 function SquareGame.moveSquare 0
+push this 1
 push constant 1
 None
-call square.moveUp 1
+square
+call square 1
 pop temp 0
+push this 1
 push constant 2
 None
-call square.moveDown 1
+square
+call square 1
 pop temp 0
+push this 1
 push constant 3
 None
-call square.moveLeft 1
+square
+call square 1
 pop temp 0
+push this 1
 push constant 4
 None
-call square.moveRight 1
+square
+call square 1
 pop temp 0
+Sys
 push constant 5
-call Sys.wait 1
+call Sys 1
 pop temp 0
 push constant 0
 return
@@ -51,6 +62,7 @@ None
 if-goto WHILE_END0
 call Keyboard.keyPressed 0
 pop local 0
+moveSquare
 call moveSquare 1
 pop temp 0
 goto WHILE_EXP0
@@ -64,33 +76,35 @@ pop local 1
 push local 0
 push constant 90
 None
-call square.decSize 1
+square
+call square 1
 pop temp 0
 push local 0
 push constant 88
 None
-call square.incSize 1
+square
+call square 1
 pop temp 0
 push local 0
 push constant 131
 None
 push constant 1
-pop None None
+pop this 1
 push local 0
 push constant 133
 None
 push constant 2
-pop None None
+pop this 1
 push local 0
 push constant 130
 None
 push constant 3
-pop None None
+pop this 1
 push local 0
 push constant 132
 None
 push constant 4
-pop None None
+pop this 1
 label WHILE_EXP1
 not
 push local 0
@@ -99,6 +113,7 @@ None
 if-goto WHILE_END1
 call Keyboard.keyPressed 0
 pop local 0
+moveSquare
 call moveSquare 1
 pop temp 0
 goto WHILE_EXP1

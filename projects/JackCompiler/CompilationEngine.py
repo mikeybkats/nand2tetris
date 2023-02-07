@@ -441,7 +441,13 @@ class CompilationEngine:
         self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
         self._tokenizer.advance()
-        calling_function = self.get_name_of_calling_function()
+        calling_function_type = self.get_type_of_calling_function()
+
+        # TODO: Replace with a variable push. whether local or global
+        if self._symbol_table.is_var(self._tokenizer.currentToken):
+            index = self._symbol_table.index_of(self._tokenizer.currentToken)
+            self._vm_writer.write_push(segment="local", index=index)
+
         is_method = False
         if self._tokenizer.currentToken[0].islower():
             is_method = True
@@ -449,7 +455,7 @@ class CompilationEngine:
         while self._tokenizer.currentToken != ";":
             self._tokenizer.advance()
 
-            calling_function = self.build_stack_methods(calling_function)
+            calling_function_type = self.build_stack_methods(calling_function_type)
 
             if self._tokenizer.currentToken == "(":
                 self.write_terminal_tag(GrammarLanguage.SYMBOL.value.lower())
@@ -457,10 +463,10 @@ class CompilationEngine:
 
             self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
-        if calling_function:
+        if calling_function_type:
             if is_method:
                 self._expression_list_count = self._expression_list_count + 1
-            self._vm_writer.write_call(calling_function, self._expression_list_count)
+            self._vm_writer.write_call(calling_function_type, self._expression_list_count)
             self._vm_writer.write_pop(segment="temp", index=0)
 
         # self.write_terminal_tag(self._tokenizer.token_type().value.lower())
@@ -644,7 +650,7 @@ class CompilationEngine:
     def write_constructor(self):
         pass
 
-    def get_name_of_calling_function(self):
+    def get_type_of_calling_function(self):
         # get the name of the calling function and save it in a variable
         return self._symbol_table.type_of(self._tokenizer.currentToken) or self._tokenizer.currentToken
 
@@ -668,7 +674,7 @@ class CompilationEngine:
 
     def compile_term_write_objects_arrays_calls(self):
         # get the name of the calling function and save it in a variable
-        calling_function = self.get_name_of_calling_function()
+        calling_function_type = self.get_type_of_calling_function()
         is_method = False
         if self._tokenizer.currentToken[0].islower():
             is_method = True
@@ -686,14 +692,14 @@ class CompilationEngine:
         # write objects and arrays
         while is_object_or_array(self._tokenizer.currentToken):
             self._tokenizer.advance()
-            calling_function = self.build_stack_methods(calling_function)
+            calling_function_type = self.build_stack_methods(calling_function_type)
 
         if is_array:
             return
-        elif calling_function:
+        elif calling_function_type:
             if is_method:
                 self._expression_list_count = self._expression_list_count + 1
-            self._calling_function = calling_function
+            self._calling_function = calling_function_type
             # self._vm_writer.write_call(calling_function, self._expression_list_count)
 
     def compile_term_write_keywords_and_identifiers(self):
