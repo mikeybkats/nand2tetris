@@ -1,4 +1,5 @@
-function Main.main 4
+function Main.main 0
+push constant 0
 push constant 18
 call String.new 1
 push constant 72

@@ -166,7 +166,6 @@ class VMWriter:
 
     def write_return(self):
         """Writes VM return command"""
-        self.write_push(segment="constant", index=0)
         self._outfile.write("return\n")
 
     def write_custom(self, custom):

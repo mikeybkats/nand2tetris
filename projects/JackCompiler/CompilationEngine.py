@@ -63,6 +63,9 @@ class CompilationEngine:
         self._symbol_table = SymbolTable()
         self._table_obj = {"name": "", "type": "", "kind": ""}
 
+        # current method can be "function" | "constructor" | "method"
+        self._current_method_type = ""
+
     @property
     def tokenizer(self):
         return self._tokenizer
@@ -193,12 +196,6 @@ class CompilationEngine:
             return True
         return False
 
-    def is_method(self):
-        if self._tokenizer.currentToken == GrammarLanguage.METHOD:
-            return True
-        else:
-            return False
-
     def compile_subroutine(self):
         """Compiles a complete method, function, or constructor"""
         if self.is_subroutine():
@@ -206,14 +203,19 @@ class CompilationEngine:
             self.reset_table_obj()
 
             # write the first subroutine entry
-            if self.is_method():
+            if self._tokenizer.currentToken == GrammarLanguage.METHOD.value:
+                self._current_method_type = "method"
+            if self._current_method_type == "method":
                 self._symbol_table.define(
                     i_name="this",
                     i_type=self._class_name,
                     i_kind="argument"
                 )
+            is_constructor = self._tokenizer.currentToken == GrammarLanguage.CONSTRUCTOR.value
+            if is_constructor:
+                self._current_method_type = "constructor"
 
-            self.write_xml_tag_smart(GrammarLanguage.SUB_ROUTINE_DEC.value, False)
+            # self.write_xml_tag_smart(GrammarLanguage.SUB_ROUTINE_DEC.value, False)
 
             class_function_name = self._class_name
             count = 0
@@ -223,6 +225,7 @@ class CompilationEngine:
                 # count 2 write the name of the method / function / constructor
                 if count == 2:
                     class_function_name = class_function_name + "." + self._tokenizer.currentToken
+                    self._vm_writer.write_function(name=class_function_name, n_locals=self._var_declaration_count)
 
                 self.write_terminal_tag(self._tokenizer.token_type().value.lower())
                 self._tokenizer.advance()
@@ -232,6 +235,11 @@ class CompilationEngine:
                 # write the opening '(' symbol
                 self.write_terminal_tag(self._tokenizer.token_type().value.lower())
                 self.compile_parameter_list()
+
+                if self._current_method_type == "constructor":
+                    self._vm_writer.write_custom("call Memory.alloc 1")
+                    self._vm_writer.write_pop("pointer", 0)
+
                 # write the closing ')' symbol
                 self.write_terminal_tag(GrammarLanguage.SYMBOL.value)
 
@@ -251,8 +259,12 @@ class CompilationEngine:
                 if (self._tokenizer.currentToken == GrammarLanguage.LET.value or
                     self._tokenizer.currentToken == GrammarLanguage.DO.value or
                         self._tokenizer.currentToken == GrammarLanguage.IF.value):
-                    self._vm_writer.write_function(name=class_function_name, n_locals=self._var_declaration_count)
-                    if self.is_method():
+
+                    # TODO: Why is this write_function here?
+                    # self._vm_writer.write_function(name=class_function_name, n_locals=self._var_declaration_count)
+                    # print(self._tokenizer.currentToken, self._tokenizer.look_ahead())
+
+                    if self._current_method_type == "method":
                         self._vm_writer.write_push(segment="argument", index=0)
                         self._vm_writer.write_pop(segment="pointer", index=0)
                     self._var_declaration_count = 0
@@ -271,6 +283,7 @@ class CompilationEngine:
         if self._tokenizer.currentToken == "(":
             self._tokenizer.advance()
 
+        parameter_count = 0
         # ((type varName)(',' type varName)*)?
         while self._tokenizer.currentToken != ")":
             # self._symbol_table.define(i_name=)
@@ -283,9 +296,12 @@ class CompilationEngine:
             elif self._tokenizer.token_type().value.lower() == "identifier":
                 self._table_obj["name"] = self._tokenizer.currentToken
                 self.write_table_object_definition()
+                parameter_count = parameter_count + 1
 
             self.write_terminal_tag(self._tokenizer.token_type().value.lower())
             self._tokenizer.advance()
+
+        self._vm_writer.write_push(segment="constant", index=parameter_count)
 
         self.write_xml_closing_tag(GrammarLanguage.PARAMETER_LIST.value)
 
@@ -300,17 +316,22 @@ class CompilationEngine:
 
             self._table_obj["kind"] = self._tokenizer.currentToken
 
+            count = 0
             while self._tokenizer.currentToken != ";":
                 self._tokenizer.advance()
+                count = count + 1
 
-                # TODO: refactor and remove write_temp_table_object!!
-                self.write_temp_table_object(self._tokenizer.token_type().value.lower())
+                if count == 1:
+                    self._table_obj["type"] = self._tokenizer.currentToken
 
-                # self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+                if count == 2:
+                    self._table_obj["name"] = self._tokenizer.currentToken
 
                 if self._tokenizer.currentToken == "," or self._tokenizer.currentToken == ";":
+                    count = 1
                     self.write_table_object_definition()
 
+            self._symbol_table.print_table()
             self.write_xml_closing_tag(GrammarLanguage.CLASS_VAR_DEC.value)
 
     def compile_var_declaration(self):
@@ -341,7 +362,6 @@ class CompilationEngine:
                 self.write_table_object_definition()
                 self._var_declaration_count = self._var_declaration_count + 1
 
-        self._symbol_table.print_table()
         # self.write_xml_closing_tag(GrammarLanguage.VAR_DEC.value)
 
     def compile_statements(self):
@@ -448,9 +468,9 @@ class CompilationEngine:
             index = self._symbol_table.index_of(self._tokenizer.currentToken)
             self._vm_writer.write_push(segment="local", index=index)
 
-        is_method = False
+        is_calling_method = False
         if self._tokenizer.currentToken[0].islower():
-            is_method = True
+            is_calling_method = True
 
         while self._tokenizer.currentToken != ";":
             self._tokenizer.advance()
@@ -464,10 +484,16 @@ class CompilationEngine:
             self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
         if calling_function_type:
-            if is_method:
+            if is_calling_method:
                 self._expression_list_count = self._expression_list_count + 1
-            self._vm_writer.write_call(calling_function_type, self._expression_list_count)
+                self._vm_writer.write_push(segment="pointer", index=0)
+                self._vm_writer.write_call(self._class_name + "." + calling_function_type, self._expression_list_count)
+            else:
+                self._vm_writer.write_call(calling_function_type, self._expression_list_count)
             self._vm_writer.write_pop(segment="temp", index=0)
+
+            if is_calling_method:
+                self._vm_writer.write_push(segment="pointer", index=0)
 
         # self.write_terminal_tag(self._tokenizer.token_type().value.lower())
         self.write_xml_closing_tag(GrammarLanguage.DO_STATEMENT.value)
@@ -556,7 +582,11 @@ class CompilationEngine:
         if self._tokenizer.currentToken != ";":
             self.compile_expression()
 
+        if self._current_method_type != "constructor":
+            self._vm_writer.write_push(segment="constant", index=0)
+
         self._vm_writer.write_return()
+
         self.write_terminal_tag(self._tokenizer.token_type().value.lower())
         self.write_xml_closing_tag(GrammarLanguage.RETURN_STATEMENT.value)
 
