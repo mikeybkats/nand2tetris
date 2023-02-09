@@ -66,6 +66,9 @@ class CompilationEngine:
         # current method can be "function" | "constructor" | "method"
         self._current_method_type = ""
 
+        # current line keyword "let" | "do" | "if"
+        self._current_line_keyword = ""
+
     @property
     def tokenizer(self):
         return self._tokenizer
@@ -211,6 +214,9 @@ class CompilationEngine:
                     i_type=self._class_name,
                     i_kind="argument"
                 )
+            if self._current_method_type == "method" or self._current_method_type == "function":
+                self._symbol_table.define(i_name="this", i_type=self._class_name, i_kind="argument")
+
             is_constructor = self._tokenizer.currentToken == GrammarLanguage.CONSTRUCTOR.value
             if is_constructor:
                 self._current_method_type = "constructor"
@@ -271,6 +277,7 @@ class CompilationEngine:
 
                     self.compile_statements()
 
+            # self._symbol_table.print_table()
             self.write_terminal_tag(self._tokenizer.token_type().value.lower())
             self.write_xml_closing_tag(GrammarLanguage.SUB_ROUTINE_BOD.value)
             self.write_xml_closing_tag(GrammarLanguage.SUB_ROUTINE_DEC.value)
@@ -301,7 +308,8 @@ class CompilationEngine:
             self.write_terminal_tag(self._tokenizer.token_type().value.lower())
             self._tokenizer.advance()
 
-        self._vm_writer.write_push(segment="constant", index=parameter_count)
+        if self._current_method_type == "constructor":
+            self._vm_writer.write_push(segment="constant", index=parameter_count)
 
         self.write_xml_closing_tag(GrammarLanguage.PARAMETER_LIST.value)
 
@@ -331,7 +339,7 @@ class CompilationEngine:
                     count = 1
                     self.write_table_object_definition()
 
-            self._symbol_table.print_table()
+            # self._symbol_table.print_table()
             self.write_xml_closing_tag(GrammarLanguage.CLASS_VAR_DEC.value)
 
     def compile_var_declaration(self):
@@ -411,6 +419,7 @@ class CompilationEngine:
 
     def compile_let(self):
         """Compiles a let statement"""
+        self._current_line_keyword = GrammarLanguage.LET.value
         # self.write_xml_tag_smart(GrammarLanguage.LET_STATEMENT.value, False)
         # self.write_terminal_tag(self._tokenizer.token_type().value.lower())
         array_object = ""
@@ -457,6 +466,8 @@ class CompilationEngine:
 
     def compile_do(self):
         """Compiles a do statement"""
+        self._current_line_keyword = GrammarLanguage.DO.value
+
         self.write_xml_tag_smart(GrammarLanguage.DO_STATEMENT.value, False)
         self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
@@ -486,6 +497,8 @@ class CompilationEngine:
         if calling_function_type:
             if is_calling_method:
                 self._expression_list_count = self._expression_list_count + 1
+
+                # TODO: Why is this write push here? when a function is called the only thing that should be pushed to the stack are the function arguments
                 self._vm_writer.write_push(segment="pointer", index=0)
                 self._vm_writer.write_call(self._class_name + "." + calling_function_type, self._expression_list_count)
             else:
@@ -575,6 +588,7 @@ class CompilationEngine:
 
     def compile_return(self):
         """Compiles a return statement"""
+        self._current_line_keyword = GrammarLanguage.RETURN.value
         self.write_non_terminal_tag(GrammarLanguage.RETURN_STATEMENT.value, False)
         self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
@@ -740,8 +754,16 @@ class CompilationEngine:
                 self._vm_writer.write_arithmetic("neg")
             if self._tokenizer.currentToken == "false" or self._tokenizer.currentToken == "null":
                 self._vm_writer.write_push("constant", 0)
+            if self._tokenizer.currentToken == "this" and self._current_line_keyword == "do":
+                self._vm_writer.write_push(segment="pointer", index=0)
+
         if self._tokenizer.token_type() == Token_Type.IDENTIFIER:
             self.write_terminal_tag(GrammarLanguage.IDENTIFIER.value)
+
+            # if self._current_line_keyword == GrammarLanguage.DO.value:
+            #     index = self._symbol_table.index_of(self._tokenizer.currentToken)
+            #     segment = self._vm_writer.get_segment_from_kind(self._symbol_table.kind_of(self._tokenizer.currentToken))
+            #     self._vm_writer.write_push(segment=segment, index=index)
 
             # # is function call array or object
             if (self._tokenizer.look_ahead() == "." or
@@ -754,7 +776,6 @@ class CompilationEngine:
                 kind = self._symbol_table.kind_of(self._tokenizer.currentToken)
                 segment = VMWriter.get_segment_from_kind(kind)
                 index = self._symbol_table.index_of(self._tokenizer.currentToken)
-
                 self._vm_writer.write_push(segment=segment, index=index)
 
     def compile_term_write_operators(self):
