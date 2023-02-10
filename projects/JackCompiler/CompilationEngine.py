@@ -31,6 +31,8 @@ class CompilationEngine:
 
     _while_expression_count = 0
 
+    _if_statement_count = 0
+
     # _array_object = ""
 
     _calling_function = ""
@@ -201,6 +203,8 @@ class CompilationEngine:
 
     def compile_subroutine(self):
         """Compiles a complete method, function, or constructor"""
+        self._if_statement_count = 0
+
         if self.is_subroutine():
             self._symbol_table.start_subroutine()
             self.reset_table_obj()
@@ -544,6 +548,8 @@ class CompilationEngine:
 
     def compile_if(self):
         """Compiles if statement"""
+        self._current_line_keyword == GrammarLanguage.IF.value
+
         self.write_non_terminal_tag(GrammarLanguage.IF_STATEMENT.value, False)
         self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
@@ -559,6 +565,15 @@ class CompilationEngine:
         while self._tokenizer.currentToken != "}":
 
             if self._tokenizer.currentToken == "{":
+                # Write if-goto IF_TRUE
+                self._vm_writer.write_if(label="IF_TRUE" + str(self._if_statement_count))
+
+                # Write goto IF_FALSE
+                self._vm_writer.write_goto(label="IF_FALSE" + str(self._if_statement_count))
+
+                # Write label IF_TRUE
+                self._vm_writer.write_label(label="IF_TRUE" + str(self._if_statement_count))
+
                 self.write_terminal_tag(self._tokenizer.token_type().value.lower())
                 self._tokenizer.advance()
                 self.compile_statements()
@@ -571,7 +586,11 @@ class CompilationEngine:
             self._tokenizer.advance()
             self.compile_else()
 
-        self.write_non_terminal_tag(GrammarLanguage.IF_STATEMENT.value, True)
+        # Write label IF_FALSE
+        self._vm_writer.write_label(label="IF_FALSE" + str(self._if_statement_count))
+        self._if_statement_count == self._if_statement_count + 1
+
+        # self.write_non_terminal_tag(GrammarLanguage.IF_STATEMENT.value, True)
 
     def compile_else(self):
         self.write_terminal_tag(self._tokenizer.token_type().value.lower())
@@ -617,8 +636,8 @@ class CompilationEngine:
             self._vm_writer.write_call(arithmetic_command, get_math_lib_args(arithmetic_command))
         else:
             self._vm_writer.write_arithmetic(arithmetic_command)
-            if arithmetic_command == "lt":
-                self._vm_writer.write_arithmetic("not")
+            # if arithmetic_command == "lt":
+            #     self._vm_writer.write_arithmetic("not")
 
     def compile_expression(self):
         """Compiles an expression - expression grammar: term (op term) """

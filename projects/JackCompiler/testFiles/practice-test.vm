@@ -1,8 +1,4 @@
-push constant 2125
-pop pointer 0
-push constant 2250
-pop pointer 1
-push constant 10
-pop this 1
-push constant 20
-pop that 0
+push constant 1
+neg
+push constant 0
+not
