@@ -78,7 +78,6 @@ label IF_TRUE0
 push pointer 0
 call Square.erase 1
 pop temp 0
-push pointer 0
 push this 2
 push constant 2
 add
@@ -86,7 +85,6 @@ pop this 2
 push pointer 0
 call Square.draw 1
 pop temp 0
-push pointer 0
 label IF_FALSE0
 push constant 0
 return
@@ -102,7 +100,6 @@ label IF_TRUE0
 push pointer 0
 call Square.erase 1
 pop temp 0
-push pointer 0
 push this 2
 push constant 2
 sub
@@ -110,7 +107,6 @@ pop this 2
 push pointer 0
 call Square.draw 1
 pop temp 0
-push pointer 0
 label IF_FALSE0
 push constant 0
 return

@@ -502,15 +502,15 @@ class CompilationEngine:
             if is_calling_method:
                 self._expression_list_count = self._expression_list_count + 1
 
-                # TODO: Why is this write push here? when a function is called the only thing that should be pushed to the stack are the function arguments
+                # if calling a method then push a reference to the class - pointer 0
                 self._vm_writer.write_push(segment="pointer", index=0)
                 self._vm_writer.write_call(self._class_name + "." + calling_function_type, self._expression_list_count)
             else:
                 self._vm_writer.write_call(calling_function_type, self._expression_list_count)
             self._vm_writer.write_pop(segment="temp", index=0)
 
-            if is_calling_method:
-                self._vm_writer.write_push(segment="pointer", index=0)
+            # if is_calling_method:
+            #     self._vm_writer.write_push(segment="pointer", index=0)
 
         # self.write_terminal_tag(self._tokenizer.token_type().value.lower())
         self.write_xml_closing_tag(GrammarLanguage.DO_STATEMENT.value)
@@ -617,6 +617,8 @@ class CompilationEngine:
 
         if self._current_method_type != "constructor":
             self._vm_writer.write_push(segment="constant", index=0)
+        else:
+            self._vm_writer.write_push(segment="pointer", index=0)
 
         self._vm_writer.write_return()
 
