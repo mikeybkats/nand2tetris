@@ -56,6 +56,8 @@ class VMWriter:
     @staticmethod
     def get_arithmetic_command(symbol):
         # :param arithmetic_command: ADD, SUB, NEG, EQ, GT, LT, AND, OR, NOT
+        if symbol == "=":
+            return "eq"
         if symbol == "-":
             return "sub"
         if symbol == "+":

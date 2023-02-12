@@ -130,6 +130,22 @@ class SymbolTable:
             }
             # creates entry like this: (i_name, { "name": xxx, "type": xxx, "kind": xxx, "#": xxx })
 
+    def var_table_count(self, scope):
+        """
+        Returns the number variables in the scoped table
+
+        :param scope:
+            "class" or "subroutine"
+        :return:
+        """
+
+        if scope == "class":
+            scope = CurrentScope.CLASS
+        else:
+            scope = CurrentScope.SUBROUTINE
+
+        return len(self._tables[scope].items())
+
     def var_count(self, kind):
         """
         Returns the number of variables of the given kind already defined in the current scope.
