@@ -37,6 +37,13 @@ class CompilationEngine:
 
     _calling_function = ""
 
+    # current method can be "function" | "constructor" | "method"
+    _current_method_type = ""
+    _current_method_name = ""
+
+    # current line keyword "let" | "do" | "if"
+    _current_line_keyword = ""
+
     def __init__(self, input_stream, output_stream, write_xml):
         """
         Creates a new compilation engine with the given input and output. The next routine called must be compileClass()
@@ -64,12 +71,6 @@ class CompilationEngine:
         # make SymbolTable
         self._symbol_table = SymbolTable()
         self._table_obj = {"name": "", "type": "", "kind": ""}
-
-        # current method can be "function" | "constructor" | "method"
-        self._current_method_type = ""
-
-        # current line keyword "let" | "do" | "if"
-        self._current_line_keyword = ""
 
     @property
     def tokenizer(self):
@@ -202,11 +203,21 @@ class CompilationEngine:
             return True
         return False
 
+    def write_function_name(self):
+        # write the function name after the number of local vars has been counted
+        self._var_declaration_count = self._symbol_table.var_table_count(None)
+        n_locals = self._var_declaration_count if self._current_method_name == "new" else self._var_declaration_count - 1
+        self._vm_writer.write_function(name=self._class_name + "." + self._current_method_name, n_locals=n_locals)
+
+        subroutine_name_written = True
+        if self._current_method_type == "constructor":
+            self._vm_writer.write_push(segment="constant", index=self._symbol_table.var_table_count("class"))
+            self._vm_writer.write_custom("call Memory.alloc 1")
+            self._vm_writer.write_pop("pointer", 0)
+
     def compile_subroutine(self):
         """Compiles a complete method, function, or constructor"""
         subroutine_name_written = False
-        parameter_count = 0
-
         self._if_statement_count = 0
 
         if self.is_subroutine():
@@ -222,11 +233,12 @@ class CompilationEngine:
             if self._current_method_type == GrammarLanguage.METHOD.value or self._current_method_type == GrammarLanguage.FUNCTION.value:
                 self._symbol_table.define(i_name="this", i_type=self._class_name, i_kind="argument")
 
-            class_function_name = self._class_name
+            # class_function_name = self._class_name
             count = 0
             while count != 3:
                 if count == 2:
-                    class_function_name = class_function_name + "." + self._tokenizer.currentToken
+                    # class_function_name = class_function_name + "." + self._tokenizer.currentToken
+                    self._current_method_name = self._tokenizer.currentToken
 
                 self._tokenizer.advance()
                 count = count + 1
@@ -234,8 +246,6 @@ class CompilationEngine:
             if self._tokenizer.currentToken == "(":
                 # write the opening '(' symbol
                 self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-
-                parameter_count = self.compile_parameter_list()
 
                 # write the closing ')' symbol
                 self.write_terminal_tag(GrammarLanguage.SYMBOL.value)
@@ -246,31 +256,26 @@ class CompilationEngine:
                 if self._tokenizer.currentToken == "{":
                     self.write_xml_tag_smart(GrammarLanguage.SUB_ROUTINE_BOD.value, False)
                     self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+                    self._tokenizer.advance()
+                    print(self._tokenizer.currentToken)
 
                 # compile declarations
                 if (self._tokenizer.currentToken == GrammarLanguage.VAR.value or
                         self._tokenizer.currentToken == GrammarLanguage.INT.value):
                     self.compile_var_declaration()
 
-                if not subroutine_name_written:
-                    # write the function name after the number of local vars has been counted
-                    self._vm_writer.write_function(name=class_function_name, n_locals=self._var_declaration_count)
-
-                    subroutine_name_written = True
-                    if self._current_method_type == "constructor":
-                        self._vm_writer.write_push(segment="constant", index=self._symbol_table.var_table_count("class"))
-                        self._vm_writer.write_custom("call Memory.alloc 1")
-                        self._vm_writer.write_pop("pointer", 0)
-
                 # compile statements
                 if (self._tokenizer.currentToken == GrammarLanguage.LET.value or
                     self._tokenizer.currentToken == GrammarLanguage.DO.value or
                         self._tokenizer.currentToken == GrammarLanguage.IF.value):
 
+                    if not subroutine_name_written:
+                        self.write_function_name()
+                        subroutine_name_written = True
+
                     if self._current_method_type == "method":
                         self._vm_writer.write_push(segment="argument", index=0)
                         self._vm_writer.write_pop(segment="pointer", index=0)
-                    self._var_declaration_count = 0
 
                     self.compile_statements()
 
@@ -580,7 +585,7 @@ class CompilationEngine:
 
         # Write label IF_FALSE
         self._vm_writer.write_label(label="IF_FALSE" + str(self._if_statement_count))
-        self._if_statement_count == self._if_statement_count + 1
+        self._if_statement_count = self._if_statement_count + 1
 
         # self.write_non_terminal_tag(GrammarLanguage.IF_STATEMENT.value, True)
 
