@@ -1,5 +1,5 @@
 from JackTokenizer import JackTokenizer
-from TokenTypes import Token_Type, GrammarLanguage, TerminalTypeTable, is_op
+from TokenTypes import Token_Type, GrammarLanguage, TerminalTypeTable, is_op, is_prefix_operator
 from io import TextIOBase
 from VMWriter import VMWriter, Segments, get_math_lib_args
 from SymbolTable import SymbolTable, is_standard_lib
@@ -514,34 +514,25 @@ class CompilationEngine:
 
     def compile_while(self):
         """Compiles a while statement"""
-        self.write_non_terminal_tag(GrammarLanguage.WHILE_STATEMENT.value, False)
-        self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-
         while self._tokenizer.currentToken != "}":
             self._tokenizer.advance()
 
             if self._tokenizer.currentToken == "(":
                 self._vm_writer.write_label(label="WHILE_EXP" + str(self._while_expression_count))
 
-                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
                 self._tokenizer.advance()
                 self.compile_expression()
 
                 self._vm_writer.write_if(label="WHILE_END" + str(self._while_expression_count))
-                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+                self._while_expression_count = self._while_expression_count + 1
 
             if self._tokenizer.currentToken == "{":
-                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
                 self._tokenizer.advance()
                 self.compile_statements()
-                # self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
         self._vm_writer.write_goto(label="WHILE_EXP" + str(self._while_expression_count))
         self._vm_writer.write_label(label="WHILE_END" + str(self._while_expression_count))
-
-        self._while_expression_count = self._while_expression_count + 1
-        self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-        self.write_xml_closing_tag(GrammarLanguage.WHILE_STATEMENT.value)
+        # self._while_expression_count = self._while_expression_count + 1
 
     def compile_if(self):
         """Compiles if statement"""
@@ -650,13 +641,17 @@ class CompilationEngine:
         if is_op(self._tokenizer.currentToken):
             cur_operator = self._tokenizer.currentToken
 
-            self.write_arithmetic_vm(cur_operator)
+            if is_prefix_operator(cur_operator):
+                self._tokenizer.advance()
+                self.compile_term()
+                self.write_arithmetic_vm(cur_operator)
+                self._tokenizer.advance()
+            else:
+                self.write_arithmetic_vm(cur_operator)
+                self._tokenizer.advance()
+                self.compile_term()
+                self._tokenizer.advance()
 
-            self._tokenizer.advance()
-
-            self.compile_term()
-
-            self._tokenizer.advance()
             expression = False
 
         while expression:
@@ -778,11 +773,6 @@ class CompilationEngine:
         if self._tokenizer.token_type() == Token_Type.IDENTIFIER:
             self.write_terminal_tag(GrammarLanguage.IDENTIFIER.value)
 
-            # if self._current_line_keyword == GrammarLanguage.DO.value:
-            #     index = self._symbol_table.index_of(self._tokenizer.currentToken)
-            #     segment = self._vm_writer.get_segment_from_kind(self._symbol_table.kind_of(self._tokenizer.currentToken))
-            #     self._vm_writer.write_push(segment=segment, index=index)
-
             # # is function call array or object
             if (self._tokenizer.look_ahead() == "." or
                     self._tokenizer.look_ahead() == "[" or
@@ -791,6 +781,7 @@ class CompilationEngine:
 
             # code_write if exp.is_var then write_push(exp)
             if self._symbol_table.is_var(self._tokenizer.currentToken):
+                # TODO: How to write ~exit ?
                 kind = self._symbol_table.kind_of(self._tokenizer.currentToken)
                 segment = VMWriter.get_segment_from_kind(kind)
                 index = self._symbol_table.index_of(self._tokenizer.currentToken)

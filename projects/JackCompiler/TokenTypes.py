@@ -25,6 +25,13 @@ def is_op(token):
         return False
 
 
+def is_prefix_operator(token):
+    if token == "-" or token == "~":
+        return True
+    else:
+        return False
+
+
 class TokenTypeTable:
     def __init__(self):
         self._table = self.build_token_table()
