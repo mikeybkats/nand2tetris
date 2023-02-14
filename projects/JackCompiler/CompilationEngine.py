@@ -29,11 +29,11 @@ class CompilationEngine:
 
     _var_declaration_count = 0
 
-    _while_expression_count = 0
-
     _if_statement_count = 0
 
     # _array_object = ""
+
+    _while_expression_count = 0
 
     _calling_function = ""
 
@@ -205,11 +205,9 @@ class CompilationEngine:
 
     def write_function_name(self):
         # write the function name after the number of local vars has been counted
-        self._var_declaration_count = self._symbol_table.var_table_count(None)
-        n_locals = self._var_declaration_count if self._current_method_name == "new" else self._var_declaration_count - 1
-        self._vm_writer.write_function(name=self._class_name + "." + self._current_method_name, n_locals=n_locals)
+        self._var_declaration_count = self._symbol_table.var_count("var")
+        self._vm_writer.write_function(name=self._class_name + "." + self._current_method_name, n_locals=self._var_declaration_count)
 
-        subroutine_name_written = True
         if self._current_method_type == "constructor":
             self._vm_writer.write_push(segment="constant", index=self._symbol_table.var_table_count("class"))
             self._vm_writer.write_custom("call Memory.alloc 1")
@@ -219,6 +217,7 @@ class CompilationEngine:
         """Compiles a complete method, function, or constructor"""
         subroutine_name_written = False
         self._if_statement_count = 0
+        self._while_expression_count = 0
 
         if self.is_subroutine():
             self._symbol_table.start_subroutine()
@@ -237,18 +236,13 @@ class CompilationEngine:
             count = 0
             while count != 3:
                 if count == 2:
-                    # class_function_name = class_function_name + "." + self._tokenizer.currentToken
                     self._current_method_name = self._tokenizer.currentToken
 
                 self._tokenizer.advance()
                 count = count + 1
 
             if self._tokenizer.currentToken == "(":
-                # write the opening '(' symbol
-                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-
-                # write the closing ')' symbol
-                self.write_terminal_tag(GrammarLanguage.SYMBOL.value)
+                self.compile_parameter_list()
 
             while self.not_end_of_routine():
                 self._tokenizer.advance()
@@ -257,11 +251,9 @@ class CompilationEngine:
                     self.write_xml_tag_smart(GrammarLanguage.SUB_ROUTINE_BOD.value, False)
                     self.write_terminal_tag(self._tokenizer.token_type().value.lower())
                     self._tokenizer.advance()
-                    print(self._tokenizer.currentToken)
 
                 # compile declarations
-                if (self._tokenizer.currentToken == GrammarLanguage.VAR.value or
-                        self._tokenizer.currentToken == GrammarLanguage.INT.value):
+                if self._tokenizer.currentToken == GrammarLanguage.VAR.value:
                     self.compile_var_declaration()
 
                 # compile statements
@@ -269,6 +261,7 @@ class CompilationEngine:
                     self._tokenizer.currentToken == GrammarLanguage.DO.value or
                         self._tokenizer.currentToken == GrammarLanguage.IF.value):
 
+                    # compile subroutine name
                     if not subroutine_name_written:
                         self.write_function_name()
                         subroutine_name_written = True
@@ -300,6 +293,7 @@ class CompilationEngine:
                 # then it must be the parameter type
                 self._table_obj["type"] = self._tokenizer.currentToken
             elif self._tokenizer.token_type().value.lower() == "identifier":
+
                 self._table_obj["name"] = self._tokenizer.currentToken
                 self.write_table_object_definition()
                 parameter_count = parameter_count + 1
@@ -313,9 +307,6 @@ class CompilationEngine:
 
         if (self._tokenizer.currentToken == GrammarLanguage.STATIC.value or
                 self._tokenizer.currentToken == GrammarLanguage.FIELD.value):
-
-            # self.write_xml_tag_smart(GrammarLanguage.CLASS_VAR_DEC.value, False)
-            # self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
             self._table_obj["kind"] = self._tokenizer.currentToken
 
@@ -342,9 +333,6 @@ class CompilationEngine:
 
         var type varName (, varName)*;
         """
-        # self.write_xml_tag_smart(GrammarLanguage.VAR_DEC.value, False)
-        # self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-
         self.write_temp_table_object(self._tokenizer.token_type().value.lower())
         self._table_obj["kind"] = "var"
 
@@ -514,25 +502,30 @@ class CompilationEngine:
 
     def compile_while(self):
         """Compiles a while statement"""
+
+        local_while_expression_count = self._while_expression_count
+
         while self._tokenizer.currentToken != "}":
             self._tokenizer.advance()
 
             if self._tokenizer.currentToken == "(":
-                self._vm_writer.write_label(label="WHILE_EXP" + str(self._while_expression_count))
+                self._vm_writer.write_label(label="WHILE_EXP" + str(local_while_expression_count))
+
+                self._while_expression_count = local_while_expression_count + 1
 
                 self._tokenizer.advance()
                 self.compile_expression()
 
-                self._vm_writer.write_if(label="WHILE_END" + str(self._while_expression_count))
-                self._while_expression_count = self._while_expression_count + 1
+                self._vm_writer.write_arithmetic("not")
+
+                self._vm_writer.write_if(label="WHILE_END" + str(local_while_expression_count))
 
             if self._tokenizer.currentToken == "{":
                 self._tokenizer.advance()
                 self.compile_statements()
 
-        self._vm_writer.write_goto(label="WHILE_EXP" + str(self._while_expression_count))
-        self._vm_writer.write_label(label="WHILE_END" + str(self._while_expression_count))
-        # self._while_expression_count = self._while_expression_count + 1
+        self._vm_writer.write_goto(label="WHILE_EXP" + str(local_while_expression_count))
+        self._vm_writer.write_label(label="WHILE_END" + str(local_while_expression_count))
 
     def compile_if(self):
         """Compiles if statement"""
@@ -781,7 +774,6 @@ class CompilationEngine:
 
             # code_write if exp.is_var then write_push(exp)
             if self._symbol_table.is_var(self._tokenizer.currentToken):
-                # TODO: How to write ~exit ?
                 kind = self._symbol_table.kind_of(self._tokenizer.currentToken)
                 segment = VMWriter.get_segment_from_kind(kind)
                 index = self._symbol_table.index_of(self._tokenizer.currentToken)
