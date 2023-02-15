@@ -381,16 +381,30 @@ class CompilationEngine:
         self.write_xml_closing_tag(GrammarLanguage.STATEMENTS.value)
 
     def compile_array_addition(self, array_object):
+        # location is now [
         self.tokenizer.advance()
+
+        # if the array object exists in the table then compile array addition
+        if self._symbol_table.type_of(self._tokenizer.look_ahead()) == "Array":
+            self._tokenizer.advance()
+            self.compile_array_addition(self._tokenizer.currentToken)
 
         array_seg2 = self._vm_writer.get_segment_from_kind(self._symbol_table.kind_of(array_object))
         array_seg_index2 = self._symbol_table.index_of(array_object)
 
+        # location is now inside of array [here]
         self.tokenizer.advance()
 
+        # array object is
+        # location is now inside of array [here]
         array_object = self._tokenizer.currentToken
-        array_seg1 = self._vm_writer.get_segment_from_kind(self._symbol_table.kind_of(array_object))
-        array_seg_index1 = self._symbol_table.index_of(array_object)
+
+        if array_object.isnumeric():
+            array_seg1 = "constant"
+            array_seg_index1 = self._tokenizer.currentToken
+        else:
+            array_seg1 = self._vm_writer.get_segment_from_kind(self._symbol_table.kind_of(array_object))
+            array_seg_index1 = self._symbol_table.index_of(array_object)
 
         self._vm_writer.write_push(
             segment=array_seg1, index=array_seg_index1)
@@ -402,8 +416,6 @@ class CompilationEngine:
     def compile_let(self):
         """Compiles a let statement"""
         self._current_line_keyword = GrammarLanguage.LET.value
-        # self.write_xml_tag_smart(GrammarLanguage.LET_STATEMENT.value, False)
-        # self.write_terminal_tag(self._tokenizer.token_type().value.lower())
         array_object = ""
 
         count = 0
