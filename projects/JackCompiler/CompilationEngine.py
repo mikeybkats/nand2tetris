@@ -44,7 +44,7 @@ class CompilationEngine:
     # current line keyword "let" | "do" | "if"
     _current_line_keyword = ""
 
-    def __init__(self, input_stream, output_stream, write_xml):
+    def __init__(self, input_stream, output_stream):
         """
         Creates a new compilation engine with the given input and output. The next routine called must be compileClass()
 
@@ -56,14 +56,13 @@ class CompilationEngine:
 
         # make a jack tokenizer
         self._tokenizer = JackTokenizer(inputStreamOrFile=input_stream)
-        self._write_xml = write_xml
-
+        self._write_xml = False
         # make the outfile
-        if write_xml:
-            if isinstance(output_stream, TextIOBase):
-                self._outfile = output_stream
-            else:
-                self._outfile = open(output_stream, mode="w+", encoding='utf-8')
+        # if write_xml:
+        #     if isinstance(output_stream, TextIOBase):
+        #         self._outfile = output_stream
+        #     else:
+        #         self._outfile = open(output_stream, mode="w+", encoding='utf-8')
 
         # make VMWriter
         self._vm_writer = VMWriter(output_stream)
@@ -380,43 +379,41 @@ class CompilationEngine:
 
         self.write_xml_closing_tag(GrammarLanguage.STATEMENTS.value)
 
-    def compile_array_addition(self, array_object):
-        # location is now [
-        self.tokenizer.advance()
-
-        # if the array object exists in the table then compile array addition
-        if self._symbol_table.type_of(self._tokenizer.look_ahead()) == "Array":
+    def compile_array_addition(self, array_expression):
+        is_array = self._symbol_table.type_of(array_expression) == "Array"
+        if not is_array:
+            self.compile_term()
+        else:
             self._tokenizer.advance()
+            self._tokenizer.advance()
+            has_child_array = self._symbol_table.type_of(self._tokenizer.currentToken) == "Array"
+
             self.compile_array_addition(self._tokenizer.currentToken)
 
-        array_seg2 = self._vm_writer.get_segment_from_kind(self._symbol_table.kind_of(array_object))
-        array_seg_index2 = self._symbol_table.index_of(array_object)
+            if has_child_array:
+                self._vm_writer.write_pop(segment="pointer", index=1)
+                self._vm_writer.write_push(segment="that", index=0)
 
-        # location is now inside of array [here]
-        self.tokenizer.advance()
+                segment = self._vm_writer.get_segment_from_kind(self._symbol_table.kind_of(array_expression))
+                index = self._symbol_table.index_of(array_expression)
+                self._vm_writer.write_push(segment, index)
+            else:
+                segment = self._vm_writer.get_segment_from_kind(self._symbol_table.kind_of(array_expression))
+                index = self._symbol_table.index_of(array_expression)
+                self._vm_writer.write_push(segment, index)
 
-        # array object is
-        # location is now inside of array [here]
-        array_object = self._tokenizer.currentToken
+            self._vm_writer.write_arithmetic(arithmetic_command="add")
 
-        if array_object.isnumeric():
-            array_seg1 = "constant"
-            array_seg_index1 = self._tokenizer.currentToken
-        else:
-            array_seg1 = self._vm_writer.get_segment_from_kind(self._symbol_table.kind_of(array_object))
-            array_seg_index1 = self._symbol_table.index_of(array_object)
-
-        self._vm_writer.write_push(
-            segment=array_seg1, index=array_seg_index1)
-
-        self._vm_writer.write_push(
-            segment=array_seg2, index=array_seg_index2)
-        self._vm_writer.write_arithmetic("add")
+    def write_array_closure_exp2(self):
+        self._vm_writer.write_pop("temp", 0)
+        self._vm_writer.write_pop("pointer", 1)
+        self._vm_writer.write_push("temp", 0)
+        self._vm_writer.write_pop("that", 0)
 
     def compile_let(self):
         """Compiles a let statement"""
         self._current_line_keyword = GrammarLanguage.LET.value
-        array_object = ""
+        destination_array_object = False
 
         count = 0
         while self._tokenizer.currentToken != ";":
@@ -427,36 +424,20 @@ class CompilationEngine:
                 assignment_destination = self._tokenizer.currentToken
 
             if self.tokenizer.look_ahead() == "[":
-                array_object = self._tokenizer.currentToken
-                self.compile_array_addition(array_object)
+                destination_array_object = True
+                self.compile_array_addition(self._tokenizer.currentToken)
 
             if self.tokenizer.currentToken == "=":
-                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
                 self.compile_expression()
 
                 segment = self._vm_writer.get_segment_from_kind(self._symbol_table.kind_of(assignment_destination))
                 index = self._symbol_table.index_of(assignment_destination)
 
-                if self._calling_function:
-                    self._vm_writer.write_call(self._calling_function, self._expression_list_count)
-                    self._calling_function = ""
-
-            if self.tokenizer.currentToken == ";" and not array_object:
+            if self.tokenizer.currentToken == ";" and not destination_array_object:
                 self._vm_writer.write_pop(segment=segment, index=index)
 
-            self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-
-        if array_object:
-            self._vm_writer.write_pop("temp", 0)
-            self._vm_writer.write_pop("pointer", 1)
-            self._vm_writer.write_push("temp", 0)
-            self._vm_writer.write_pop("that", 0)
-
-        # else:
-            # self._vm_writer.write_pop(segment=segment, index=index)
-
-        self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-        self.write_xml_closing_tag(GrammarLanguage.LET_STATEMENT.value)
+        if destination_array_object:
+            self.write_array_closure_exp2()
 
     def get_segment_from_current_token(self):
         return self._vm_writer.get_segment_from_kind(self._symbol_table.kind_of(self._tokenizer.currentToken))
@@ -618,53 +599,49 @@ class CompilationEngine:
         self.write_terminal_tag(self._tokenizer.token_type().value.lower())
         self.write_xml_closing_tag(GrammarLanguage.RETURN_STATEMENT.value)
 
-    # @property
-    # def exp(self):
-    #     return self._exp
-    #
-    # def build_exp(self):
-    #     self._exp = self._exp + self._tokenizer.currentToken
-
     def write_arithmetic_vm(self, operator):
         arithmetic_command = VMWriter.get_arithmetic_command(operator)
         if is_standard_lib(arithmetic_command):
             self._vm_writer.write_call(arithmetic_command, get_math_lib_args(arithmetic_command))
         else:
             self._vm_writer.write_arithmetic(arithmetic_command)
-            # if arithmetic_command == "lt":
-            #     self._vm_writer.write_arithmetic("not")
+
+    def compile_expression_operator(self):
+        cur_operator = self._tokenizer.currentToken
+
+        if is_prefix_operator(cur_operator):
+            self._tokenizer.advance()
+            self.compile_term()
+            self.write_arithmetic_vm(cur_operator)
+            self._tokenizer.advance()
+        else:
+            self.write_arithmetic_vm(cur_operator)
+            self._tokenizer.advance()
+            self.compile_term()
+            self._tokenizer.advance()
+
+    def expression_ended(self):
+        return self._tokenizer.currentToken == ";"
+        # return (self._tokenizer.currentToken == ";" or
+        #         self._tokenizer.currentToken == ")" or
+        #         self._tokenizer.currentToken == "]" or
+        #         self._tokenizer.currentToken == ",")
 
     def compile_expression(self):
         """Compiles an expression - expression grammar: term (op term) """
         expression = True
 
-        self.write_non_terminal_tag(GrammarLanguage.EXPRESSION.value, False)
-
         if self._tokenizer.currentToken == "=":
             self._tokenizer.advance()
 
         if is_op(self._tokenizer.currentToken):
-            cur_operator = self._tokenizer.currentToken
-
-            if is_prefix_operator(cur_operator):
-                self._tokenizer.advance()
-                self.compile_term()
-                self.write_arithmetic_vm(cur_operator)
-                self._tokenizer.advance()
-            else:
-                self.write_arithmetic_vm(cur_operator)
-                self._tokenizer.advance()
-                self.compile_term()
-                self._tokenizer.advance()
-
+            self.compile_expression_operator()
             expression = False
 
         while expression:
             if self._tokenizer.currentToken == "(":
                 self.compile_term()
             if is_op(self._tokenizer.currentToken):
-                self.write_terminal_tag(GrammarLanguage.SYMBOL.value)
-
                 cur_operator = self._tokenizer.currentToken
                 self._tokenizer.advance()
 
@@ -676,31 +653,19 @@ class CompilationEngine:
             elif self._tokenizer.token_type() != Token_Type.SYMBOL:
                 self.compile_term()
 
-            # if self._tokenizer.currentToken != ";":
-
             self._tokenizer.advance()
 
-            if (self._tokenizer.currentToken == ";" or
-                    self._tokenizer.currentToken == ")" or
-                    self._tokenizer.currentToken == "]" or
-                    self._tokenizer.currentToken == ","):
+            if self._tokenizer.currentToken == ")":
+                self.compile_term()
+
+            if self.expression_ended():
                 expression = False
-
-        self.write_non_terminal_tag(GrammarLanguage.EXPRESSION.value, True)
-
-    def compile_term_write_opening_tag(self):
-        self.write_xml_tag_open(GrammarLanguage.TERM.value)
-        if self._write_xml:
-            self._outfile.write("\n")
 
     def compile_term_write_function_call(self):
         # is function call or arithmetic priority
         if self._tokenizer.currentToken == "(":
-            self.write_terminal_tag(self._tokenizer.token_type().value.lower())
             self._tokenizer.advance()
-
             self.compile_expression()
-            self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
     def compile_term_write_int_constant(self):
         # code_write if exp.is_numeric then write_push int constant
@@ -719,18 +684,14 @@ class CompilationEngine:
     def build_stack_methods(self, calling_function):
         # push each argument to the stack
         if self._tokenizer.currentToken == ".":
-            self.write_terminal_tag(self._tokenizer.token_type().value.lower())
             calling_function = calling_function + self._tokenizer.currentToken
             self._tokenizer.advance()
 
-            self.write_terminal_tag(self._tokenizer.token_type().value.lower())
             calling_function = calling_function + self._tokenizer.currentToken
             self._tokenizer.advance()
 
             if self._tokenizer.currentToken == "(":
-                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
                 self.compile_expression_list()
-                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
 
         return calling_function
 
@@ -762,11 +723,10 @@ class CompilationEngine:
             if is_method:
                 self._expression_list_count = self._expression_list_count + 1
             self._calling_function = calling_function_type
-            # self._vm_writer.write_call(calling_function, self._expression_list_count)
+            self._vm_writer.write_call(self._calling_function, self._expression_list_count)
 
-    def compile_term_write_keywords_and_identifiers(self):
+    def compile_term_write_variables(self):
         if self._tokenizer.token_type() == Token_Type.KEYWORD:
-            self.write_terminal_tag(GrammarLanguage.KEYWORD.value)
             if self._tokenizer.currentToken == "true":
                 self._vm_writer.write_push("constant", 1)
                 self._vm_writer.write_arithmetic("neg")
@@ -776,9 +736,7 @@ class CompilationEngine:
                 self._vm_writer.write_push(segment="pointer", index=0)
 
         if self._tokenizer.token_type() == Token_Type.IDENTIFIER:
-            self.write_terminal_tag(GrammarLanguage.IDENTIFIER.value)
-
-            # # is function call array or object
+            # is function call array or object
             if (self._tokenizer.look_ahead() == "." or
                     self._tokenizer.look_ahead() == "[" or
                     self._tokenizer.look_ahead() == "("):
@@ -822,14 +780,14 @@ class CompilationEngine:
         This routine will require a look ahead token which will be one of
         '[', or '(', or '.'. Any other token is not part of the term
         """
-        self.compile_term_write_opening_tag()
         self.compile_term_write_function_call()
         self.compile_term_write_int_constant()
-        self.compile_term_write_keywords_and_identifiers()
+
+        # write vm for variables
+        self.compile_term_write_variables()
+
         self.compile_term_write_string_constant()
         self.compile_term_write_operators()
-
-        self.write_xml_closing_tag(GrammarLanguage.TERM.value)
 
     def compile_expression_list(self):
         """Compiles a possibly empty comma-separated list of expressions"""

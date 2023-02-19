@@ -20,7 +20,7 @@ class TestCompilationEngine(TestCase):
         jack_mock_in_file = StringIO(jack_mock_class)
 
         self._comp_eng = CompilationEngine(
-            input_stream=jack_mock_in_file, output_stream=StringIO(), write_xml=False)
+            input_stream=jack_mock_in_file, output_stream=StringIO())
 
         self._comp_eng.compile_class()
 
@@ -468,7 +468,7 @@ class TestCompilationEngine(TestCase):
         jack_mock_in_file = StringIO(jack_mock_subroutine)
 
         self._comp_eng = CompilationEngine(
-            input_stream=jack_mock_in_file, output_stream=StringIO(), write_xml=False)
+            input_stream=jack_mock_in_file, output_stream=StringIO())
         self._comp_eng._class_name = "Square"
         self._comp_eng._symbol_table.start_class()
         self._comp_eng._symbol_table.define(

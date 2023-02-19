@@ -13,11 +13,17 @@ class Main {
     function void main() {
         var Array a, b, c;
         
-        let a = Array.new(10);
-        let b = Array.new(5);
-        let c = Array.new(1);
+        let a = Array.new(10); // new array created at local 0
+        let b = Array.new(5); // new array created at local 1
+        let c = Array.new(1); // new array created at local 2
         
         let a[3] = 2;
+        // write_array_push(a[3])
+        // push constant 3
+        // push local 0
+        // add
+        // back to compile_let
+        // push constant 2 ---
         let a[4] = 8;
         let a[5] = 4;
         let b[a[3]] = a[3] + 3;  // b[2] = 5

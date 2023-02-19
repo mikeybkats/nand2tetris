@@ -26,6 +26,8 @@ def is_standard_lib(name):
     match name:
         case "Math":
             return True
+        case "Math.double":
+            return True
         case "Math.multiply":
             return True
         case "Math.divide":
