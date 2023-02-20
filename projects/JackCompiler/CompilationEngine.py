@@ -382,7 +382,7 @@ class CompilationEngine:
     def compile_array_addition(self, array_expression):
         is_array = self._symbol_table.type_of(array_expression) == "Array"
         if not is_array:
-            self.compile_term()
+            self.compile_expression("]")
         else:
             self._tokenizer.advance()
             self._tokenizer.advance()
@@ -609,6 +609,7 @@ class CompilationEngine:
     def compile_expression_operator(self):
         cur_operator = self._tokenizer.currentToken
 
+        # a prefix operator is - or ~
         if is_prefix_operator(cur_operator):
             self._tokenizer.advance()
             self.compile_term()
@@ -621,16 +622,29 @@ class CompilationEngine:
             self._tokenizer.advance()
 
     def expression_ended(self):
-        return self._tokenizer.currentToken == ";"
-        # return (self._tokenizer.currentToken == ";" or
-        #         self._tokenizer.currentToken == ")" or
-        #         self._tokenizer.currentToken == "]" or
-        #         self._tokenizer.currentToken == ",")
+        return (self._tokenizer.currentToken == ";" or
+                self._tokenizer.currentToken == ")" or
+                self._tokenizer.currentToken == "]" or
+                self._tokenizer.currentToken == ",")
 
-    def compile_expression(self):
+    def get_type_of_grammar_language(self):
+        """returns the type of the symbol of the current token
+        :returns "array" | "object" | "function" | "integer"
+        """
+        cur_token = self._tokenizer.currentToken
+        if self._symbol_table.is_var(cur_token):
+            if self._symbol_table.type_of(cur_token) == "Array":
+                return GrammarLanguage.ARRAY.value
+            if self._symbol_table.type_of(cur_token) != "Array" and self._symbol_table.type_of(cur_token).isupper():
+                return GrammarLanguage.OBJECT.value
+            if self._symbol_table.type_of(cur_token) == "int":
+                return GrammarLanguage.INT.value
+        else:
+            None
+
+    def compile_expression(self, until=False):
         """Compiles an expression - expression grammar: term (op term) """
         expression = True
-
         if self._tokenizer.currentToken == "=":
             self._tokenizer.advance()
 
@@ -655,30 +669,29 @@ class CompilationEngine:
 
             self._tokenizer.advance()
 
-            if self._tokenizer.currentToken == ")":
-                self.compile_term()
-
-            if self.expression_ended():
+            if until:
+                if self._tokenizer.currentToken == until:
+                    expression = False
+            elif self.expression_ended():
                 expression = False
 
     def compile_term_write_function_call(self):
         # is function call or arithmetic priority
         if self._tokenizer.currentToken == "(":
-            self._tokenizer.advance()
+            while self._tokenizer.currentToken == "(":
+                self._tokenizer.advance()
             self.compile_expression()
 
     def compile_term_write_int_constant(self):
         # code_write if exp.is_numeric then write_push int constant
-        if self._tokenizer.token_type() == Token_Type.INT_CONST:
-            self.write_terminal_tag(GrammarLanguage.INT_CONSTANT.value)
-
+        if self._tokenizer.token_type() == Token_Type.INT_CONST.value or self._tokenizer.currentToken.isnumeric():
             self._vm_writer.write_push(segment=Segments.CONST.value, index=self._tokenizer.currentToken)
 
     def write_constructor(self):
         pass
 
     def get_type_of_calling_function(self):
-        # get the name of the calling function and save it in a variable
+        # get the type of the calling function and save it in a variable
         return self._symbol_table.type_of(self._tokenizer.currentToken) or self._tokenizer.currentToken
 
     def build_stack_methods(self, calling_function):
@@ -696,18 +709,19 @@ class CompilationEngine:
         return calling_function
 
     def compile_term_write_objects_arrays_calls(self):
+        # TODO: this method is failing the test. the cursor gets to "- Main.double(2)) + 1" but
         # get the name of the calling function and save it in a variable
-        calling_function_type = self.get_type_of_calling_function()
         is_method = False
-        if self._tokenizer.currentToken[0].islower():
-            is_method = True
-
         is_array = False
-        array_object = self._tokenizer.currentToken
+
+        calling_function_type = self.get_type_of_calling_function()
+        if self._tokenizer.currentToken[0].islower() and not self._symbol_table.is_var(self._tokenizer.currentToken):
+            is_method = True
 
         if self._tokenizer.look_ahead() == "[":
             is_array = True
-            self.compile_array_addition(array_object)
+            print("compiling array addition from term", self._tokenizer.currentToken)
+            self.compile_array_addition(self._tokenizer.currentToken)
 
             self._vm_writer.write_pop("pointer", 1)
             self._vm_writer.write_push("that", 0)
@@ -717,15 +731,22 @@ class CompilationEngine:
             self._tokenizer.advance()
             calling_function_type = self.build_stack_methods(calling_function_type)
 
-        if is_array:
-            return
-        elif calling_function_type:
-            if is_method:
-                self._expression_list_count = self._expression_list_count + 1
+        if is_method:
+            self._expression_list_count = self._expression_list_count + 1
+
+        if not is_array:
             self._calling_function = calling_function_type
             self._vm_writer.write_call(self._calling_function, self._expression_list_count)
 
-    def compile_term_write_variables(self):
+    def compile_term_write_arrays(self):
+        if self._tokenizer.token_type() == Token_Type.IDENTIFIER:
+            # is function call array or object
+            if (self._tokenizer.look_ahead() == "." or
+                    self._tokenizer.look_ahead() == "[" or
+                    self._tokenizer.look_ahead() == "("):
+                self.compile_term_write_objects_arrays_calls()
+
+    def compile_term_write_boolean(self):
         if self._tokenizer.token_type() == Token_Type.KEYWORD:
             if self._tokenizer.currentToken == "true":
                 self._vm_writer.write_push("constant", 1)
@@ -735,19 +756,12 @@ class CompilationEngine:
             if self._tokenizer.currentToken == "this" and self._current_line_keyword == "do":
                 self._vm_writer.write_push(segment="pointer", index=0)
 
-        if self._tokenizer.token_type() == Token_Type.IDENTIFIER:
-            # is function call array or object
-            if (self._tokenizer.look_ahead() == "." or
-                    self._tokenizer.look_ahead() == "[" or
-                    self._tokenizer.look_ahead() == "("):
-                self.compile_term_write_objects_arrays_calls()
-
-            # code_write if exp.is_var then write_push(exp)
-            if self._symbol_table.is_var(self._tokenizer.currentToken):
-                kind = self._symbol_table.kind_of(self._tokenizer.currentToken)
-                segment = VMWriter.get_segment_from_kind(kind)
-                index = self._symbol_table.index_of(self._tokenizer.currentToken)
-                self._vm_writer.write_push(segment=segment, index=index)
+    def compile_term_write_variables(self):
+        if self._symbol_table.is_var(self._tokenizer.currentToken):
+            kind = self._symbol_table.kind_of(self._tokenizer.currentToken)
+            segment = VMWriter.get_segment_from_kind(kind)
+            index = self._symbol_table.index_of(self._tokenizer.currentToken)
+            self._vm_writer.write_push(segment=segment, index=index)
 
     def compile_term_write_operators(self):
         if is_op(self._tokenizer.currentToken):
@@ -780,10 +794,13 @@ class CompilationEngine:
         This routine will require a look ahead token which will be one of
         '[', or '(', or '.'. Any other token is not part of the term
         """
-        self.compile_term_write_function_call()
         self.compile_term_write_int_constant()
 
+        self.compile_term_write_function_call()
+
         # write vm for variables
+        self.compile_term_write_boolean()
+        self.compile_term_write_arrays()
         self.compile_term_write_variables()
 
         self.compile_term_write_string_constant()

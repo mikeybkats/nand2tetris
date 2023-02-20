@@ -61,7 +61,9 @@ class TestCompileExpression(TestCase):
 
         self._comp_eng.tokenizer.advance()
         self.assertEqual(self._comp_eng.tokenizer.currentToken, "a")
-        self._comp_eng.compile_expression()
+
+        while self._comp_eng.tokenizer.currentToken != ";":
+            self._comp_eng.compile_expression()
 
         correct_output = dedent("""\
             push constant 5

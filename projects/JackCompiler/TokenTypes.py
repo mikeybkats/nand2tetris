@@ -105,6 +105,8 @@ class TokenTypeTable:
 
 
 class GrammarLanguage(Enum):
+    ARRAY = "array"
+    OBJECT = "object"
     BOOLEAN = "boolean"
     CHAR = "char"
     CLASS = "class"
