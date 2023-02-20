@@ -169,14 +169,9 @@ class CompilationEngine:
                     self._tokenizer.currentToken == GrammarLanguage.FIELD.value):
                 self.compile_class_var_declaration()
 
-            if (self._tokenizer.currentToken == GrammarLanguage.METHOD.value or
-                self._tokenizer.currentToken == GrammarLanguage.CONSTRUCTOR.value or
-                    self._tokenizer.currentToken == GrammarLanguage.FUNCTION.value):
+            if self.is_subroutine():
                 self._current_method_type = self._tokenizer.currentToken
                 self.compile_subroutine()
-
-        self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-        self.write_non_terminal_tag(GrammarLanguage.CLASS.value, True)
 
     def is_subroutine(self):
         if (self._tokenizer.currentToken == GrammarLanguage.FUNCTION.value or
@@ -212,68 +207,65 @@ class CompilationEngine:
             self._vm_writer.write_custom("call Memory.alloc 1")
             self._vm_writer.write_pop("pointer", 0)
 
+    def is_statement(self):
+        return (self._tokenizer.currentToken == GrammarLanguage.LET.value or
+                self._tokenizer.currentToken == GrammarLanguage.DO.value or
+                self._tokenizer.currentToken == GrammarLanguage.IF.value or
+                self._tokenizer.currentToken == GrammarLanguage.WHILE.value or
+                self._tokenizer.currentToken == GrammarLanguage.RETURN.value)
+
     def compile_subroutine(self):
         """Compiles a complete method, function, or constructor"""
         subroutine_name_written = False
         self._if_statement_count = 0
         self._while_expression_count = 0
 
-        if self.is_subroutine():
-            self._symbol_table.start_subroutine()
-            self.reset_table_obj()
+        self._symbol_table.start_subroutine()
+        self.reset_table_obj()
 
-            if self._current_method_type == GrammarLanguage.METHOD.value:
-                self._symbol_table.define(
-                    i_name="this",
-                    i_type=self._class_name,
-                    i_kind="argument"
-                )
-            if self._current_method_type == GrammarLanguage.METHOD.value or self._current_method_type == GrammarLanguage.FUNCTION.value:
-                self._symbol_table.define(i_name="this", i_type=self._class_name, i_kind="argument")
+        if self._current_method_type == GrammarLanguage.METHOD.value:
+            self._symbol_table.define(
+                i_name="this",
+                i_type=self._class_name,
+                i_kind="argument"
+            )
+        if (self._current_method_type == GrammarLanguage.METHOD.value or
+                self._current_method_type == GrammarLanguage.FUNCTION.value):
+            self._symbol_table.define(i_name="this", i_type=self._class_name, i_kind="argument")
 
-            # class_function_name = self._class_name
-            count = 0
-            while count != 3:
-                if count == 2:
-                    self._current_method_name = self._tokenizer.currentToken
+        count = 0
+        while count != 3:
+            if count == 2:
+                self._current_method_name = self._tokenizer.currentToken
 
+            self._tokenizer.advance()
+            count = count + 1
+
+        if self._tokenizer.currentToken == "(":
+            self.compile_parameter_list()
+
+        while self.not_end_of_routine():
+            self._tokenizer.advance()
+
+            if self._tokenizer.currentToken == "{":
                 self._tokenizer.advance()
-                count = count + 1
 
-            if self._tokenizer.currentToken == "(":
-                self.compile_parameter_list()
+            # compile declarations
+            if self._tokenizer.currentToken == GrammarLanguage.VAR.value:
+                self.compile_var_declaration()
 
-            while self.not_end_of_routine():
-                self._tokenizer.advance()
+            # compile statements
+            if self.is_statement():
+                # compile subroutine name
+                if not subroutine_name_written:
+                    self.write_function_name()
+                    subroutine_name_written = True
 
-                if self._tokenizer.currentToken == "{":
-                    self.write_xml_tag_smart(GrammarLanguage.SUB_ROUTINE_BOD.value, False)
-                    self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-                    self._tokenizer.advance()
+                if self._current_method_type == "method":
+                    self._vm_writer.write_push(segment="argument", index=0)
+                    self._vm_writer.write_pop(segment="pointer", index=0)
 
-                # compile declarations
-                if self._tokenizer.currentToken == GrammarLanguage.VAR.value:
-                    self.compile_var_declaration()
-
-                # compile statements
-                if (self._tokenizer.currentToken == GrammarLanguage.LET.value or
-                    self._tokenizer.currentToken == GrammarLanguage.DO.value or
-                        self._tokenizer.currentToken == GrammarLanguage.IF.value):
-
-                    # compile subroutine name
-                    if not subroutine_name_written:
-                        self.write_function_name()
-                        subroutine_name_written = True
-
-                    if self._current_method_type == "method":
-                        self._vm_writer.write_push(segment="argument", index=0)
-                        self._vm_writer.write_pop(segment="pointer", index=0)
-
-                    self.compile_statements()
-
-            self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-            self.write_xml_closing_tag(GrammarLanguage.SUB_ROUTINE_BOD.value)
-            self.write_xml_closing_tag(GrammarLanguage.SUB_ROUTINE_DEC.value)
+                self.compile_statements()
 
     def compile_parameter_list(self):
         """Compiles a (possibly empty) parameter list, not including the enclosing "()"."""
@@ -286,13 +278,14 @@ class CompilationEngine:
         # ((type varName)(',' type varName)*)?
         while self._tokenizer.currentToken != ")":
             next_token = self._tokenizer.look_ahead()
+
             if (not self._tokenizer.currentToken == "," and
                     not next_token == ","
                     and self._tokenizer.get_token_type(next_token) == "identifier"):
                 # then it must be the parameter type
                 self._table_obj["type"] = self._tokenizer.currentToken
-            elif self._tokenizer.token_type().value.lower() == "identifier":
 
+            elif self._tokenizer.token_type().value.lower() == "identifier":
                 self._table_obj["name"] = self._tokenizer.currentToken
                 self.write_table_object_definition()
                 parameter_count = parameter_count + 1
@@ -356,14 +349,7 @@ class CompilationEngine:
     def compile_statements(self):
         """Compiles a sequence of statements, not including the
         enclosing curly braces "{}". Compiles if, let and while statements"""
-        self.write_xml_tag_smart(GrammarLanguage.STATEMENTS.value, False)
-
-        while (self._tokenizer.currentToken == GrammarLanguage.DO.value or
-                self._tokenizer.currentToken == GrammarLanguage.RETURN.value or
-               self._tokenizer.currentToken == GrammarLanguage.WHILE.value or
-               self._tokenizer.currentToken == GrammarLanguage.LET.value or
-               self._tokenizer.currentToken == GrammarLanguage.IF.value):
-
+        while self.is_statement():
             if self._tokenizer.currentToken == GrammarLanguage.LET.value:
                 self.compile_let()
             if self._tokenizer.currentToken == GrammarLanguage.DO.value:
@@ -376,8 +362,6 @@ class CompilationEngine:
                 self.compile_return()
 
             self._tokenizer.advance()
-
-        self.write_xml_closing_tag(GrammarLanguage.STATEMENTS.value)
 
     def compile_array_addition(self, array_expression):
         is_array = self._symbol_table.type_of(array_expression) == "Array"
@@ -404,7 +388,7 @@ class CompilationEngine:
 
             self._vm_writer.write_arithmetic(arithmetic_command="add")
 
-    def write_array_closure_exp2(self):
+    def write_array_closure(self):
         self._vm_writer.write_pop("temp", 0)
         self._vm_writer.write_pop("pointer", 1)
         self._vm_writer.write_push("temp", 0)
@@ -428,7 +412,8 @@ class CompilationEngine:
                 self.compile_array_addition(self._tokenizer.currentToken)
 
             if self.tokenizer.currentToken == "=":
-                self.compile_expression()
+                while self._tokenizer.currentToken != ";":
+                    self.compile_expression()
 
                 segment = self._vm_writer.get_segment_from_kind(self._symbol_table.kind_of(assignment_destination))
                 index = self._symbol_table.index_of(assignment_destination)
@@ -437,7 +422,7 @@ class CompilationEngine:
                 self._vm_writer.write_pop(segment=segment, index=index)
 
         if destination_array_object:
-            self.write_array_closure_exp2()
+            self.write_array_closure()
 
     def get_segment_from_current_token(self):
         return self._vm_writer.get_segment_from_kind(self._symbol_table.kind_of(self._tokenizer.currentToken))
@@ -709,8 +694,6 @@ class CompilationEngine:
         return calling_function
 
     def compile_term_write_objects_arrays_calls(self):
-        # TODO: this method is failing the test. the cursor gets to "- Main.double(2)) + 1" but
-        # get the name of the calling function and save it in a variable
         is_method = False
         is_array = False
 
@@ -720,7 +703,6 @@ class CompilationEngine:
 
         if self._tokenizer.look_ahead() == "[":
             is_array = True
-            print("compiling array addition from term", self._tokenizer.currentToken)
             self.compile_array_addition(self._tokenizer.currentToken)
 
             self._vm_writer.write_pop("pointer", 1)

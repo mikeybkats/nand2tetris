@@ -92,10 +92,6 @@ class TestCompileExpression(TestCase):
             pop pointer 1
             push that 0
             call Math.multiply 2
-            pop temp 0
-            pop pointer 1
-            push temp 0
-            pop that 0
         """)
         mock_correct_output = StringIO(correct_output)
         expected_result = mock_correct_output.readlines()

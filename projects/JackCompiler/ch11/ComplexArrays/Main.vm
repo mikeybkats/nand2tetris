@@ -80,8 +80,13 @@ sub
 push constant 2
 call Main.double 1
 sub
+push constant 1
+add
 push local 1
 add
+pop pointer 1
+push that 0
+call Math.multiply 2
 pop temp 0
 pop pointer 1
 push temp 0
@@ -666,7 +671,19 @@ call Output.println 0
 pop temp 0
 push constant 0
 return
+function Main.double 0
+push argument 1
+push constant 2
+call Math.multiply 2
+push constant 0
+return
 function Main.fill 0
+label WHILE_EXP0
+push argument 2
+push constant 0
+gt
+not
+if-goto WHILE_END0
 push argument 2
 push constant 1
 sub
@@ -680,3 +697,7 @@ pop temp 0
 pop pointer 1
 push temp 0
 pop that 0
+goto WHILE_EXP0
+label WHILE_END0
+push constant 0
+return
