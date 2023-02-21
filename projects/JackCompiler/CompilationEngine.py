@@ -40,6 +40,7 @@ class CompilationEngine:
     # current method can be "function" | "constructor" | "method"
     _current_method_type = ""
     _current_method_name = ""
+    _current_method_return_type = ""
 
     # current line keyword "let" | "do" | "if"
     _current_line_keyword = ""
@@ -229,12 +230,11 @@ class CompilationEngine:
                 i_type=self._class_name,
                 i_kind="argument"
             )
-        if (self._current_method_type == GrammarLanguage.METHOD.value or
-                self._current_method_type == GrammarLanguage.FUNCTION.value):
-            self._symbol_table.define(i_name="this", i_type=self._class_name, i_kind="argument")
 
         count = 0
         while count != 3:
+            if count == 1:
+                self._current_method_return_type = self._tokenizer.currentToken
             if count == 2:
                 self._current_method_name = self._tokenizer.currentToken
 
@@ -261,7 +261,7 @@ class CompilationEngine:
                     self.write_function_name()
                     subroutine_name_written = True
 
-                if self._current_method_type == "method":
+                if self._current_method_type == GrammarLanguage.METHOD.value:
                     self._vm_writer.write_push(segment="argument", index=0)
                     self._vm_writer.write_pop(segment="pointer", index=0)
 
@@ -288,6 +288,7 @@ class CompilationEngine:
             elif self._tokenizer.token_type().value.lower() == "identifier":
                 self._table_obj["name"] = self._tokenizer.currentToken
                 self.write_table_object_definition()
+
                 parameter_count = parameter_count + 1
 
             self._tokenizer.advance()
@@ -380,10 +381,12 @@ class CompilationEngine:
 
                 segment = self._vm_writer.get_segment_from_kind(self._symbol_table.kind_of(array_expression))
                 index = self._symbol_table.index_of(array_expression)
+
                 self._vm_writer.write_push(segment, index)
             else:
                 segment = self._vm_writer.get_segment_from_kind(self._symbol_table.kind_of(array_expression))
                 index = self._symbol_table.index_of(array_expression)
+
                 self._vm_writer.write_push(segment, index)
 
             self._vm_writer.write_arithmetic(arithmetic_command="add")
@@ -437,7 +440,6 @@ class CompilationEngine:
         self._tokenizer.advance()
         calling_function_type = self.get_type_of_calling_function()
 
-        # TODO: Replace with a variable push. whether local or global
         if self._symbol_table.is_var(self._tokenizer.currentToken):
             index = self._symbol_table.index_of(self._tokenizer.currentToken)
             segment = self.get_segment_from_current_token()
@@ -471,12 +473,6 @@ class CompilationEngine:
                     self._expression_list_count = self._expression_list_count + 1
                 self._vm_writer.write_call(calling_function_type, self._expression_list_count)
             self._vm_writer.write_pop(segment="temp", index=0)
-
-            # if is_calling_method:
-            #     self._vm_writer.write_push(segment="pointer", index=0)
-
-        # self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-        self.write_xml_closing_tag(GrammarLanguage.DO_STATEMENT.value)
 
     def compile_while(self):
         """Compiles a while statement"""
@@ -515,10 +511,8 @@ class CompilationEngine:
         self._tokenizer.advance()
 
         if self._tokenizer.currentToken == "(":
-            self.write_terminal_tag(self._tokenizer.token_type().value.lower())
             self._tokenizer.advance()
-            self.compile_expression()
-            self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+            self.compile_expression(")")
             self._tokenizer.advance()
 
         while self._tokenizer.currentToken != "}":
@@ -567,22 +561,18 @@ class CompilationEngine:
     def compile_return(self):
         """Compiles a return statement"""
         self._current_line_keyword = GrammarLanguage.RETURN.value
-        self.write_non_terminal_tag(GrammarLanguage.RETURN_STATEMENT.value, False)
-        self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-
         self._tokenizer.advance()
+
         if self._tokenizer.currentToken != ";":
             self.compile_expression()
 
-        if self._current_method_type != "constructor":
+        if (self._current_method_type != GrammarLanguage.CONSTRUCTOR.value and
+                self._current_method_return_type == "void"):
             self._vm_writer.write_push(segment="constant", index=0)
         else:
             self._vm_writer.write_push(segment="pointer", index=0)
 
         self._vm_writer.write_return()
-
-        self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-        self.write_xml_closing_tag(GrammarLanguage.RETURN_STATEMENT.value)
 
     def write_arithmetic_vm(self, operator):
         arithmetic_command = VMWriter.get_arithmetic_command(operator)
@@ -639,7 +629,10 @@ class CompilationEngine:
 
         while expression:
             if self._tokenizer.currentToken == "(":
-                self.compile_term()
+                self._tokenizer.advance()
+                self.compile_expression(until=")")
+                self._tokenizer.advance()
+
             if is_op(self._tokenizer.currentToken):
                 cur_operator = self._tokenizer.currentToken
                 self._tokenizer.advance()
@@ -663,9 +656,10 @@ class CompilationEngine:
     def compile_term_write_function_call(self):
         # is function call or arithmetic priority
         if self._tokenizer.currentToken == "(":
-            while self._tokenizer.currentToken == "(":
-                self._tokenizer.advance()
-            self.compile_expression()
+            # TODO: verify this is the correct logic
+            # while self._tokenizer.currentToken == "(":
+            self._tokenizer.advance()
+            self.compile_expression(")")
 
     def compile_term_write_int_constant(self):
         # code_write if exp.is_numeric then write_push int constant
@@ -739,10 +733,12 @@ class CompilationEngine:
                 self._vm_writer.write_push(segment="pointer", index=0)
 
     def compile_term_write_variables(self):
+        # changed from .is_var to .kind_of
         if self._symbol_table.is_var(self._tokenizer.currentToken):
             kind = self._symbol_table.kind_of(self._tokenizer.currentToken)
             segment = VMWriter.get_segment_from_kind(kind)
             index = self._symbol_table.index_of(self._tokenizer.currentToken)
+
             self._vm_writer.write_push(segment=segment, index=index)
 
     def compile_term_write_operators(self):
