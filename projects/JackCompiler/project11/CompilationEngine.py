@@ -30,6 +30,7 @@ class CompilationEngine:
     _var_declaration_count = 0
 
     _if_statement_count = 0
+    _else_statement_count = 0
 
     # _array_object = ""
 
@@ -505,9 +506,6 @@ class CompilationEngine:
         """Compiles if statement"""
         self._current_line_keyword == GrammarLanguage.IF.value
 
-        self.write_non_terminal_tag(GrammarLanguage.IF_STATEMENT.value, False)
-        self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-
         self._tokenizer.advance()
 
         if self._tokenizer.currentToken == "(":
@@ -515,6 +513,7 @@ class CompilationEngine:
             self.compile_expression(")")
             self._tokenizer.advance()
 
+        this_if_statement_count = 0
         while self._tokenizer.currentToken != "}":
 
             if self._tokenizer.currentToken == "{":
@@ -527,35 +526,34 @@ class CompilationEngine:
                 # Write label IF_TRUE
                 self._vm_writer.write_label(label="IF_TRUE" + str(self._if_statement_count))
 
-                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+                this_if_statement_count = self._if_statement_count
+                self._if_statement_count = self._if_statement_count + 1
+
                 self._tokenizer.advance()
                 self.compile_statements()
-                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+
                 break
 
             self._tokenizer.advance()
 
         if self._tokenizer.look_ahead() == GrammarLanguage.ELSE.value:
+            self._vm_writer.write_goto(label="IF_END" + str(this_if_statement_count))
+            self._vm_writer.write_label(label="IF_FALSE" + str(this_if_statement_count))
             self._tokenizer.advance()
-            self.compile_else()
+            self.compile_else(this_if_statement_count)
+        else:
+            # Write label IF_FALSE
+            self._vm_writer.write_label(label="IF_FALSE" + str(this_if_statement_count))
 
-        # Write label IF_FALSE
-        self._vm_writer.write_label(label="IF_FALSE" + str(self._if_statement_count))
-        self._if_statement_count = self._if_statement_count + 1
-
-        # self.write_non_terminal_tag(GrammarLanguage.IF_STATEMENT.value, True)
-
-    def compile_else(self):
-        self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-
+    def compile_else(self, count):
         while self._tokenizer.currentToken != "}":
             if self._tokenizer.currentToken == "{":
-                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
                 self._tokenizer.advance()
                 self.compile_statements()
-                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
+                self._vm_writer.write_label(label="IF_END" + str(count))
                 break
 
+            self._else_statement_count = self._else_statement_count + 1
             self._tokenizer.advance()
 
     def compile_return(self):
