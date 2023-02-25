@@ -42,30 +42,51 @@ class Main {
     	while (loop) {
     	    let position = position + 1;
     	    let mask = Main.nextMask(mask);
-    	
+
+    	    // goto IF_True0
     	    if (~(position > 16)) {
-    	
+    	        // goto IF_False0
+    	        // label IF_True0
+
+                // goto IF_True1
     	        if (~((value & mask) = 0)) {
+    	            // goto IF_False1
+    	            // label IF_True1
+
     	            do Memory.poke(8000 + position, 1);
+    	            // goto IF_End1
+                    // label IF_False1
        	        }
     	        else {
     	            do Memory.poke(8000 + position, 0);
-      	        }    
+                    // label IF_End1
+      	        }
+                // goto IF_End0
+                // label IF_False0
+
     	    }
     	    else {
     	        let loop = false;
+                // label IF_End0
     	    }
+            // label IF_End0
     	}
     	return;
     }
  
     /** Returns the next mask (the mask that should follow the given mask). */
     function int nextMask(int mask) {
+        // if-goto IF_True0
     	if (mask = 0) {
+    	    // goto IF_False0
+    	    // label IF_True0
     	    return 1;
+    	    // goto IF_End0
     	}
+    	// label IF_False0
     	else {
-	    return mask * 2;
+            return mask * 2;
+            // label IF_End0
     	}
     }
     

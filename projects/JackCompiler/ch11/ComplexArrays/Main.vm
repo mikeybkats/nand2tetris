@@ -675,7 +675,6 @@ function Main.double 0
 push argument 0
 push constant 2
 call Math.multiply 2
-push pointer 0
 return
 function Main.fill 0
 label WHILE_EXP0
