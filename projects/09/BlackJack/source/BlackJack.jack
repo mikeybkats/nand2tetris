@@ -24,8 +24,10 @@ class BlackJack {
     field int randomizer;
 
     field Boolean hitPlayer;
+    field int someNumber;
 
     constructor BlackJack new() {
+        // the constructor allocates memory for the class itself using Memory.alloc
         let prompt = Prompt.new();
         let gameActive = 0;
         let playerCards = Array.new(9);
@@ -37,12 +39,17 @@ class BlackJack {
         return this;
     }
 
-
     // method start: void
         // starts the game
     method void start(){
         do promptPlayerStart("Welcome to Black Jack. Press spacebar to start.", 32, 0, 0);
         return;
+    }
+
+    function int add(){
+        var int added;
+        let added = 1 + 2;
+        return added;
     }
 
     // method testBlackJack
@@ -52,12 +59,17 @@ class BlackJack {
         var Suit cardSuitObj;
         var String cardSuit;
         var CardValue cardVal;
+        var int myNumber;
         let cardSuitObj = Suit.new();
         let cardSuit = cardSuitObj.getSpades();
         let cardVal = CardValue.new();
         let playerCards[0] = Card.new(cardSuit, cardVal.getAce(), cardSuitObj, cardVal);
         let playerCards[1] = Card.new(cardSuit, cardVal.getNine(), cardSuitObj, cardVal);
         let playerCards[2] = Card.new(cardSuit, cardVal.getAce(), cardSuitObj, cardVal);
+
+        let myNumber = add();
+        let someNumber = Math.sqrt(10);
+
         return;
     }
 

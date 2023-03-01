@@ -435,9 +435,6 @@ class CompilationEngine:
         """Compiles a do statement"""
         self._current_line_keyword = GrammarLanguage.DO.value
 
-        self.write_xml_tag_smart(GrammarLanguage.DO_STATEMENT.value, False)
-        self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-
         self._tokenizer.advance()
         calling_function_type = self.get_type_of_calling_function()
 
@@ -579,6 +576,12 @@ class CompilationEngine:
         else:
             self._vm_writer.write_arithmetic(arithmetic_command)
 
+    def write_arithmetic_negation_vm(self, operator):
+        if operator == "-":
+            self._vm_writer.write_arithmetic("neg")
+        if operator == "~":
+            self._vm_writer.write_arithmetic("not")
+
     def compile_expression_operator(self):
         cur_operator = self._tokenizer.currentToken
 
@@ -586,7 +589,8 @@ class CompilationEngine:
         if is_prefix_operator(cur_operator):
             self._tokenizer.advance()
             self.compile_term()
-            self.write_arithmetic_vm(cur_operator)
+            self.write_arithmetic_negation_vm(cur_operator)
+            # self.write_arithmetic_vm(cur_operator)
             self._tokenizer.advance()
         else:
             self.write_arithmetic_vm(cur_operator)
@@ -741,8 +745,6 @@ class CompilationEngine:
 
     def compile_term_write_operators(self):
         if is_op(self._tokenizer.currentToken):
-            self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-
             arithmetic_command = VMWriter.get_arithmetic_command(self._tokenizer.currentToken)
             self._vm_writer.write_arithmetic(arithmetic_command)
             self.write_arithmetic_vm(self._tokenizer.currentToken)
@@ -784,8 +786,6 @@ class CompilationEngine:
 
     def compile_expression_list(self):
         """Compiles a possibly empty comma-separated list of expressions"""
-        self.write_xml_tag_smart(GrammarLanguage.EXPRESSION_LIST.value, False)
-
         self._expression_list_count = 0
         while self._tokenizer.currentToken != ";" and self._tokenizer.currentToken != ")":
             self._tokenizer.advance()
@@ -794,7 +794,5 @@ class CompilationEngine:
                 self._expression_list_count = self._expression_list_count + 1
                 self.compile_expression()
 
-            if self._tokenizer.currentToken == ",":
-                self.write_terminal_tag(self._tokenizer.token_type().value.lower())
-
-        self.write_non_terminal_tag(GrammarLanguage.EXPRESSION_LIST.value, True)
+            # if self._tokenizer.currentToken == ",":
+            #     self.write_terminal_tag(self._tokenizer.token_type().value.lower())
