@@ -43,6 +43,7 @@ class Math {
         }
         let twoToThe[15] = -32767;
 
+
         return;
     }
 
@@ -63,19 +64,24 @@ class Math {
         let i = 0;
         let sumOf = 0;
 
+
         while(i < 15){
-            if (twoToThe[i] > x & twoToThe[i-1] < x){
-                do Output.printInt(i);
-                do Output.println();
+            if ((twoToThe[i] > x) & (twoToThe[i-1] < x)){
                 let ii = i - 1;
-                while(ii > 0){
-                    if((twoToThe[ii] + sumOf) > x){
+                let sumOf = twoToThe[ii];
+
+                while((ii > 0 ) | (ii = 0)){
+
+                    if((sumOf + twoToThe[ii - 1]) > x){
                         let trueBits[ii] = false;
-                        let ii = i - 1;
+                    } else {
+                        let sumOf = sumOf + twoToThe[ii - 1];
+
+                        do Output.printInt(sumOf);
+                        do Output.println();
+                        let trueBits[ii] = true;
                     }
-                    let sumOf = sumOf + twoToThe[ii];
-                    let trueBits[ii] = true;
-                    let ii = i - 1;
+                    let ii = ii - 1;
                 }
             }
             let i = i + 1;
