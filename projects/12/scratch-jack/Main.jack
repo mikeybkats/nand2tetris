@@ -1,0 +1,34 @@
+class Main {
+
+    function void main() {
+        var boolean bit;
+
+        do Math.init();
+
+        let bit = Math.bit(500, 9);
+
+        do Output.println(bit);
+
+        return;
+    }
+
+   //  function int multiply(int x, int y) {
+   //      var int sum;
+   //      var int shiftedX;
+   //      var int i;
+
+   //      let sum = 0;
+   //      let shiftedX = x;
+   //      let i = 0;
+
+   //      while(i < 16) {
+   //          if (y[i] = 1){
+   //           let sum = sum + shiftedX;
+   //          }
+   //          let shiftedX = shiftedX + shiftedX;
+   //          let i = i + 1;
+   //      }
+
+   //      return sum;
+   //  }
+}
