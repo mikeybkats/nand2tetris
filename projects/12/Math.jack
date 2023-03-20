@@ -56,59 +56,6 @@ class Math {
         return ~((x & twoToThe[j]) = 0);
     }
 
-    /** Returns true if the j-th bit of the integer x is 1 and false otherwise. */
-    function boolean bitWrong(int x, int j) {
-        // j'th location of holds the value 2 to the power of j.
-        var int i;
-        var int sumOf;
-        var array trueBits;
-        var int nextSumOf;
-        var boolean polarity;
-
-        let trueBits = Array.new(16);
-        let sumOf = 0;
-
-        if (x < 0){
-            let i = 15;
-            let polarity = false;
-
-            // initialize true bits
-            while (i > 0){
-                let trueBits[i] = 1;
-                let i = i - 1;
-            }
-
-            let i = 15;
-
-        } else {
-            let i = 14;
-            let polarity = true;
-        }
-
-        while(i > 0){
-            if ((twoToThe[i] > x) & (twoToThe[i-1] < x)){
-                let i = i - 1;
-                let sumOf = twoToThe[i];
-                let trueBits[i] = polarity;
-
-                while((i > 0 ) | (i = 0)){
-                    let nextSumOf = sumOf + twoToThe[i - 1];
-                    // can you add the next number w/o going over x?
-                    if((nextSumOf < x) | (nextSumOf = x)){
-                        // okay, add the next number to the total
-                        let sumOf = nextSumOf;
-                        let trueBits[i - 1] = polarity;
-                    } 
-                    let i = i - 1;
-                }
-            } else {
-                let i = i - 1;
-            }
-        }
-
-        return trueBits[j];
-    }
-
     /** Returns the product of x and y. 
      *  When a Jack compiler detects the multiplication operator '*' in the 
      *  program's code, it handles it by invoking this method. In other words,
