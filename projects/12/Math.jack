@@ -20,14 +20,14 @@ class Math {
         let double = 1;
 
         // twoToThe[0] = 1;
-        // twoToThe[1] = 2;
-        // twoToThe[2] = 4;
-        // twoToThe[3] = 8;
-        // twoToThe[4] = 16;
-        // twoToThe[5] = 32;
-        // twoToThe[6] = 64;
-        // twoToThe[7] = 128;
-        // twoToThe[8] = 256;
+        // twoToThe[1] = 2; 
+        // twoToThe[2] = 4; x
+        // twoToThe[3] = 8; 
+        // twoToThe[4] = 16; x
+        // twoToThe[5] = 32; x
+        // twoToThe[6] = 64; x
+        // twoToThe[7] = 128; x
+        // twoToThe[8] = 256; x
         // twoToThe[9] = 512;
         // twoToThe[10] = 1024;
         // twoToThe[11] = 2048;
@@ -56,37 +56,73 @@ class Math {
     function boolean bit(int x, int j) {
         // j'th location of holds the value 2 to the power of j.
         var int i;
-        var int ii;
         var int sumOf;
         var array trueBits;
+        var int nextSumOf;
+        var boolean polarity;
 
         let trueBits = Array.new(16);
-        let i = 0;
         let sumOf = 0;
 
+        if (x < 0){
+            let i = 15;
+            let polarity = false;
 
-        while(i < 15){
-            if ((twoToThe[i] > x) & (twoToThe[i-1] < x)){
-                let ii = i - 1;
-                let sumOf = twoToThe[ii];
-
-                while((ii > 0 ) | (ii = 0)){
-
-                    if((sumOf + twoToThe[ii - 1]) > x){
-                        let trueBits[ii] = false;
-                    } else {
-                        let sumOf = sumOf + twoToThe[ii - 1];
-
-                        do Output.printInt(sumOf);
-                        do Output.println();
-                        let trueBits[ii] = true;
-                    }
-                    let ii = ii - 1;
-                }
+            // initialize true bits
+            while (i > 0){
+                let trueBits[i] = 1;
+                let i = i - 1;
             }
-            let i = i + 1;
-            let trueBits[i] = false;
+
+            let i = 15;
+
+        } else {
+            let i = 14;
+            let polarity = true;
         }
+
+
+
+        while(i > 0){
+            if ((twoToThe[i] > x) & (twoToThe[i-1] < x)){
+                let i = i - 1;
+                let sumOf = twoToThe[i];
+                let trueBits[i] = polarity;
+
+                while((i > 0 ) | (i = 0)){
+                    let nextSumOf = sumOf + twoToThe[i - 1];
+                    // can you add the next number w/o going over x?
+                    if((nextSumOf < x) | (nextSumOf = x)){
+                        // okay, add the next number to the total
+                        let sumOf = nextSumOf;
+                        let trueBits[i - 1] = polarity;
+                    } 
+                    let i = i - 1;
+                }
+            } else {
+                let i = i - 1;
+            }
+        }
+
+        let i = 0;
+        while(i < 16){
+            do Output.printInt(i);
+            do Output.printString(" /// ");
+            do Output.printInt(twoToThe[i]);
+            do Output.printString(" /// ");
+            do Output.printInt(trueBits[i]);
+            do Output.println();
+            let i = i + 1;
+        }
+
+            do Output.println();
+        do Output.printInt(trueBits[3]);
+            do Output.println();
+
+            do Output.println();
+        do Output.printInt(~(x & twoToThe[3] = 0));
+            do Output.println();
+        do Output.printInt(~(x & twoToThe[4] = 0));
 
         return trueBits[j];
     }
