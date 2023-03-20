@@ -5,9 +5,9 @@ class Main {
 
         do Math.init();
 
-        let bit = Math.bit(500, 9);
+        let bit = Math.bit(500, 8);
 
-        do Output.println(bit);
+        do Output.printInt(bit);
 
         return;
     }

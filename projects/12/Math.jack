@@ -52,8 +52,12 @@ class Math {
         return 0;
     }
 
+    function boolean bit(int x, int j){
+        return ~((x & twoToThe[j]) = 0);
+    }
+
     /** Returns true if the j-th bit of the integer x is 1 and false otherwise. */
-    function boolean bit(int x, int j) {
+    function boolean bitWrong(int x, int j) {
         // j'th location of holds the value 2 to the power of j.
         var int i;
         var int sumOf;
@@ -81,8 +85,6 @@ class Math {
             let polarity = true;
         }
 
-
-
         while(i > 0){
             if ((twoToThe[i] > x) & (twoToThe[i-1] < x)){
                 let i = i - 1;
@@ -103,26 +105,6 @@ class Math {
                 let i = i - 1;
             }
         }
-
-        let i = 0;
-        while(i < 16){
-            do Output.printInt(i);
-            do Output.printString(" /// ");
-            do Output.printInt(twoToThe[i]);
-            do Output.printString(" /// ");
-            do Output.printInt(trueBits[i]);
-            do Output.println();
-            let i = i + 1;
-        }
-
-            do Output.println();
-        do Output.printInt(trueBits[3]);
-            do Output.println();
-
-            do Output.println();
-        do Output.printInt(~(x & twoToThe[3] = 0));
-            do Output.println();
-        do Output.printInt(~(x & twoToThe[4] = 0));
 
         return trueBits[j];
     }
