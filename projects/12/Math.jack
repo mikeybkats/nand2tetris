@@ -36,7 +36,7 @@ class Math {
         // twoToThe[14] = 16384;
         // twoToThe[15] = -32768;
 
-        while(i < 15){
+        while(i < 16){
             let twoToThe[i] = double;
             let double = double + double;
             let i = i + 1;
@@ -52,7 +52,7 @@ class Math {
         return 0;
     }
 
-    function boolean bit(int x, int j){
+    function int bit(int x, int j){
         return ~((x & twoToThe[j]) = 0);
     }
 
@@ -60,21 +60,47 @@ class Math {
      *  When a Jack compiler detects the multiplication operator '*' in the 
      *  program's code, it handles it by invoking this method. In other words,
      *  the Jack expressions x*y and multiply(x,y) return the same value.
+
+     multiply(x, y):
+        sum = 0
+        shiftedX = x
+        for i = 0... #ofBits - 1 do:
+            if((i'th bit of y) == 1):
+                sum = sum + shiftedX         
+            shiftedX = shiftedX + shiftedX
+
+        return sum
      */
     function int multiply(int x, int y) {
         var int sum;
         var int shiftedX;
         var int i;
+        var int bitOfY;
+        var int length;
 
         let sum = 0;
         let shiftedX = x;
         let i = 0;
 
-        while(i < 16) {
-            if (y[i] = 1){
-             let sum = sum + shiftedX;
+        if(x < 0){
+            let length = 16;
+        } 
+        else {
+            let length = 15;
+        }
+
+        while(i < length) {
+            let bitOfY = Math.bit(y, i);
+
+            if ( bitOfY = -1 ) {
+                do Output.printInt(i);
+                do Output.printString("---");
+                do Output.printInt(bitOfY);
+                do Output.println();
+                let sum = sum + shiftedX;
             }
-            let shiftedX = shiftedX * 2;
+
+            let shiftedX = shiftedX + shiftedX;
             let i = i + 1;
         }
 

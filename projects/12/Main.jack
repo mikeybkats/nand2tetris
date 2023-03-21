@@ -1,0 +1,21 @@
+class Main {
+
+    function void main() {
+        var boolean bit;
+        var int mult;
+
+        do Math.init();
+
+        // let bit = Math.bit(500, 8);
+        // do Output.printInt(bit);
+
+        let mult = Math.multiply(50, 9);
+
+        do Output.println();
+        // do Output.println();
+        do Output.printInt(mult);
+
+        return;
+    }
+
+}
