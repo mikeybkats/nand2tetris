@@ -6,11 +6,30 @@
 /**
  * A library of commonly used mathematical functions.
  * Note: Jack compilers implement multiplication and division using OS method calls.
+
  */
+
 class Math {
     static Array twoToThe;
 
-    /** Initializes the library. */
+    /** Initializes the library.
+    // twoToThe[0] = 1;
+    // twoToThe[1] = 2; 
+    // twoToThe[2] = 4; x
+    // twoToThe[3] = 8; 
+    // twoToThe[4] = 16; x
+    // twoToThe[5] = 32; x
+    // twoToThe[6] = 64; x
+    // twoToThe[7] = 128; x
+    // twoToThe[8] = 256; x
+    // twoToThe[9] = 512;
+    // twoToThe[10] = 1024;
+    // twoToThe[11] = 2048;
+    // twoToThe[12] = 4096;
+    // twoToThe[13] = 8192;
+    // twoToThe[14] = 16384;
+    // twoToThe[15] = -32768;
+     */
     function void init() {
         var int i;
         var int double;
@@ -18,24 +37,6 @@ class Math {
         let twoToThe = Array.new(16);
         let i = 0;
         let double = 1;
-
-        // twoToThe[0] = 1;
-        // twoToThe[1] = 2; 
-        // twoToThe[2] = 4; x
-        // twoToThe[3] = 8; 
-        // twoToThe[4] = 16; x
-        // twoToThe[5] = 32; x
-        // twoToThe[6] = 64; x
-        // twoToThe[7] = 128; x
-        // twoToThe[8] = 256; x
-        // twoToThe[9] = 512;
-        // twoToThe[10] = 1024;
-        // twoToThe[11] = 2048;
-        // twoToThe[12] = 4096;
-        // twoToThe[13] = 8192;
-        // twoToThe[14] = 16384;
-        // twoToThe[15] = -32768;
-
         while(i < 16){
             let twoToThe[i] = double;
             let double = double + double;
@@ -43,13 +44,15 @@ class Math {
         }
         let twoToThe[15] = -32767;
 
-
         return;
     }
 
     /** Returns the absolute value of x. */
     function int abs(int x) {
-        return 0;
+        if(x < 0){
+            return ~x;
+        }
+        return x;
     }
 
     function int bit(int x, int j){
@@ -93,10 +96,6 @@ class Math {
             let bitOfY = Math.bit(y, i);
 
             if ( bitOfY = -1 ) {
-                do Output.printInt(i);
-                do Output.printString("---");
-                do Output.printInt(bitOfY);
-                do Output.println();
                 let sum = sum + shiftedX;
             }
 
@@ -111,9 +110,31 @@ class Math {
      *  When a Jack compiler detects the multiplication operator '/' in the 
      *  program's code, it handles it by invoking this method. In other words,
      *  the Jack expressions x/y and divide(x,y) return the same value.
+     divide(x,y):
+        if y > x return 0
+      
+        q = divide(x,2*y)
+
+        if(x-2 * q * y)  < y
+            return 2 * q
+        else
+            return 2 * q + 1
      */
     function int divide(int x, int y) {
-        return 0;
+        var int q;
+
+        if(y > x){
+            return 0;
+        }
+
+        let q = Math.divide(x, (2 * y));
+
+        if(((x - (2 * q * y)) < y)){
+            return 2 * q;
+        }
+        else {
+            return (2 * q) + 1;
+        }
     }
 
     /** Returns the integer part of the square root of x. */

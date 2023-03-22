@@ -1,4 +1,4 @@
-function Main.main 2
+function Main.main 3
 call Math.init 0
 pop temp 0
 push constant 50
@@ -8,6 +8,15 @@ pop local 1
 call Output.println 0
 pop temp 0
 push local 1
+call Output.printInt 1
+pop temp 0
+push constant 27
+push constant 27
+call Math.divide 2
+pop local 2
+call Output.println 0
+pop temp 0
+push local 2
 call Output.printInt 1
 pop temp 0
 push constant 0

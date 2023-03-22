@@ -3,17 +3,22 @@ class Main {
     function void main() {
         var boolean bit;
         var int mult;
+        var int divide;
 
         do Math.init();
 
-        // let bit = Math.bit(500, 8);
-        // do Output.printInt(bit);
+        let bit = Math.bit(500, 8);
+        do Output.printInt(bit);
 
         let mult = Math.multiply(50, 9);
 
         do Output.println();
-        // do Output.println();
         do Output.printInt(mult);
+
+        let divide = Math.divide(27, 9);
+
+        do Output.println();
+        do Output.printInt(divide);
 
         return;
     }
