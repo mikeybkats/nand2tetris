@@ -4,6 +4,7 @@ class Main {
         var boolean bit;
         var int mult;
         var int divide;
+        var int power;
 
         do Math.init();
 
@@ -19,6 +20,12 @@ class Main {
 
         do Output.println();
         do Output.printInt(divide);
+
+        let power = Math.power(2, 14);
+
+        do Output.println();
+        do Output.printString("2 to the 14th power: ");
+        do Output.printInt(power);
 
         return;
     }

@@ -161,7 +161,45 @@ push constant 1
 add
 return
 label IF_END1
-function Math.sqrt 0
+function Math.power 1
+push argument 0
+pop local 0
+label WHILE_EXP0
+push argument 1
+push constant 1
+gt
+not
+if-goto WHILE_END0
+push local 0
+push argument 0
+call Math.multiply 2
+pop local 0
+push argument 1
+push constant 1
+sub
+pop argument 1
+goto WHILE_EXP0
+label WHILE_END0
+push local 0
+return
+function Math.sqrt 2
+push constant 0
+pop local 0
+push constant 7
+pop local 1
+label WHILE_EXP0
+push local 1
+push constant 0
+eq
+not
+not
+if-goto WHILE_END0
+push local 1
+push constant 1
+sub
+pop local 1
+goto WHILE_EXP0
+label WHILE_END0
 push constant 0
 return
 function Math.max 0
