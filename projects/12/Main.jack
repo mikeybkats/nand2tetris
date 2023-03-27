@@ -10,22 +10,25 @@ class Main {
 
         let bit = Math.bit(500, 8);
         do Output.printInt(bit);
+        // -1
 
         let mult = Math.multiply(50, 9);
 
         do Output.println();
         do Output.printInt(mult);
+        // 450
 
         let divide = Math.divide(27, 9);
 
         do Output.println();
         do Output.printInt(divide);
+        // 3
 
         let power = Math.power(2, 14);
-
         do Output.println();
         do Output.printString("2 to the 14th power: ");
         do Output.printInt(power);
+        // 16384
 
         return;
     }
