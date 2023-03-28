@@ -1,4 +1,9 @@
-function Main.main 4
+function Main.main 0
+call Main.testMath 0
+pop temp 0
+push constant 0
+return
+function Main.testMath 4
 call Math.init 0
 pop temp 0
 push constant 500
