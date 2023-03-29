@@ -1,0 +1,18 @@
+class LLMemNode {
+    // field location - integer - the location of memory block
+    field int location;
+    // field next - LLMemNode - the location of the memory block of the next node
+    field LLMemNode next;
+    // field length - integer the size of the memory block
+    field int length;
+
+    constructor LLMemNode new(int length, int location){
+        let length = length;
+        let location = location;
+        let next = null;
+    }
+
+    method void dispose(){
+        return;
+    }
+}

@@ -11,9 +11,18 @@
 class Memory {
     static Array ram;
 
+    static LLMemNode freelist;
+
     /** Initializes the class. */
     function void init() {
         let ram = 0;
+        
+        // init free list:
+        // // length is size of heap - 14355
+        // // location is start of heap - 2048
+        // // next is null since there is no next node to start with
+        let freelist = LLMemNode.new(14355, 2048, null)
+
         return;
     }
 
@@ -29,39 +38,36 @@ class Memory {
         return;
     }
 
+    function LLMemNode firstFit(int size){
+        var LLMemNode node;
+        let node = freelist;
+
+        while (~(node.next = null)){
+            if(node.length < size){
+                return node;
+            }
+            let node = node.next;
+        }
+
+        return;
+    }
+
     /** Finds an available RAM block of the given size and returns
      *  a reference to its base address. */
     function int alloc(int size) {
-        var int startOfBlock;
-        var int endOfBlock;
-        var int location;
+        var LLMemNode availableNode;
+        // int block - the needed part of the memory segment
+        var int block;
 
-        let location = 2048;
-        while(location < 16384){
-            // if the ram does not = 0 continue to search
-            if(~(ram[location = 0])){
-                let location = location + 1;
-            }
-            else {
-                // if a 0 is found count how large it spans
-                let startOfBlock = location;
-                let endOfBlock = location;
+        let availableNode = Memory.firstFit(size);
 
-                while(endOfBlock - startOfBlock = size){
-                    if (ram[endOfBlock] = 0){
-                        let endOfBlock = endOfBlock + 1;
-                    }
-                    // the block is too short
-                    if((ram[endOfBlock] = 1) & (endOfBlock - startOfBlock < size)){
-                        let startOfBlock = endOfBlock + 1;
-                        let endOfBlock = endOfBlock + 1;
-                    }
-                }
-
-            }
-
+        if(~(availableNode)){
+            // attempt to defragment space
+            return "memory failure";
         }
-        return startOfBlock;
+
+        // remove required size from node length
+        // create new node ad 
     }
 
     /** De-allocates the given object (cast as an array) by making
