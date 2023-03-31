@@ -21,9 +21,9 @@ class Memory {
         // // length is size of heap - 14355
         // // location is start of heap - 2048
         // // next is null since there is no next node to start with
-        let freelist = LLMemNode.new(14355, 2048, null)
+        let freelist = LLMemNode.new(14354, 2048);
 
-        return;
+        return ;
     }
 
     /** Returns the RAM value at the given address. */
@@ -38,36 +38,49 @@ class Memory {
         return;
     }
 
-    function LLMemNode firstFit(int size){
+    function LLMemNode firstFit(int size) {
         var LLMemNode node;
         let node = freelist;
 
-        while (~(node.next = null)){
-            if(node.length < size){
+        if(node.getNext() = null){
+            if(node.getLength() < size){
                 return node;
             }
-            let node = node.next;
         }
 
-        return;
+        while (~(node.getNext() = null)){
+            if(node.getLength() < size){
+                return node;
+            }
+            let node = node.getNext();
+        }
+
+        return 0;
     }
 
     /** Finds an available RAM block of the given size and returns
      *  a reference to its base address. */
     function int alloc(int size) {
-        var LLMemNode availableNode;
+        var LLMemNode availableBlock;
         // int block - the needed part of the memory segment
         var int block;
 
-        let availableNode = Memory.firstFit(size);
+        let availableBlock = Memory.firstFit(size);
 
-        if(~(availableNode)){
+        if(~(availableBlock)){
             // attempt to defragment space
             return "memory failure";
         }
+        else {
+            // remove required size from node length
+            do availableBlock.setLength(availableBlock.getLength() - size);
 
-        // remove required size from node length
-        // create new node ad 
+            // create the new node and add
+            let block = availableBlock.getLength() + 1;
+            do availableBlock.setNext(LLMemNode.new(size, block));
+        }
+
+        return block;
     }
 
     /** De-allocates the given object (cast as an array) by making

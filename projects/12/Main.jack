@@ -1,13 +1,12 @@
 class Main {
-
     function void main() {
         do Main.testMath();
+        // do Main.testMemory();
+
         return;
     }
 
     function void testMemory(){
-        do Memory.init();
-
         return;
     }
 
@@ -16,22 +15,25 @@ class Main {
         var int mult;
         var int divide;
         var int power;
+        var int abs;
+
 
         do Math.init();
 
         let bit = Math.bit(500, 8);
+        do Output.printString("bit 8 in 500: ");
         do Output.printInt(bit);
         // -1
 
         let mult = Math.multiply(50, 9);
-
         do Output.println();
+        do Output.printString("50 * 9: ");
         do Output.printInt(mult);
         // 450
 
         let divide = Math.divide(27, 9);
-
         do Output.println();
+        do Output.printString("27 / 9: ");
         do Output.printInt(divide);
         // 3
 
@@ -40,6 +42,11 @@ class Main {
         do Output.printString("2 to the 14th power: ");
         do Output.printInt(power);
         // 16384
+
+        let abs = Math.abs(-233);
+        do Output.println();
+        do Output.printString("Abs of -233: ");
+        do Output.printInt(abs);
         return;
     }
 }

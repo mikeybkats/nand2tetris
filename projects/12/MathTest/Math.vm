@@ -50,8 +50,6 @@ goto IF_FALSE0
 label IF_TRUE0
 push argument 0
 not
-push constant 1
-add
 return
 label IF_FALSE0
 push argument 0

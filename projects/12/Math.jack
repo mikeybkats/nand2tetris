@@ -9,38 +9,42 @@
 
  */
 
+/** Initializes the library.
+// twoToThe[0] = 1;
+// twoToThe[1] = 2; 
+// twoToThe[2] = 4; x
+// twoToThe[3] = 8; 
+// twoToThe[4] = 16; x
+// twoToThe[5] = 32; x
+// twoToThe[6] = 64; x
+// twoToThe[7] = 128; x
+// twoToThe[8] = 256; x
+// twoToThe[9] = 512;
+// twoToThe[10] = 1024;
+// twoToThe[11] = 2048;
+// twoToThe[12] = 4096;
+// twoToThe[13] = 8192;
+// twoToThe[14] = 16384;
+// twoToThe[15] = -32768;
+    */
+
 class Math {
     static Array twoToThe;
 
-    /** Initializes the library.
-    // twoToThe[0] = 1;
-    // twoToThe[1] = 2; 
-    // twoToThe[2] = 4; x
-    // twoToThe[3] = 8; 
-    // twoToThe[4] = 16; x
-    // twoToThe[5] = 32; x
-    // twoToThe[6] = 64; x
-    // twoToThe[7] = 128; x
-    // twoToThe[8] = 256; x
-    // twoToThe[9] = 512;
-    // twoToThe[10] = 1024;
-    // twoToThe[11] = 2048;
-    // twoToThe[12] = 4096;
-    // twoToThe[13] = 8192;
-    // twoToThe[14] = 16384;
-    // twoToThe[15] = -32768;
-     */
     function void init() {
         var int i;
         var int double;
 
         let twoToThe = Array.new(16);
+
         let i = 0;
         let double = 1;
+
         while(i < 16){
-            let twoToThe[i] = double;
+            let twoToThe[i] = 1;
             let double = double + double;
             let i = i + 1;
+
         }
         let twoToThe[15] = -32767;
 
@@ -50,7 +54,7 @@ class Math {
     /** Returns the absolute value of x. */
     function int abs(int x) {
         if(x < 0){
-            return ~x;
+            return (~x) + 1;
         }
         return x;
     }
@@ -123,7 +127,7 @@ class Math {
     function int divide(int x, int y) {
         var int q;
 
-        if(y > x){
+        if(Math.abs(y) > Math.abs(x)){
             return 0;
         }
 
