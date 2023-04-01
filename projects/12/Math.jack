@@ -41,7 +41,11 @@ class Math {
         let double = 1;
 
         while(i < 16){
-            let twoToThe[i] = 1;
+            let twoToThe[i] = double;
+
+            // do Output.printInt(twoToThe[i]);
+            // do Output.println();
+
             let double = double + double;
             let i = i + 1;
 
@@ -89,7 +93,7 @@ class Math {
         let shiftedX = x;
         let i = 0;
 
-        if(x < 0){
+        if((x < 0) | (y < 0)){
             let length = 16;
         } 
         else {
@@ -126,17 +130,33 @@ class Math {
      */
     function int divide(int x, int y) {
         var int q;
+        var int xyLess;
 
-        if(Math.abs(y) > Math.abs(x)){
+        if(x < 0){
+            let xyLess = 1;
+            let x = Math.abs(x);
+        }
+        if(y < 0){
+            let xyLess = 1;
+            let y = Math.abs(y);
+        }
+
+        if(y > x){
             return 0;
         }
 
-        let q = Math.divide(x, (2 * y));
+        let q = Math.divide(x, 2 * y);
 
         if(((x - (2 * q * y)) < y)){
+            if(xyLess = 1){
+                return 2 * q * -1;
+            }
             return 2 * q;
         }
         else {
+            if(xyLess = 1){
+                return ~((2 * q));
+            }
             return (2 * q) + 1;
         }
     }
