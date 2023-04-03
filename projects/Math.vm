@@ -263,30 +263,20 @@ push that 0
 add
 pop local 2
 push local 2
-push constant 2
-call Math.power 2
+push local 2
+call Math.multiply 2
 push argument 0
 lt
 push local 2
-push constant 2
-call Math.power 2
+push local 2
+call Math.multiply 2
 push argument 0
 eq
 or
-push local 2
-push constant 2
-call Math.power 2
-push constant 0
-gt
-and
 if-goto IF_TRUE0
 goto IF_FALSE0
 label IF_TRUE0
-call Output.println 0
-pop temp 0
 push local 2
-push constant 2
-call Math.power 2
 call Output.printInt 1
 pop temp 0
 call Output.println 0

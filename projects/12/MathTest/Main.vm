@@ -100,6 +100,11 @@ pop temp 0
 pop pointer 1
 push temp 0
 pop that 0
+push constant 180
+push constant 180
+call Math.multiply 2
+call Output.printInt 1
+pop temp 0
 push constant 8
 push local 0
 add
