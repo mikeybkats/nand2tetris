@@ -9,9 +9,10 @@
  * consists of 32,768 words, each holding a 16-bit binary number.
  */ 
 class Memory {
-    static Array ram;
-
-    static LLMemNode freelist;
+    static int ram;
+    static int freelist;
+    static int blockSize;
+    static int nextBlock;
 
     /** Initializes the class. */
     function void init() {
@@ -19,9 +20,15 @@ class Memory {
         
         // init free list:
         // // length is size of heap - 14355
-        // // location is start of heap - 2048
         // // next is null since there is no next node to start with
-        let freelist = LLMemNode.new(14354, 2048);
+        // node[0] = block size
+        // node[1] = next array
+        // node[2] = data
+
+        let blockSize = 0;
+        let nextBlock = 1;
+        let freelist = 0; // start of heap is 2048
+        let freelist[blockSize] = 14354;
 
         return ;
     }
@@ -38,21 +45,21 @@ class Memory {
         return;
     }
 
-    function LLMemNode firstFit(int size) {
-        var LLMemNode node;
+    function int firstFit(int size){
+        var int node;
+
         let node = freelist;
 
-        if(node.getNext() = null){
-            if(node.getLength() < size){
-                return node;
+        if(node[blockSize] > size){
+            return node;
+        } 
+        else {
+            while(~(node[nextBlock] = null)){
+                if(node[blockSize] > size){
+                    return node;
+                }
+                let node = node[nextBlock];
             }
-        }
-
-        while (~(node.getNext() = null)){
-            if(node.getLength() < size){
-                return node;
-            }
-            let node = node.getNext();
         }
 
         return 0;
@@ -61,9 +68,8 @@ class Memory {
     /** Finds an available RAM block of the given size and returns
      *  a reference to its base address. */
     function int alloc(int size) {
-        var LLMemNode availableBlock;
-        // int block - the needed part of the memory segment
-        var int block;
+        var int newBlock;
+        var int availableBlock;
 
         let availableBlock = Memory.firstFit(size);
 
@@ -73,19 +79,28 @@ class Memory {
         }
         else {
             // remove required size from node length
-            do availableBlock.setLength(availableBlock.getLength() - size);
+            let availableBlock[blockSize] = availableBlock[blockSize] - size;
 
-            // create the new node and add
-            let block = availableBlock.getLength() + 1;
-            do availableBlock.setNext(LLMemNode.new(size, block));
+            // create the new node and add 
+            // newBlock location points to the end of the availableBlock length
+            // let newBlock = availableBlock[blockSize];
+            let newBlock = 0;
+            let newBlock[blockSize] = size;
+
+            let availableBlock[nextBlock] = newBlock;
         }
 
-        return block;
+        return availableBlock;
     }
 
     /** De-allocates the given object (cast as an array) by making
      *  it available for future allocations. */
     function void deAlloc(Array o) {
+        var int freelistSize;
+        let freelistSize = freelist[blockSize];
+        let freelist[blockSize] = freelist[blockSize] + o[blockSize];
+        let freelist[freelistSize] = o;
+
         return;
     }    
 }

@@ -1,0 +1,20 @@
+function Main.main 0
+call Memory.init 0
+pop temp 0
+push constant 11
+call Memory.alloc 1
+pop temp 0
+push constant 110
+call Memory.alloc 1
+pop temp 0
+push constant 501
+call Memory.alloc 1
+pop temp 0
+push constant 139
+call Memory.alloc 1
+pop temp 0
+push constant 1312
+call Memory.alloc 1
+pop temp 0
+push constant 0
+return

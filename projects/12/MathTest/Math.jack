@@ -43,9 +43,6 @@ class Math {
         while(i < 16){
             let twoToThe[i] = double;
 
-            // do Output.printInt(twoToThe[i]);
-            // do Output.println();
-
             let double = double + double;
             let i = i + 1;
 
@@ -169,6 +166,10 @@ class Math {
         while(power > 1){
             let sum = Math.multiply(sum, x);
             let power = power - 1;
+
+            // if(sum < 0){
+            //     let sum = ~twoToThe[15];
+            // }
         }
 
         return sum;
@@ -176,30 +177,41 @@ class Math {
 
     /** Returns the integer part of the square root of x. 
         sqrt(x):
-            y = 0
+            y = 0;
 
             for j = (n/2) - 1 until 0 do:
-                if (y+2 to the j)squared <= x:
-                    y = y + 2 to the j
+                if (y+(2 to the j))squared <= x:
+                    y = y + (2 to the j)
             
             return y
     */
     function int sqrt(int x) {
         var int y;
         var int j;
-        var int jSquared;
+        var int yPlusjPower;
 
         let y = 0;
 
         // j = bit length / 2 - 1
-        let j = 7;
+        let j = 8;
 
         while(~(j = 0)){
-            let jSquared = Math.power(y + 2, j);
-            if(Math.power(jSquared, 2) < (x +1)){
-                let y = Math.power(y + 2, j);
-            }
             let j = j - 1;
+
+            let yPlusjPower = (y + twoToThe[j]);
+
+            if(((Math.power(yPlusjPower, 2) < x) | ((Math.power(yPlusjPower, 2)) = x)) & (Math.power(yPlusjPower, 2) > 0)){
+                do Output.println();
+                do Output.printInt(Math.power(yPlusjPower, 2));
+                do Output.println();
+
+                // y = 0 + 128;
+                // y = 128 + 32 // 160
+                // y = 160 + 16 // 176
+                // y = 176 + 4 // 180
+                // y = 176 + 1 // 181
+                let y = yPlusjPower;
+            }
         }
         
         return y;
