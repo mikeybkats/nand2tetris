@@ -10,9 +10,27 @@
  * the screen is indexed (0,0).
  */
 class Screen {
+    static Array twoToThe;
 
     /** Initializes the Screen. */
     function void init() {
+        var int i;
+        var int double;
+
+        let twoToThe = Array.new(16);
+
+        let i = 0;
+        let double = 1;
+
+        while(i < 16){
+            let twoToThe[i] = double;
+
+            let double = double + double;
+            let i = i + 1;
+
+        }
+        let twoToThe[15] = -32767;
+
         return;
     }
 
@@ -29,27 +47,27 @@ class Screen {
 
     /** Draws the (x,y) pixel, using the current color. */
     function void drawPixel(int x, int y) {
-        // res = 512 x 255 
-        // 16384 = 16 bits = pixels long 
-        // 16384 to 16416 = line 0
-        // 24575 = 511, 255
-
         var int segment;
         var int address;
         var int value;
+        var int mod;
+        var int bit;
 
         // 32 ram segments per line
         // linestart = linestart + 32 * segment
-        let segment = (y + x) / 16;
+        let segment = (32 * y) + (x / 16);
         let address = 16384;
-        let address = address + (32 * segment);
+        let address = address + (segment);
 
         let value = Memory.peek(address);
 
+        let mod = x - ((x / 16) * 16)
+        
+        let bit = twoToThe[mod];
+
         // value  0001 0001 0000 0011
         // x % 16 0000 0000 1000 0000 
-
-        let value = (value | (x - (x / 16)));
+        let value = (value | bit);
 
         do Memory.poke(address, value);
 
