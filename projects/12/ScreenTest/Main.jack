@@ -10,14 +10,10 @@ class Main {
     function void main() {
         var int i;
         let i = 0;
-    
-        while(i < 100){
-            do Screen.drawPixel(100, i);
-            let i = i + 1;
-        }
 
-        // do Screen.drawLine(0,220,511,220);        // base line
-        // do Screen.drawRectangle(280,90,410,220);  // house
+        do Screen.drawLine(0,220,511,220);        // base line
+
+        do Screen.drawRectangle(280,90,410,220);  // house
         
         // do Screen.setColor(false); 
         // do Screen.drawRectangle(350,120,390,219); // door

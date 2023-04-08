@@ -11,6 +11,7 @@
  */
 class Screen {
     static Array twoToThe;
+    static int color;
 
     /** Initializes the Screen. */
     function void init() {
@@ -31,6 +32,8 @@ class Screen {
         }
         let twoToThe[15] = -32767;
 
+        let color = 1;
+
         return;
     }
 
@@ -42,6 +45,13 @@ class Screen {
     /** Sets the current color, to be used for all subsequent drawXXX commands.
      *  Black is represented by true, white by false. */
     function void setColor(boolean b) {
+        if(b){
+            let color = 1;
+        } 
+        else {
+            let color = -1;
+        }
+
         return;
     }
 
@@ -61,9 +71,9 @@ class Screen {
 
         let value = Memory.peek(address);
 
-        let mod = x - ((x / 16) * 16)
+        let mod = x - ((x / 16) * 16);
         
-        let bit = twoToThe[mod];
+        let bit = twoToThe[mod * color];
 
         // value  0001 0001 0000 0011
         // x % 16 0000 0000 1000 0000 
@@ -76,12 +86,68 @@ class Screen {
 
     /** Draws a line from pixel (x1,y1) to pixel (x2,y2), using the current color. */
     function void drawLine(int x1, int y1, int x2, int y2) {
+        var int a;
+        var int b;
+        var int dy;
+        var int dx;
+
+        let a = 0;
+        let b = 0;
+
+        let dy =  y2 - y1;
+
+        let dx = x2 - x1;
+
+        while(((a < dx) | (a = dx)) & ((b < dy) | (b = dy))){
+            do Screen.drawPixel(x1 + a, y1 + b);
+
+            if(dy=0){
+                // no rise
+                let a = a + 1;
+            }
+            if(dx = 0){
+                // no run
+                let b = b + 1;
+            }
+
+            if(~(dx = 0) & ~(dy = 0)){
+                // if(b/a > (dy/dx)){
+                if((a / dx) < (b / dy)){
+                    let a = a + 1;
+                } 
+                else {
+                    let b = b + 1;
+                }
+            }
+        }
+
         return;
     }
 
     /** Draws a filled rectangle whose top left corner is (x1, y1)
      * and bottom right corner is (x2,y2), using the current color. */
     function void drawRectangle(int x1, int y1, int x2, int y2) {
+        var int height;
+        var int width;
+        var int i;
+        var int j;
+
+        let height = Math.abs(y2 - y1);
+        let width = Math.abs(x2 - x1); 
+        let i = 0;
+        let j = 0;
+
+        while(i < height){
+            while(j < width){
+                do Screen.drawPixel(x1 + j, y1 + i);
+                let j = j + 1;
+            }
+            if(j = width){
+                let j = 0;
+            }
+            let i = i + 1;
+        }
+
         return;
     }
 

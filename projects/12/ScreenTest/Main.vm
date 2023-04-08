@@ -1,21 +1,17 @@
 function Main.main 1
 push constant 0
 pop local 0
-label WHILE_EXP0
-push local 0
-push constant 100
-lt
-not
-if-goto WHILE_END0
-push constant 100
-push local 0
-call Screen.drawPixel 2
+push constant 0
+push constant 220
+push constant 511
+push constant 220
+call Screen.drawLine 4
 pop temp 0
-push local 0
-push constant 1
-add
-pop local 0
-goto WHILE_EXP0
-label WHILE_END0
+push constant 280
+push constant 90
+push constant 410
+push constant 220
+call Screen.drawRectangle 4
+pop temp 0
 push constant 0
 return
