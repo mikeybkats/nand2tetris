@@ -204,60 +204,34 @@ goto WHILE_EXP0
 label WHILE_END0
 push constant 0
 return
-function Screen.drawRectangle 4
+function Screen.drawRectangle 2
 push argument 3
 push argument 1
 sub
 call Math.abs 1
 pop local 0
-push argument 2
-push argument 0
-sub
-call Math.abs 1
+push constant 0
 pop local 1
-push constant 0
-pop local 2
-push constant 0
-pop local 3
 label WHILE_EXP0
-push local 2
+push local 1
 push local 0
 lt
 not
 if-goto WHILE_END0
-label WHILE_EXP1
-push local 3
-push local 1
-lt
-not
-if-goto WHILE_END1
 push argument 0
-push local 3
-add
 push argument 1
-push local 2
-add
-call Screen.drawPixel 2
-pop temp 0
-push local 3
-push constant 1
-add
-pop local 3
-goto WHILE_EXP1
-label WHILE_END1
-push local 3
 push local 1
-eq
-if-goto IF_TRUE0
-goto IF_FALSE0
-label IF_TRUE0
-push constant 0
-pop local 3
-label IF_FALSE0
-push local 2
+add
+push argument 2
+push argument 1
+push local 1
+add
+call Screen.drawLine 4
+pop temp 0
+push local 1
 push constant 1
 add
-pop local 2
+pop local 1
 goto WHILE_EXP0
 label WHILE_END0
 push constant 0

@@ -128,23 +128,13 @@ class Screen {
      * and bottom right corner is (x2,y2), using the current color. */
     function void drawRectangle(int x1, int y1, int x2, int y2) {
         var int height;
-        var int width;
         var int i;
-        var int j;
 
         let height = Math.abs(y2 - y1);
-        let width = Math.abs(x2 - x1); 
         let i = 0;
-        let j = 0;
 
         while(i < height){
-            while(j < width){
-                do Screen.drawPixel(x1 + j, y1 + i);
-                let j = j + 1;
-            }
-            if(j = width){
-                let j = 0;
-            }
+            do Screen.drawLine(x1, y1 + i, x2, y1 + i);
             let i = i + 1;
         }
 
