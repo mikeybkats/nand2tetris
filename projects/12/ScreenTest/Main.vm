@@ -1,6 +1,11 @@
 function Main.main 1
 push constant 0
 pop local 0
+push constant 100
+push constant 100
+push constant 40
+call Screen.drawCircle 3
+pop temp 0
 push constant 0
 push constant 220
 push constant 511
@@ -31,6 +36,11 @@ pop temp 0
 push constant 0
 not
 call Screen.setColor 1
+pop temp 0
+push constant 360
+push constant 170
+push constant 3
+call Screen.drawCircle 3
 pop temp 0
 push constant 280
 push constant 90

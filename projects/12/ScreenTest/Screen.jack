@@ -196,6 +196,18 @@ class Screen {
     //         yCoord = y + dy
     //         drawLine(x - triangleBase, yCoord, x + triangleBase, yCoord)
     function void drawCircle(int x, int y, int r) {
+        var int dy;
+        var int triangleBase;
+        var int yCoord;
+
+        let dy = r * -1;
+
+        while(~(dy = r)){
+            let triangleBase = Math.sqrt(((r * r) - (dy * dy)));
+            let yCoord = y + dy;
+            do Screen.drawLine(x - triangleBase, yCoord, x + triangleBase, yCoord);
+            let dy = dy + 1;
+        }
         return;
     }
 }
