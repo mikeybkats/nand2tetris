@@ -30,7 +30,7 @@ class Screen {
             let i = i + 1;
 
         }
-        let twoToThe[15] = -32767;
+        // let twoToThe[15] = -32767;
 
         let color = 1;
 
@@ -72,12 +72,13 @@ class Screen {
         let value = Memory.peek(address);
 
         let mod = x - ((x / 16) * 16);
+        // 287 - (287/16 * 16) 
         
-        let bit = twoToThe[mod * color];
+        let bit = twoToThe[mod];
 
         // value  0001 0001 0000 0011
-        // x % 16 0000 0000 1000 0000 
-        let value = (value | bit);
+        // x % 16 1000 0000 1000 0000 
+        let value = (value | bit) * color;
 
         do Memory.poke(address, value);
 
@@ -85,39 +86,77 @@ class Screen {
     }
 
     /** Draws a line from pixel (x1,y1) to pixel (x2,y2), using the current color. */
+    /** 
+    function void drawLine(int x1, int y1, int x2, int y2) {
+        dx = x2 - x1
+        dy = y2 - y1
+        a = 0
+        b = 0
+
+        while((a <= dx) && (b <= dy)){
+            drawPixel(x + a, y + b)
+
+            if (diff < 0){
+                a++
+                diff += dy
+            } else {
+                b++ 
+                diff -= dx
+            }
+        }
+    }
+    */
     function void drawLine(int x1, int y1, int x2, int y2) {
         var int a;
         var int b;
         var int dy;
         var int dx;
+        var int diff;
 
         let a = 0;
         let b = 0;
+        let dy =  Math.abs(y2 - y1);
+        let dx = Math.abs(x2 - x1);
+        let diff = 0;
 
-        let dy =  y2 - y1;
-
-        let dx = x2 - x1;
+        if(dy=0){
+            // write the horizontal line
+            while(diff < dx){
+                do Screen.drawPixel(x1 + diff, y1);
+                let diff = diff + 1;
+            }
+            return;
+        }
+        if(dx = 0){
+            // write the vertical line
+            while(diff < dy){
+                do Screen.drawPixel(x1, y1 + diff);
+                let diff = diff + 1;
+            }
+            return;
+        }
 
         while(((a < dx) | (a = dx)) & ((b < dy) | (b = dy))){
-            do Screen.drawPixel(x1 + a, y1 + b);
+            if((x1 > x2) & (y1 > y2)){
+                do Screen.drawPixel(x1 - a, y1 - b);
+            }
+            if((x1 > x2) & (y1 < y2)){
+                do Screen.drawPixel(x1 - a, y1 + b);
+            }
+            if((x1 < x2) & (y1 > y2)){
+                do Screen.drawPixel(x1 + a, y1 - b);
+            }
+            if((x1 < x2) & (y1 < y2)){
+                do Screen.drawPixel(x1 + a, y1 + b);
+            }
 
-            if(dy=0){
-                // no rise
+            if (diff < 0){
                 let a = a + 1;
+                let diff = diff + dy;
             }
-            if(dx = 0){
-                // no run
+            else {
                 let b = b + 1;
-            }
-
-            if(~(dx = 0) & ~(dy = 0)){
-                // if(b/a > (dy/dx)){
-                if((a / dx) < (b / dy)){
-                    let a = a + 1;
-                } 
-                else {
-                    let b = b + 1;
-                }
+                let diff = diff - dx;
             }
         }
 
@@ -130,11 +169,20 @@ class Screen {
         var int height;
         var int i;
 
-        let height = Math.abs(y2 - y1);
+        let height = y2 - y1;
         let i = 0;
 
         while(i < height){
             do Screen.drawLine(x1, y1 + i, x2, y1 + i);
+
+            // while x1 % 32 != 0
+            // drawPixel 
+            // x1 = x1 + 1;
+                // if x1 % 32 == 0
+                    // while x1 % 32 == 0
+                        // screenLocation = -32767
+                        // x1 = x1 + 15
+
             let i = i + 1;
         }
 
@@ -142,6 +190,11 @@ class Screen {
     }
 
     /** Draws a filled circle of radius r<=181 around (x,y), using the current color. */
+    // drawCircle(x, y, r):
+    //     for each dy = -r do:
+    //         triangleBase = SquareRoot(r squared - dy squared) 
+    //         yCoord = y + dy
+    //         drawLine(x - triangleBase, yCoord, x + triangleBase, yCoord)
     function void drawCircle(int x, int y, int r) {
         return;
     }
