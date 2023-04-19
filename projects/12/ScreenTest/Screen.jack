@@ -122,7 +122,12 @@ class Screen {
         if(dy=0){
             // write the horizontal line
             while(diff < dx){
-                do Screen.drawPixel(x1 + diff, y1);
+                if(x1 < x2){
+                    do Screen.drawPixel(x1 + diff, y1);
+                }
+                if(x2 < x1){
+                    do Screen.drawPixel(x2 + diff, y1);
+                }
                 let diff = diff + 1;
             }
             return;
@@ -130,7 +135,12 @@ class Screen {
         if(dx = 0){
             // write the vertical line
             while(diff < dy){
-                do Screen.drawPixel(x1, y1 + diff);
+                if(y1 < y2){
+                    do Screen.drawPixel(x1, y1 + diff);
+                }
+                if(y2 < y1){
+                    do Screen.drawPixel(x1, y2 + diff);
+                }
                 let diff = diff + 1;
             }
             return;

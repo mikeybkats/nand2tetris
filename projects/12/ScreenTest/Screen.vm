@@ -126,11 +126,31 @@ lt
 not
 if-goto WHILE_END0
 push argument 0
+push argument 2
+lt
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push argument 0
 push local 4
 add
 push argument 1
 call Screen.drawPixel 2
 pop temp 0
+label IF_FALSE1
+push argument 2
+push argument 0
+lt
+if-goto IF_TRUE2
+goto IF_FALSE2
+label IF_TRUE2
+push argument 2
+push local 4
+add
+push argument 1
+call Screen.drawPixel 2
+pop temp 0
+label IF_FALSE2
 push local 4
 push constant 1
 add
@@ -143,21 +163,41 @@ label IF_FALSE0
 push local 3
 push constant 0
 eq
-if-goto IF_TRUE1
-goto IF_FALSE1
-label IF_TRUE1
+if-goto IF_TRUE3
+goto IF_FALSE3
+label IF_TRUE3
 label WHILE_EXP1
 push local 4
 push local 2
 lt
 not
 if-goto WHILE_END1
+push argument 1
+push argument 3
+lt
+if-goto IF_TRUE4
+goto IF_FALSE4
+label IF_TRUE4
 push argument 0
 push argument 1
 push local 4
 add
 call Screen.drawPixel 2
 pop temp 0
+label IF_FALSE4
+push argument 3
+push argument 1
+lt
+if-goto IF_TRUE5
+goto IF_FALSE5
+label IF_TRUE5
+push argument 0
+push argument 3
+push local 4
+add
+call Screen.drawPixel 2
+pop temp 0
+label IF_FALSE5
 push local 4
 push constant 1
 add
@@ -166,7 +206,7 @@ goto WHILE_EXP1
 label WHILE_END1
 push constant 0
 return
-label IF_FALSE1
+label IF_FALSE3
 label WHILE_EXP2
 push local 0
 push local 3
@@ -192,81 +232,81 @@ push argument 1
 push argument 3
 gt
 and
-if-goto IF_TRUE2
-goto IF_FALSE2
-label IF_TRUE2
-push argument 0
-push local 0
-sub
-push argument 1
-push local 1
-sub
-call Screen.drawPixel 2
-pop temp 0
-label IF_FALSE2
-push argument 0
-push argument 2
-gt
-push argument 1
-push argument 3
-lt
-and
-if-goto IF_TRUE3
-goto IF_FALSE3
-label IF_TRUE3
-push argument 0
-push local 0
-sub
-push argument 1
-push local 1
-add
-call Screen.drawPixel 2
-pop temp 0
-label IF_FALSE3
-push argument 0
-push argument 2
-lt
-push argument 1
-push argument 3
-gt
-and
-if-goto IF_TRUE4
-goto IF_FALSE4
-label IF_TRUE4
-push argument 0
-push local 0
-add
-push argument 1
-push local 1
-sub
-call Screen.drawPixel 2
-pop temp 0
-label IF_FALSE4
-push argument 0
-push argument 2
-lt
-push argument 1
-push argument 3
-lt
-and
-if-goto IF_TRUE5
-goto IF_FALSE5
-label IF_TRUE5
-push argument 0
-push local 0
-add
-push argument 1
-push local 1
-add
-call Screen.drawPixel 2
-pop temp 0
-label IF_FALSE5
-push local 4
-push constant 0
-lt
 if-goto IF_TRUE6
 goto IF_FALSE6
 label IF_TRUE6
+push argument 0
+push local 0
+sub
+push argument 1
+push local 1
+sub
+call Screen.drawPixel 2
+pop temp 0
+label IF_FALSE6
+push argument 0
+push argument 2
+gt
+push argument 1
+push argument 3
+lt
+and
+if-goto IF_TRUE7
+goto IF_FALSE7
+label IF_TRUE7
+push argument 0
+push local 0
+sub
+push argument 1
+push local 1
+add
+call Screen.drawPixel 2
+pop temp 0
+label IF_FALSE7
+push argument 0
+push argument 2
+lt
+push argument 1
+push argument 3
+gt
+and
+if-goto IF_TRUE8
+goto IF_FALSE8
+label IF_TRUE8
+push argument 0
+push local 0
+add
+push argument 1
+push local 1
+sub
+call Screen.drawPixel 2
+pop temp 0
+label IF_FALSE8
+push argument 0
+push argument 2
+lt
+push argument 1
+push argument 3
+lt
+and
+if-goto IF_TRUE9
+goto IF_FALSE9
+label IF_TRUE9
+push argument 0
+push local 0
+add
+push argument 1
+push local 1
+add
+call Screen.drawPixel 2
+pop temp 0
+label IF_FALSE9
+push local 4
+push constant 0
+lt
+if-goto IF_TRUE10
+goto IF_FALSE10
+label IF_TRUE10
 push local 0
 push constant 1
 add
@@ -275,8 +315,8 @@ push local 4
 push local 2
 add
 pop local 4
-goto IF_END6
-label IF_FALSE6
+goto IF_END10
+label IF_FALSE10
 push local 1
 push constant 1
 add
@@ -285,7 +325,7 @@ push local 4
 push local 3
 sub
 pop local 4
-label IF_END6
+label IF_END10
 goto WHILE_EXP2
 label WHILE_END2
 push constant 0
