@@ -32,13 +32,22 @@ class Screen {
         }
         // let twoToThe[15] = -32767;
 
-        let color = 1;
+        let color = -1;
 
         return;
     }
 
     /** Erases the entire screen. */
     function void clearScreen() {
+        var int y;
+        let y = 0;
+
+        while(y < 255){
+            do Screen.setColor(false);
+            do Screen.clearLineRow(y);
+            let y = y + 1;
+        }
+
         return;
     }
 
@@ -49,7 +58,27 @@ class Screen {
             let color = 1;
         } 
         else {
-            let color = -1;
+            let color = 0;
+        }
+
+        return;
+    }
+
+
+    /* clears the line to the opposite of the set color */
+    function void clearLineRow(int y){
+        var int segment;
+        var int address;
+        var int interval;
+
+        let segment = (32 * y);
+        let address = 16384;
+        let address = address + (segment);
+        let interval = 0;
+
+        while(interval < 32){
+            do Memory.poke(address + interval, ~color);
+            let interval = interval + 1;
         }
 
         return;
