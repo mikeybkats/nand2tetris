@@ -107,7 +107,11 @@ class Screen {
 
         // value  0001 0001 0000 0011
         // x % 16 1000 0000 1000 0000 
-        let value = (value | bit) * color;
+        let value = (value | bit);
+
+        if (color = 0){
+            let value = ~value 
+        }
 
         do Memory.poke(address, value);
 
