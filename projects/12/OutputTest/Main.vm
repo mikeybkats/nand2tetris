@@ -1,0 +1,10 @@
+function Main.main 0
+push constant 0
+push constant 63
+call Output.moveCursor 2
+pop temp 0
+push constant 66
+call Output.printChar 1
+pop temp 0
+push constant 0
+return
