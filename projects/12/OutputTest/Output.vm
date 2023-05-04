@@ -3,6 +3,8 @@ push constant 0
 pop static 1
 push constant 0
 pop static 2
+call Output.initMap 0
+pop temp 0
 push constant 0
 return
 function Output.initMap 1
@@ -1488,8 +1490,6 @@ push argument 0
 pop static 2
 push constant 8
 push argument 1
-push constant 1
-sub
 call Math.multiply 2
 pop local 2
 push constant 11
@@ -1576,7 +1576,13 @@ add
 pop pointer 1
 push that 0
 push static 1
+push constant 8
+call Math.multiply 2
 push static 2
+push constant 11
+call Math.multiply 2
+push local 1
+add
 call Output.drawBinary 3
 pop temp 0
 push local 1
@@ -1585,9 +1591,55 @@ add
 pop local 1
 goto WHILE_EXP0
 label WHILE_END0
+push static 1
+push constant 64
+eq
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push constant 0
+pop static 1
+push static 2
+push constant 22
+lt
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push static 2
+push constant 1
+add
+pop static 2
+label IF_FALSE1
+goto IF_END0
+label IF_FALSE0
+push static 1
+push constant 1
+add
+pop static 1
+label IF_END0
 push constant 0
 return
-function Output.printString 0
+function Output.printString 2
+push constant 0
+pop local 0
+push argument 0
+call String.length 1
+pop local 1
+label WHILE_EXP0
+push local 0
+push local 1
+lt
+not
+if-goto WHILE_END0
+push local 0
+push argument 0
+add
+pop pointer 1
+push that 0
+call Output.printChar 1
+pop temp 0
+goto WHILE_EXP0
+label WHILE_END0
 push constant 0
 return
 function Output.printInt 0
@@ -1595,7 +1647,24 @@ push constant 0
 return
 function Output.println 0
 push constant 0
+pop static 1
+push static 2
+push constant 1
+add
+pop static 2
+push constant 0
 return
 function Output.backSpace 0
+push static 1
+push constant 0
+gt
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push static 1
+push constant 1
+sub
+pop static 1
+label IF_FALSE0
 push constant 0
 return

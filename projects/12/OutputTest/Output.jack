@@ -27,6 +27,8 @@ class Output {
         let cursorLocationX = 0;
         let cursorLocationY = 0;
 
+        do Output.initMap();
+
         return;
     }
 
@@ -190,21 +192,23 @@ class Output {
     function void moveCursor(int i, int j) {
         var int x;
         var int y;
+        var int lx;
+        var int ly;
+
         let x = 0;
         let y = 0;
-        let cursorLocationX = 0;
-        let cursorLocationY = 0;
-
         // find the pixel x and y for top left corner for the cursor 
         // set the static pixel location to those values
-        let cursorLocationX = 8 * (j-1);
-        let cursorLocationY = 11 * (i); 
+        let cursorLocationX = j;
+        let cursorLocationY = i;
+        let lx = 8 * j;
+        let ly = 11 * i; 
 
         do Screen.setColor(false);
         // delete the character displayed there by printing a blank character
         while(x < 8){
             while(y < 11){
-                do Screen.drawPixel(cursorLocationX + x, cursorLocationY + y);
+                do Screen.drawPixel(lx + x, ly + y);
                 let y = y + 1;
             }
             let y = 0;
@@ -216,15 +220,15 @@ class Output {
     }
 
     function void drawBinary(int number, int x, int y){
-        var int segment;
+        var int segmentBase;
         var int address;
         var int value;
         var int mod;
         var int bit;
 
-        let segment = (32 * y) + (x / 16);
+        let segmentBase = (32 * y) + (x / 16);
         let address = 16384;
-        let address = address + (segment);
+        let address = address + segmentBase;
 
         do Memory.poke(address, number);
 
@@ -234,32 +238,42 @@ class Output {
     /** Displays the given character at the cursor location,
      *  and advances the cursor one column forward. */
     function void printChar(char c) {
-        var char charMap;
+        var Array map;
         var int i;
 
-        let charMap = Output.getMap(c);
+        let map = Output.getMap(c);
 
-        // loop through charMap and print each row
         while(i < 11){
-            // the char map is 10 rows of bits for the font. 
-            // each row is a number that corresponds to the pixels to be printed
-            // 14 = 1110 
-            // ~14 = 0111 (which is the top of the letter a in the example in the lecture)
-            // go to the location in the screen
-
-            // TODO: What method do i want to use for finding the location on the screen?
-            do Output.drawBinary(charMap[i], cursorLocationX, cursorLocationY);
-
+            do Output.drawBinary(map[i], cursorLocationX * 8, (cursorLocationY * 11) + i);
             let i = i + 1;
         }
 
-        
+        if(cursorLocationX = 64){
+            let cursorLocationX = 0;
+            if(cursorLocationY < 22){
+                let cursorLocationY = cursorLocationY + 1;
+            }
+        }
+        else {
+            let cursorLocationX = cursorLocationX + 1;
+        }
+
         return;
     }
 
     /** displays the given string starting at the cursor location,
      *  and advances the cursor appropriately. */
     function void printString(String s) {
+        var int i;
+        var int n;
+        
+        let i = 0;
+        let n = s.length();
+
+        while(i < n){
+            do Output.printChar(s[i]);
+        }
+
         return;
     }
 
@@ -271,11 +285,16 @@ class Output {
 
     /** Advances the cursor to the beginning of the next line. */
     function void println() {
+        let cursorLocationX = 0;
+        let cursorLocationY = cursorLocationY + 1;
         return;
     }
 
     /** Moves the cursor one column back. */
     function void backSpace() {
+        if(cursorLocationX > 0){
+            let cursorLocationX = cursorLocationX - 1;
+        }
         return;
     }
 }
