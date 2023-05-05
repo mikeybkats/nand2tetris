@@ -80,7 +80,8 @@ class Output {
         do Output.create(64,30,51,51,59,59,59,27,3,30,0,0);  // @
         do Output.create(63,30,51,51,24,12,12,0,12,12,0,0);  // ?
 
-        do Output.create(65,0,0,0,0,0,0,0,0,0,0,0);          // A ** TO BE FILLED **
+        // do Output.create(65,0,0,0,0,0,0,0,0,0,0,0);          // A ** TO BE FILLED **
+        do Output.create(65,30,30,51,51,63,63,51,51,51,0,0);          //
         do Output.create(66,31,51,51,51,31,51,51,51,31,0,0); // B
         do Output.create(67,28,54,35,3,3,3,35,54,28,0,0);    // C
         do Output.create(68,15,27,51,51,51,51,51,27,15,0,0); // D
@@ -230,7 +231,9 @@ class Output {
         let address = 16384;
         let address = address + segmentBase;
 
-        do Memory.poke(address, number);
+        let value = Memory.peek(address);
+
+        do Memory.poke(address, (number | value));
 
         return;
     }
@@ -240,17 +243,32 @@ class Output {
     function void printChar(char c) {
         var Array map;
         var int i;
+        var int mapLoc;
+        var int cursorBlock;
 
         let map = Output.getMap(c);
 
         while(i < 11){
-            do Output.drawBinary(map[i], cursorLocationX * 8, (cursorLocationY * 11) + i);
+            let mapLoc = map[i];
+            let cursorBlock = cursorLocationX;
+
+            // use bitwise & to check if number is even
+            if(~(cursorLocationX & 1 = 0)){
+                let mapLoc = (mapLoc * 256);
+                let cursorBlock = cursorLocationX - 1;
+            }
+
+            do Output.drawBinary(mapLoc, (cursorBlock * 8), (cursorLocationY * 11) + i);
             let i = i + 1;
         }
 
-        if(cursorLocationX = 64){
+        if(cursorLocationX = 63){
             let cursorLocationX = 0;
-            if(cursorLocationY < 22){
+
+            if(cursorLocationY = 22){
+                let cursorLocationY = 0;
+            } 
+            else {
                 let cursorLocationY = cursorLocationY + 1;
             }
         }

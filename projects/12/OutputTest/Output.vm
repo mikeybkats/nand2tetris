@@ -488,15 +488,15 @@ push constant 0
 call Output.create 12
 pop temp 0
 push constant 65
-push constant 0
-push constant 0
-push constant 0
-push constant 0
-push constant 0
-push constant 0
-push constant 0
-push constant 0
-push constant 0
+push constant 30
+push constant 30
+push constant 51
+push constant 51
+push constant 63
+push constant 63
+push constant 51
+push constant 51
+push constant 51
 push constant 0
 push constant 0
 call Output.create 12
@@ -1555,12 +1555,17 @@ push local 0
 add
 pop local 1
 push local 1
+call Memory.peek 1
+pop local 2
+push local 1
 push argument 0
+push local 2
+or
 call Memory.poke 2
 pop temp 0
 push constant 0
 return
-function Output.printChar 2
+function Output.printChar 4
 push argument 0
 call Output.getMap 1
 pop local 0
@@ -1575,7 +1580,29 @@ push local 0
 add
 pop pointer 1
 push that 0
+pop local 2
 push static 1
+pop local 3
+push static 1
+push constant 1
+and
+push constant 0
+eq
+not
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push local 2
+push constant 256
+call Math.multiply 2
+pop local 2
+push static 1
+push constant 1
+sub
+pop local 3
+label IF_FALSE0
+push local 2
+push local 3
 push constant 8
 call Math.multiply 2
 push static 2
@@ -1592,31 +1619,35 @@ pop local 1
 goto WHILE_EXP0
 label WHILE_END0
 push static 1
-push constant 64
+push constant 63
 eq
-if-goto IF_TRUE0
-goto IF_FALSE0
-label IF_TRUE0
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
 push constant 0
 pop static 1
 push static 2
 push constant 22
-lt
-if-goto IF_TRUE1
-goto IF_FALSE1
-label IF_TRUE1
+eq
+if-goto IF_TRUE2
+goto IF_FALSE2
+label IF_TRUE2
+push constant 0
+pop static 2
+goto IF_END2
+label IF_FALSE2
 push static 2
 push constant 1
 add
 pop static 2
+label IF_END2
+goto IF_END1
 label IF_FALSE1
-goto IF_END0
-label IF_FALSE0
 push static 1
 push constant 1
 add
 pop static 1
-label IF_END0
+label IF_END1
 push constant 0
 return
 function Output.printString 2
