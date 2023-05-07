@@ -22,6 +22,8 @@ class Output {
     static int cursorLocationX;
     static int cursorLocationY;
 
+    static Array charNumberMaps;
+
     /** Initializes the screen, and locates the cursor at the screen's top-left. */
     function void init() {
         let cursorLocationX = 0;
@@ -80,8 +82,7 @@ class Output {
         do Output.create(64,30,51,51,59,59,59,27,3,30,0,0);  // @
         do Output.create(63,30,51,51,24,12,12,0,12,12,0,0);  // ?
 
-        // do Output.create(65,0,0,0,0,0,0,0,0,0,0,0);          // A ** TO BE FILLED **
-        do Output.create(65,30,30,51,51,63,63,51,51,51,0,0);          //
+        do Output.create(65,30,30,51,51,63,63,51,51,51,0,0);          // A
         do Output.create(66,31,51,51,51,31,51,51,51,31,0,0); // B
         do Output.create(67,28,54,35,3,3,3,35,54,28,0,0);    // C
         do Output.create(68,15,27,51,51,51,51,51,27,15,0,0); // D
@@ -185,25 +186,15 @@ class Output {
         return charMaps[c];
     }
 
-    /** Moves the cursor to the j-th column of the i-th row,
-     *  and erases the character displayed there. 
-     *  each frame is 8 pixels wide x 11 pixels tall
-     *  the grid is 64 units wide and 23 tall
-     */
-    function void moveCursor(int i, int j) {
+    function void deleteCharacter(){
         var int x;
         var int y;
         var int lx;
         var int ly;
-
         let x = 0;
         let y = 0;
-        // find the pixel x and y for top left corner for the cursor 
-        // set the static pixel location to those values
-        let cursorLocationX = j;
-        let cursorLocationY = i;
-        let lx = 8 * j;
-        let ly = 11 * i; 
+        let lx = 8 * cursorLocationX;
+        let ly = 11 * cursorLocationY; 
 
         do Screen.setColor(false);
         // delete the character displayed there by printing a blank character
@@ -217,6 +208,24 @@ class Output {
         }
 
         do Screen.setColor(true);
+
+        return;
+    }
+
+    /** Moves the cursor to the j-th column of the i-th row,
+     *  and erases the character displayed there. 
+     *  each frame is 8 pixels wide x 11 pixels tall
+     *  the grid is 64 units wide and 23 tall
+     */
+    function void moveCursor(int i, int j) {
+
+        // find the pixel x and y for top left corner for the cursor 
+        // set the static pixel location to those values
+        let cursorLocationX = j;
+        let cursorLocationY = i;
+
+        do Output.deleteCharacter();
+
         return;
     }
 
@@ -234,6 +243,24 @@ class Output {
         let value = Memory.peek(address);
 
         do Memory.poke(address, (number | value));
+
+        return;
+    }
+
+    function void moveCursorNext(){
+        if(cursorLocationX = 63){
+            let cursorLocationX = 0;
+
+            if(cursorLocationY = 22){
+                let cursorLocationY = 0;
+            } 
+            else {
+                let cursorLocationY = cursorLocationY + 1;
+            }
+        }
+        else {
+            let cursorLocationX = cursorLocationX + 1;
+        }
 
         return;
     }
@@ -262,19 +289,7 @@ class Output {
             let i = i + 1;
         }
 
-        if(cursorLocationX = 63){
-            let cursorLocationX = 0;
-
-            if(cursorLocationY = 22){
-                let cursorLocationY = 0;
-            } 
-            else {
-                let cursorLocationY = cursorLocationY + 1;
-            }
-        }
-        else {
-            let cursorLocationX = cursorLocationX + 1;
-        }
+        do Output.moveCursorNext();
 
         return;
     }
@@ -284,20 +299,81 @@ class Output {
     function void printString(String s) {
         var int i;
         var int n;
+        var char c;
         
         let i = 0;
         let n = s.length();
 
         while(i < n){
-            do Output.printChar(s[i]);
+            do Output.printChar(s.charAt(i));
+            let i = i + 1;
         }
 
         return;
     }
 
+function void printIntAscii(int num){
+    if(num = 0){
+        do Output.printChar(48);
+    }
+    if(num = 1){
+        do Output.printChar(49);
+    }
+    if(num = 2){
+        do Output.printChar(50);
+    }
+    if(num = 3){
+        do Output.printChar(51);
+    }
+    if(num = 4){
+        do Output.printChar(52);
+    }
+    if(num = 5){
+        do Output.printChar(53);
+    }
+    if(num = 6){
+        do Output.printChar(54);
+    }
+    if(num = 7){
+        do Output.printChar(55);
+    }
+    if(num = 8){
+        do Output.printChar(56);
+    }
+    if(num = 9){
+        do Output.printChar(57);
+    }
+    return;
+}
+
     /** Displays the given integer starting at the cursor location,
      *  and advances the cursor appropriately. */
+    // printInt(-12345);
     function void printInt(int i) {
+        var int num;
+        var int divisor;
+        var int digit;
+
+        let num = Math.abs(i);
+
+        if(i < 0){
+            do Output.printChar(45);
+        }
+
+        while(num > 0){
+            let divisor = 1;
+
+            while((num / divisor) > 9){
+                let divisor = divisor * 10;
+            }
+
+            let digit = num / divisor;
+
+            do Output.printIntAscii(digit);
+
+            let num = num - (digit * divisor);
+        }
+
         return;
     }
 
@@ -313,6 +389,8 @@ class Output {
         if(cursorLocationX > 0){
             let cursorLocationX = cursorLocationX - 1;
         }
+
+        do Output.deleteCharacter();
         return;
     }
 }
