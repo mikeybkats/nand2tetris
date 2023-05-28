@@ -5,11 +5,13 @@
 
 /**
  * A library for handling user input from the keyboard.
+ * RAM[24576] contains the 16 bit register for the keyboard
  */
 class Keyboard {
 
     /** Initializes the keyboard. */
     function void init() {
+        return;
     } 
 
     /**
@@ -33,6 +35,11 @@ class Keyboard {
      * F1 - F12 = 141 - 152
      */
     function char keyPressed() {
+        var char key;
+        // get the key from the ram
+        let key = Memory.peek(24576);
+
+        return key;
     }
 
     /**								
@@ -41,6 +48,20 @@ class Keyboard {
      * of the pressed key.
      */
     function char readChar() {
+        var char key;
+        let key = 0;
+
+        while(key = 0){
+            let key = Keyboard.keyPressed();
+
+            if(~(key = 0)){
+                do Output.printChar(key);
+                do Sys.wait(200);
+                return key;
+            }
+        }
+
+        return 0;
     }
 
     /**								
@@ -49,6 +70,22 @@ class Keyboard {
      * and returns its value. Also handles user backspaces.
      */
     function String readLine(String message) {
+        var String input;
+        var char confirm;
+        var char letter;
+
+        let confirm = 0;
+        let input = String.new(125);
+
+        do Output.printString(message);
+
+        while(~(confirm = 13)){
+            let letter = Keyboard.readChar();
+            do input.appendChar(letter);
+        }
+        do Output.printString(input);
+
+        return input;
     }   
 
     /**								
@@ -58,5 +95,6 @@ class Keyboard {
      * entered text is detected). Also handles user backspaces. 
      */
     function int readInt(String message) {
+        return 0;
     }
 }
