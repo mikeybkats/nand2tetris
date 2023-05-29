@@ -312,39 +312,39 @@ class Output {
         return;
     }
 
-function void printIntAscii(int num){
-    if(num = 0){
-        do Output.printChar(48);
-    }
-    if(num = 1){
-        do Output.printChar(49);
-    }
-    if(num = 2){
-        do Output.printChar(50);
-    }
-    if(num = 3){
-        do Output.printChar(51);
-    }
-    if(num = 4){
-        do Output.printChar(52);
-    }
-    if(num = 5){
-        do Output.printChar(53);
-    }
-    if(num = 6){
-        do Output.printChar(54);
-    }
-    if(num = 7){
-        do Output.printChar(55);
-    }
-    if(num = 8){
-        do Output.printChar(56);
-    }
-    if(num = 9){
-        do Output.printChar(57);
-    }
-    return;
-}
+    // function void printIntAscii(int num){
+    //     if(num = 0){
+    //         do Output.printChar(48);
+    //     }
+    //     if(num = 1){
+    //         do Output.printChar(49);
+    //     }
+    //     if(num = 2){
+    //         do Output.printChar(50);
+    //     }
+    //     if(num = 3){
+    //         do Output.printChar(51);
+    //     }
+    //     if(num = 4){
+    //         do Output.printChar(52);
+    //     }
+    //     if(num = 5){
+    //         do Output.printChar(53);
+    //     }
+    //     if(num = 6){
+    //         do Output.printChar(54);
+    //     }
+    //     if(num = 7){
+    //         do Output.printChar(55);
+    //     }
+    //     if(num = 8){
+    //         do Output.printChar(56);
+    //     }
+    //     if(num = 9){
+    //         do Output.printChar(57);
+    //     }
+    //     return;
+    // }
 
     /** Displays the given integer starting at the cursor location,
      *  and advances the cursor appropriately. */
@@ -369,7 +369,7 @@ function void printIntAscii(int num){
 
             let digit = num / divisor;
 
-            do Output.printIntAscii(digit);
+            do Output.printChar(digit + 48);
 
             let num = num - (digit * divisor);
         }
