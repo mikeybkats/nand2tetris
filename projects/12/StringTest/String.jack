@@ -11,21 +11,18 @@
  * string-oriented operations.
  */
 class String {
-    static Array word;
-    static int length;
+    field Array word;
+    field int length;
     field int maxLength;
 
     /** constructs a new empty string with a maximum length of maxLength
      *  and initial length of 0. */
-    constructor String new(int maxLength) {
-        let maxLength = maxLength;
-
-        if(maxLength = 0){
-            let maxLength = 1;
+    constructor String new(int max_length) {
+        if(max_length = 0){
+            let max_length = 1;
         }
-        
-        let word = Array.new(maxLength);
-
+        let maxLength = max_length;
+        let word = Array.new(max_length);
         let length = 0;
 
         return this;
@@ -33,27 +30,12 @@ class String {
 
     /** Disposes this string. */
     method void dispose() {
-        do Memory.deAlloc(this);
-        do word.dispose();
+        do Array.dispose(word);
         return;
     }
 
     /** Returns the current length of this string. */
     method int length() {
-        var int count;
-        var int n;
-
-        let count = 0;
-        let n = 0;
-        while(n < maxLength){
-            if(word[n]){
-                let count = count + 1;
-            }
-            let n = n + 1;
-        }
-
-        let length = count;
-
         return length;
     }
 
@@ -70,11 +52,11 @@ class String {
 
     /** Appends c to this string's end and returns this string. */
     method String appendChar(char c) {
-        // do Output.printInt(length);
-        let word[length] = c;
-        let length = length + 1;
-
-        return word;
+        if(length < maxLength){
+            let word[length] = c;
+            let length = length + 1;
+        }
+        return this;
     }
 
     /** Erases the last character from this string. */
@@ -109,22 +91,22 @@ class String {
         return total;
     }
 
-    function int int2String(int val){
+    // returns the string representation of a non negative integer
+    function String int2String(int val){
         var int lastDigit;
-        var int c; // character representing last digit
+        var String c; // character representing last digit
+        var String rValue;
 
         let lastDigit = val - ((val / 10) * 10);
-        let c = lastDigit + 48;
+        let c = String.new(1);
+        do c.appendChar(lastDigit + 48);
 
         if(val < 10){
             return c;
         }
         else {
-            do String.int2String(val / 10);
-            // do String.appendChar(c);
-            let length = length + 1;
-            let word[length] = c;
-            return word;
+            let rValue = String.int2String(val / 10);
+            return rValue.appendChar(lastDigit + 48);
         }
     }
 
