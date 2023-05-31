@@ -192,18 +192,51 @@ pop temp 0
 push local 2
 return
 label IF_END0
-function String.setInt 2
+function String.setInt 3
 push argument 0
 pop pointer 0
+push constant 0
+pop local 2
+push argument 1
+push constant 0
+lt
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push constant 1
+pop local 2
+push argument 1
+push constant 1
+neg
+call Math.multiply 2
+pop argument 1
+label IF_FALSE0
 push argument 1
 call String.int2String 1
 pop local 1
 push constant 0
 pop local 0
+push local 2
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push constant 0
+push this 0
+add
+push constant 45
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 1
+pop local 0
+label IF_FALSE1
 label WHILE_EXP0
 push local 0
 push local 1
 call String.length 1
+push local 2
+add
 lt
 not
 if-goto WHILE_END0
@@ -212,6 +245,8 @@ push this 0
 add
 push local 1
 push local 0
+push local 2
+sub
 call String.charAt 2
 pop temp 0
 pop pointer 1

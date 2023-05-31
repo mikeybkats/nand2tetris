@@ -92,8 +92,6 @@ class String {
     }
 
     // returns the string representation of a non negative integer
-    // 23
-    // "2"
     function String int2String(int val){
         var int lastDigit;
         var String c; // character representing last digit
@@ -118,11 +116,24 @@ class String {
     method void setInt(int val) {
         var int i;
         var String intWord;
+        var int isNegative;
+
+        let isNegative = 0;
+        if(val < 0){
+            let isNegative = 1;
+            let val = val * -1;
+        }
+
         let intWord = String.int2String(val);
         let i = 0;
 
-        while(i < intWord.length()){
-            let word[i] = intWord.charAt(i);
+        if(isNegative){
+            let word[0] = 45;
+            let i = 1;
+        }
+
+        while(i < (intWord.length() + isNegative)){
+            let word[i] = intWord.charAt(i - isNegative);
             let i = i + 1;
         }
         let length = i;
