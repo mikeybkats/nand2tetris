@@ -159,7 +159,7 @@ push constant 10
 call Math.multiply 2
 sub
 pop local 0
-push constant 1
+push constant 16
 call String.new 1
 pop local 1
 push local 1
@@ -188,14 +188,43 @@ push local 0
 push constant 48
 add
 call String.appendChar 2
+pop temp 0
+push local 2
 return
 label IF_END0
-function String.setInt 0
+function String.setInt 2
 push argument 0
 pop pointer 0
 push argument 1
 call String.int2String 1
-pop this 0
+pop local 1
+push constant 0
+pop local 0
+label WHILE_EXP0
+push local 0
+push local 1
+call String.length 1
+lt
+not
+if-goto WHILE_END0
+push local 0
+push this 0
+add
+push local 1
+push local 0
+call String.charAt 2
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILE_EXP0
+label WHILE_END0
+push local 0
+pop this 1
 push constant 0
 return
 function String.newLine 0

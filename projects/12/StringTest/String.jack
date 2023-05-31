@@ -92,13 +92,16 @@ class String {
     }
 
     // returns the string representation of a non negative integer
+    // 23
+    // "2"
     function String int2String(int val){
         var int lastDigit;
         var String c; // character representing last digit
         var String rValue;
 
         let lastDigit = val - ((val / 10) * 10);
-        let c = String.new(1);
+
+        let c = String.new(16);
         do c.appendChar(lastDigit + 48);
 
         if(val < 10){
@@ -106,14 +109,24 @@ class String {
         }
         else {
             let rValue = String.int2String(val / 10);
-            return rValue.appendChar(lastDigit + 48);
+            do rValue.appendChar(lastDigit + 48);
+            return rValue;
         }
     }
 
     /** Sets this string to hold a representation of the given value. */
     method void setInt(int val) {
-        let word = String.int2String(val);
-         
+        var int i;
+        var String intWord;
+        let intWord = String.int2String(val);
+        let i = 0;
+
+        while(i < intWord.length()){
+            let word[i] = intWord.charAt(i);
+            let i = i + 1;
+        }
+        let length = i;
+
         return;
     }
 
